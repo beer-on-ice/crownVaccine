@@ -1,0 +1,202 @@
+<ons-page>
+<style>
+    [v-cloak] {
+      display: none;
+    }
+    #BesPayDetail_content{
+		background-color: #EFEFF4;
+    }
+    .chidinfoBill{
+        margin-top: 10px;
+    }
+    .chidinfoBill label{
+    	color:#666;
+    }
+    .column{
+    	display: flex;
+    	justify-content: center;
+    	flex-direction: column;
+    }
+    .row_space_between{
+    	display: flex;
+    	justify-content: space-between;
+    	flex-direction: row;
+    	margin-top: 10px;
+    	margin-right: 20px;
+    }
+    
+    .row_flex_start{
+    	display: flex;
+    	justify-content: flex-start;
+    	flex-direction: row;
+    }
+    .info_msg{
+		font-size: 18px;
+		font-weight: bold;
+		text-align: center;
+	}
+	.button--cta{
+		margin-left: 5%;
+		background-color: #6798FF;
+		font-size: 18px;
+		color:#fff;
+		width: 90%;
+	}
+</style>
+	<ons-toolbar class="toolbar">
+  	    <div class="left toolbar__left" onclick="backfunction()">
+			<ons-icon icon="ion-ios-arrow-back" style="color: white" size="24px"></ons-icon>
+		</div>
+	    <div class="center toolbar__center">
+	    	账单详情
+	    </div>
+	    <div class="right toolbar__right" >
+	    </div>
+ 	</ons-toolbar>
+	 <div id="BesPayDetail_content" class="content" style="margin-bottom: 10px;" v-cloak >
+        	<div style="display: flex;flex-direction: row;justify-content: flex-start;padding: 10px;">
+	        	<div class="info_msg">
+	        		{{bespeakInfo.pay_status_desc}}
+	        	</div>
+	        	<div style="display: flex;flex-direction: row;justify-content: flex-start;" v-if="!!bespeakInfo.reservation_display_code">
+		        	<div class="info_msg" style="padding-left: 20px;" >
+		        		预约号：<span style="color: red;font-weight: bold;">{{bespeakInfo.reservation_display_code}}</span>
+		        	</div>
+	        	</div>
+        	</div>
+        	<div style="margin: 10px;padding: 10px; background-color: #fffde9;color: red;display: flex;justify-content: flex-end;flex-direction: row;"
+        		v-if="bespeakInfo.reservation_status=='1004'">
+        		<div style="word-break:keep-all;white-space:nowrap; " v-if="stationszflag">签到提醒：</div><div v-if="stationszflag">请在预约时间段内到门诊签到！去接种门诊之前，请量好孩子的体温并做好记录。</div>
+        		<div style="word-break:keep-all;white-space:nowrap; " v-if="!stationszflag">预约提醒：</div><div v-if="!stationszflag">请在预约时间段内到门诊！去接种门诊之前，请量好孩子的体温并做好记录。</div>
+        	</div>
+        	<div style="margin-top: 10px;margin-left: 10px;margin-right: 10px;">
+	        	<div class="chidinfoBill">
+	        		<label>儿童姓名：</label>{{bespeakInfo.child_name}}
+	        	</div>
+	        	<div class="chidinfoBill">
+	        		<label>儿童编码：</label>{{bespeakInfo.child_code}}
+	        	</div>
+	        	<div class="chidinfoBill">
+	        		<label>预约门诊：</label>{{bespeakInfo.station_name}}
+	        	</div>
+	        	<div class="chidinfoBill">
+	        		<label>预约时间：</label>{{bespeakInfo.yydate}}<span v-if="bespeakInfo.begin_time&&bespeakInfo.end_time">&nbsp;{{bespeakInfo.begin_time}}-{{bespeakInfo.end_time}}</span>
+	        	</div>
+	        	<div class="chidinfoBill">
+	        		<label>接种疫苗：</label>
+	        		<div style="background: #fff;margin-top:5px ;" >
+	        			<div v-for="vaccine in bespeakInfo.vaccine_list">
+			        		<div class="column" style="margin-left:5px;">
+			        			<div class="row_space_between">
+			        				<div style="color: #666;">{{vaccine.vaccine_name}}<span v-if="vaccine.vaccine_producer">-{{vaccine.vaccine_producer}}</span>(第{{vaccine.vaccine_count}}剂次)
+			        						<span v-if="vaccine.jz_status=='0'">（未接种）</span><span v-if="vaccine.jz_status=='1'">（已接种）</span></div>
+			        				<div v-if="vaccine.vaccine_price">￥{{vaccine.vaccine_price}}</div>
+			        			</div>
+			        			<div>{{vaccine.vaccine_spec}}</div>
+			        			<div class="row_space_between" v-for="other in vaccine.other_cost_list">
+			        				<div style="color: #666;">{{other.other_cost_name}}</div><div>￥{{other.other_cost_price}}</div>
+			        			</div>
+			        			<div class="row_space_between" v-if="bespeakInfo.pay_status!='2001'">
+			        				<div style="color: #666;" v-if="vaccine.total_price!=null&&vaccine.total_price!=''">小计</div><div v-if="vaccine.total_price!=null&&vaccine.total_price!=''">￥{{vaccine.total_price}}</div>
+			        			</div>
+			        		</div>
+		        		</div>
+		        		
+	        		</div>
+	        		<div class="row_space_between">
+	        			<div style="color: #666;">总计：</div>
+	        			<div>￥{{bespeakInfo.vaccine_actual_price}}</div>
+	        		</div>
+	        		
+	        	</div>
+	        	<div class="chidinfoBill" v-if="bespeakInfo.pay_no!=undefined&&bespeakInfo.pay_no!=''">
+	        		<label>订单号：</label>{{bespeakInfo.pay_no}}
+	        	</div>
+        	</div>
+        	<div style="margin-top: 10px;" v-if="bespeakInfo.is_cancel_refund=='1'">
+                	<button class="button--cta" v-on:click="cancelRefundYY()" >取消预约并申请退款</button>
+           	</div>
+        </div>
+        
+          <script>
+          var name = sessionStorage.getItem("list_vaccine_name");
+	          	      	new Vue({
+			        		el:'#BesPayDetail_content',
+			        		data:{
+			        			bespeakInfo:{},
+			                    stationszflag:false
+			        		},
+			        		created:function(){
+			        			var that=this;
+			        			that.sessionBaby = JSON.parse(sessionStorage.getItem("baby"));
+			        			axiosGet({"reservation_code":sessionStorage.getItem("list_reservation_code")},
+				                    "/Encryption/Reservation/GetReservationDetailsWithPay",function(data){
+				                    if(data.code=='0'){
+				                    	console.log(data.data)
+				                        that.bespeakInfo=data.data;
+				                        if(name!=undefined&&name!=''){
+				                        	that.names = name.split(",");
+				                        }
+				                        that.stationszflag=data.data.station_digital=="1";
+				                    }
+				                });
+			        		},
+			        		methods:{
+			        			cancelYY:function(){
+					                var btnArray = ['否', '是'];
+					                 ons.notification.confirm('是否确定取消预约？', {
+					                 	buttonLabels:btnArray,
+					                 	title:"提示",
+					                 	callback: function(idx) {
+									      	if(idx==1){
+				                                var senddata={"reservation_code":sessionStorage.getItem("list_reservation_code")};
+				                                axiosGet(senddata,"/Encryption/Reservation/CancelReservation",function(data){
+				                                    if(data.code=='0'){
+				                                    	ons.notification.toast(data.message, toastOptions);
+						                        		setTimeout(function(){
+									                        backToPrevPage("mine/bills.html");
+						                        		},1000);
+				                                    }else{
+				                                    	ons.notification.toast(data.message, toastOptions);
+				                                    }
+				                                });
+			                                }
+									    }
+					                 });
+					                
+			        			},
+			        			goPay:function(){
+			                        top.document.querySelector('ons-navigator').pushPage("bespeak/checkPayDetail.html",{callback:function(){
+										backfunction = function(){
+											backToPrevPage("mine/billsListPayDetail.html");
+										};
+										pageBackFuncs["bespeak/checkPayDetail.html"] = backfunction;
+									}});
+				               },
+				               cancelRefundYY:function(){
+					                var btnArray = ['否', '是'];
+					                 ons.notification.confirm('退款将在您取消预约的7个工作日内汇入到您原有账户！', {
+					                 	buttonLabels:btnArray,
+					                 	title:"提示",
+					                 	callback: function(idx) {
+										    if(idx==1){
+				                                var senddata={"reservation_code":sessionStorage.getItem("list_reservation_code")};
+				                                axiosGet(senddata,"/Encryption/Reservation/RefundReservation",function(data){
+				                                    if(data.code=='0'){
+				                                    	ons.notification.toast(data.message, toastOptions);
+						                        		setTimeout(function(){
+						                        			backToPrevPage("mine/bills.html");
+						                        		},1000);
+				                                    }else{
+				                                    	ons.notification.toast(data.message, toastOptions);
+				                                    }
+				                                });
+				                            }
+									    }
+					                });
+				               }
+			        		}
+			        	});
+        </script>
+</ons-page>
+

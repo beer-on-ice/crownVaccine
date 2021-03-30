@@ -1,0 +1,142 @@
+<ons-page>
+  <ons-toolbar class="toolbar">
+    <div class="left toolbar__left"></div>
+
+    <div class="center toolbar__center">
+      我的
+    </div>
+
+    <div class="right toolbar__right"></div>
+  </ons-toolbar>
+
+  <div id="minecontent" class="content">
+    <ul class="list" style="margin-top:15px;">
+      <li class="list-item" style="">
+        <div class="list-item__left">
+          <img
+            class="list-item__thumbnail"
+            src="./images/img_user_avatar.png"
+            alt="admin user"
+          />
+        </div>
+
+        <div class="list-item__center"></div>
+      </li>
+    </ul>
+
+    <ul class="list" style="margin-top: 20px;">
+      <li
+        class="list-item list-item--chevron"
+        v-on:click="viewchildlist($event)"
+      >
+        <div class="list-item__center">儿童信息</div>
+      </li>
+      <li
+        v-if="crownInfo.isShow === '1'"
+        class="list-item list-item--chevron"
+        v-on:click="goCrownT"
+      >
+        <div class="list-item__center">新冠受种者</div>
+      </li>
+
+      <li
+        v-if="crownInfo.isShow === '1'&&crownInfo.showBespeakIcon ==='1'"
+        class="list-item list-item--chevron"
+        v-on:click="goCrownL"
+      >
+        <div class="list-item__center">新冠预订单</div>
+      </li>
+
+      <li
+        class="list-item list-item--chevron"
+        v-on:click="viewBillList($event)"
+        v-show="billFlag"
+      >
+        <div class="list-item__center">我的账单</div>
+      </li>
+    </ul>
+  </div>
+
+  <script>
+    var minevm
+
+    function setBillFlag() {
+      if (minevm) {
+        minevm.billFlag = false
+      } else {
+        setTimeout(function() {
+          setBillFlag()
+        }, 100)
+      }
+    }
+    minevm = new Vue({
+      el: '#minecontent',
+
+      data: {
+        billFlag: false,
+        crownInfo: {}
+      },
+      created() {
+        this.getUserXG()
+      },
+      methods: {
+        getUserXG() {
+          let that = this
+          axiosGet(
+            {
+              user_name: sessionStorage.getItem('user')
+            },
+            '/Encryption/XG/getUserXG',
+            function(data) {
+              if (data.code == '1') {
+                ons.notification.toast(data.message, toastOptions)
+              } else if (data.code == '0') {
+                console.log(data.data)
+                that.crownInfo = data.data
+              }
+            }
+          )
+        },
+        viewchildlist: function(event) {
+          sessionStorage.setItem('backBarId', 'minehtml')
+
+          top.document
+            .querySelector('ons-navigator')
+            .pushPage('mine/childInfoList.html', {
+              callback: function() {
+                top.backfunction = function() {
+                  setBlur()
+
+                  top.backIndex()
+                }
+
+                top.pageBackFuncs['mine/childInfoList.html'] = top.backfunction
+              }
+            })
+        },
+        // HAINANZHYYJMBWeb 上线修改
+        goCrownT() {
+          // window.location.href = '/index.html?type=3'
+          window.location.href = '/HAINANZHYYJMBWeb/index.html?type=3'
+        },
+
+        goCrownL() {
+          // window.location.href = '/index.html?type=3'
+          window.location.href = '/HAINANZHYYJMBWeb/index.html?type=2'
+        },
+
+        viewBillList: function(event) {
+          sessionStorage.setItem('backBarId', 'minehtml')
+
+          top.document
+            .querySelector('ons-navigator')
+            .pushPage('mine/bills.html')
+        }
+      }
+    })
+
+    top.pageEndFlags[2] = true
+
+    //   top.setPage()
+  </script>
+</ons-page>

@@ -1,0 +1,979 @@
+<ons-page>
+	<style>
+			[v-cloak] {
+			  display: none;
+			}
+			
+			.title{
+				margin: 20px 15px 7px;
+				color: #6d6d72;
+				font-size: 14px;
+			}
+			
+			#zzdjchildForm li input {
+				border-width: 0px;
+				font-size: 14px;
+			}
+			#zzdjchildForm .list-item{
+			     text-align:left;
+			}
+			#zzdjchildForm .list-item__center{
+				padding: 0px !important;
+				font-size: 14px;
+			}
+			#zzdjchildForm .list-item__left{
+				width:30%;
+				padding: 0px !important;
+			}
+			#zzdjchildForm .list-item__right{
+				width:70%;
+				padding: 0px !important;
+				font-size: 14px;
+			}
+			ul{
+				display:block;
+			}
+			.datepic{
+				position:absolute;right:18px;top:11px;opacity: 0.7;
+			}
+			
+		    .tabbar__label:first-child{
+		    	color:#007aff;
+		    }
+		</style>
+		
+		<ons-toolbar class="toolbar" id="zzdjchildtoolbar" style="box-shadow:0 0px 0px 0 !important;">
+		    <div v-show="viewOrEdit == 'VIEW'" class="left toolbar__left" onclick="backfunction()"><ons-icon icon="ion-ios-arrow-back" style="color: white" size="24px"></ons-icon></div>
+			<div v-show="viewOrEdit == 'EDIT'"  class="left toolbar__left" v-on:click="cancelEditZzdjChild()">取消</div>
+		    <div class="center toolbar__center">
+		    	儿童建档
+		    </div>
+		    <div v-show="viewOrEdit == 'EDIT'" class="right toolbar__right"  v-on:click="saveEditZzdjChild()">完成</div>
+		</ons-toolbar>
+		
+	    <div class="content modifyzzdjcontent" ontouchmove="movingflag = true;" ontouchend="movingflag = false;">
+				<div class="card--material"  v-on:click="zzjdInstruction();" style="height:40px;text-align: center;line-height: 40px;background-color: #F7F7F7;overflow-y: hidden;">
+				    <div style="color:#5FC5EA;font-size: 14px;">自助建档说明</div>
+				</div>
+					
+					<div id="zzdjchildForm" style="padding-bottom: 90px;height: calc(100vh - 188px); overflow-y: auto;">
+						<div class="title">
+							选择接种点
+						</div>
+						<ul class="list">
+						  <li class="list-item">
+						    <div class="list-item__center">接种点：</div>
+						    <div v-if="viewOrEdit == 'VIEW'" class="list-item__right">{{stationName2}}</div>
+							<div v-else="viewOrEdit == 'EDIT'" class="list-item__right">
+								<input autofocus readonly="readonly" v-model="stationName" id="stationNameid" type="text" name="stationName" placeholder="请选择接种点（必填项）">
+							    <ons-icon icon="ion-ios-arrow-forward" style="color: #bbb;"></ons-icon>&nbsp;&nbsp;
+							</div>
+						  </li>
+						</ul>
+						
+						<div class="title">
+							儿童基本情况
+						</div>
+						
+						<ul class="list">
+							  <li class="list-item">
+							  	<div class="list-item__center">
+							  	 	儿童姓名：
+							  	</div>
+							  	<div v-if="viewOrEdit == 'VIEW'" class="list-item__right">{{childName2}}</div>
+							    <div v-else="viewOrEdit == 'EDIT'" class="list-item__right"><input type="text" v-model="childName" name="childName" maxlength="15"></div>
+							  </li>
+							  <li class="list-item">
+							    <div class="list-item__center">出生日期：</div>
+							    <div v-if="viewOrEdit == 'VIEW'" class="list-item__right">
+							   		 {{birthday2}}
+							    </div>
+							    <div v-else="viewOrEdit == 'EDIT'" class="list-item__right">
+							        <input type="text" v-model="birthday" id="birthdayid" name="birthday" 
+										readonly="readonly" placeholder="请选择（必填项）">
+									<ons-icon id="birthdayid-icon" icon="ion-calendar" class="datepic" style=""></ons-icon>
+							    </div>
+							  </li>
+							  <li class="list-item">
+							    <div class="list-item__center">性别：</div>
+							    <div v-if="viewOrEdit == 'VIEW'" class="list-item__right">{{sex2}}</div>
+							    <div v-else="viewOrEdit == 'EDIT'" class="list-item__right">
+							    	<input type="text" v-model="sex" id="sexid" name="sex" readonly="readonly">
+							    </div>
+							  </li>
+							  <li class="list-item">
+							    <div class="list-item__center">出生体重(克)：</div>
+							    <div v-if="viewOrEdit == 'VIEW'" class="list-item__right">{{weight2}}</div>
+							    <div v-else="viewOrEdit == 'EDIT'" class="list-item__right">
+							    	<input type="tel" v-model="weight" id="weight" name="weight" maxlength="5">
+							    </div>
+							  </li>
+							  <li class="list-item">
+							    <div class="list-item__center">血型：</div>
+							    <div v-if="viewOrEdit == 'VIEW'" class="list-item__right">{{bloodType2}}</div>
+							    <div v-else="viewOrEdit == 'EDIT'" class="list-item__right">
+							    	<input type="text" v-model="bloodType" id="bloodTypeid" name="bloodType" readonly="readonly">
+							    </div>
+							  </li>
+							  <li class="list-item">
+							    <div class="list-item__center">身份证号：</div>
+							    <div v-if="viewOrEdit == 'VIEW'" class="list-item__right">{{idCard2}}</div>
+							    <div v-else="viewOrEdit == 'EDIT'" class="list-item__right">
+							    	<input type="text" v-model="idCard" name="idCard" maxlength="18">
+							    </div>
+							  </li>
+							  <li class="list-item">
+							    <div class="list-item__center">出生医院：</div>
+							    <div v-if="viewOrEdit == 'VIEW'" class="list-item__right">{{birthHospital2}}</div>
+							    <div v-else="viewOrEdit == 'EDIT'" class="list-item__right">
+							    	<input type="text" v-model="birthHospital" name="birthHospital" maxlength="25">
+							    </div>
+							  </li>
+							  <li class="list-item">
+							    <div class="list-item__center">接生医生：</div>
+							    <div v-if="viewOrEdit == 'VIEW'" class="list-item__right">{{birthDoctor2}}</div>
+							    <div v-else="viewOrEdit == 'EDIT'" class="list-item__right">
+							    	<input type="text" v-model="birthDoctor" name="birthDoctor" maxlength="10">
+							    </div>
+							  </li>
+							  <li class="list-item">
+							    <div class="list-item__center">出生证号：</div>
+							    <div v-if="viewOrEdit == 'VIEW'" class="list-item__right">{{birthCode2}}</div>
+							    <div v-else="viewOrEdit == 'EDIT'" class="list-item__right">
+							    	<input type="text" v-model="birthCode" name="birthCode" maxlength="20">
+							    </div>
+							  </li>
+							  <li class="list-item">
+							    <div class="list-item__center">出生情况：</div>
+							    <div v-if="viewOrEdit == 'VIEW'" class="list-item__right">{{birthStatus2}}</div>
+							    <div v-else="viewOrEdit == 'EDIT'" class="list-item__right">
+							    	<input type="text" v-model="birthStatus" id="birthStatusid" name="birthStatus" readonly="readonly">
+							    </div>
+							  </li>
+						</ul>
+						
+						<div class="title">
+							家庭情况
+						</div>
+						<ul class="list">
+							<li class="list-item">
+							    <div class="list-item__center">父亲姓名：</div>
+							    <div v-if="viewOrEdit == 'VIEW'" class="list-item__right">{{parentName2}}</div>
+							    <div v-else="viewOrEdit == 'EDIT'" class="list-item__right">
+							    	<input type="text" v-model="parentName" name="parentName" maxlength="10">
+							    </div>
+							</li>
+							<li class="list-item">
+							    <div class="list-item__center">父亲单位：</div>
+							    <div v-if="viewOrEdit == 'VIEW'" class="list-item__right">{{parentCompany2}}</div>
+							    <div v-else="viewOrEdit == 'EDIT'" class="list-item__right">
+							    	<input type="text" v-model="parentCompany" name="parentCompany" maxlength="25">
+							    </div>
+							</li>
+							<li class="list-item">
+							    <div class="list-item__center">父亲身份证号：</div>
+							    <div v-if="viewOrEdit == 'VIEW'" class="list-item__right">{{parentIdCard2}}</div>
+							    <div v-else="viewOrEdit == 'EDIT'" class="list-item__right">
+							    	<input type="text" v-model="parentIdCard" name="parentIdCard" maxlength="18">
+							    </div>
+							</li>
+							<li class="list-item">
+							    <div class="list-item__center">母亲姓名：</div>
+							    <div v-if="viewOrEdit == 'VIEW'" class="list-item__right">{{montherName2}}</div>
+							    <div v-else="viewOrEdit == 'EDIT'" class="list-item__right">
+							    	<input type="text" v-model="montherName" name="montherName" maxlength="10">
+							    </div>
+							</li>
+							<li class="list-item">
+							    <div class="list-item__center">母亲单位：</div>
+							    <div v-if="viewOrEdit == 'VIEW'" class="list-item__right">{{montherCompany2}}</div>
+							    <div v-else="viewOrEdit == 'EDIT'" class="list-item__right">
+							    	<input type="text" v-model="montherCompany" name="montherCompany" maxlength="25">
+							    </div>
+							</li>
+							<li class="list-item">
+							    <div class="list-item__center">母亲身份证号：</div>
+							    <div v-if="viewOrEdit == 'VIEW'" class="list-item__right">{{montherIdCard2}}</div>
+							    <div v-else="viewOrEdit == 'EDIT'" class="list-item__right">
+							    	<input type="text" v-model="montherIdCard" name="montherIdCard" maxlength="18">
+							    </div>
+							</li>
+							<li class="list-item">
+							    <div class="list-item__center">移动电话：</div>
+							    <div v-if="viewOrEdit == 'VIEW'" class="list-item__right">{{mobileNumber2}}</div>
+							    <div v-else="viewOrEdit == 'EDIT'" class="list-item__right">
+							    	<input type="tel" v-model="mobileNumber" name="mobileNumber" placeholder="（必填项）" maxlength="11">
+							    </div>
+							</li>
+							<li class="list-item">
+							    <div class="list-item__center">固定电话：</div>
+							    <div v-if="viewOrEdit == 'VIEW'" class="list-item__right">{{phoneNumber2}}</div>
+							    <div v-else="viewOrEdit == 'EDIT'" class="list-item__right">
+							    	<input type="text" v-model="phoneNumber" name="phoneNumber" maxlength="20">
+							    </div>
+							</li>
+							<li class="list-item">
+							    <div class="list-item__center">户籍地址：</div>
+							    <div v-if="viewOrEdit == 'VIEW'" class="list-item__right">{{residenceArea2}}</div>
+							    <div v-else="viewOrEdit == 'EDIT'" class="list-item__right">
+							    	<input id="residenceAreaPickerid" type="text" readonly="readonly" v-model="residenceArea" name="residenceArea" placeholder="选择地区">
+							        <ons-icon icon="ion-ios-arrow-forward" style="color: #bbb;"></ons-icon>&nbsp;&nbsp;
+							    </div>
+							</li>
+							<li class="list-item">
+							    <div class="list-item__center"></div>
+							    <div v-if="viewOrEdit == 'VIEW'" class="list-item__right">{{residenceSubAddress2}}</div>
+							    <div v-else="viewOrEdit == 'EDIT'" class="list-item__right"><input type="text" v-model="residenceSubAddress" name="residenceSubAddress" placeholder="请输入详细户籍地址" maxlength="20"></div>
+							</li>
+							
+							<li class="list-item" >
+								<div class="list-item__center">家庭地址：</div>
+								<div v-if="viewOrEdit == 'VIEW'" class="list-item__right">{{homeArea2}}</div>
+								<div v-else="viewOrEdit == 'EDIT'" class="list-item__right">
+									<input id="homeAreaPickerid" type="text" readonly="readonly" v-model="homeArea" name="homeArea" placeholder="选择地区（必填项）">
+								<ons-icon icon="ion-ios-arrow-forward" style="color: #bbb;"></ons-icon>&nbsp;&nbsp;
+								</div>
+							</li>
+							<li class="list-item" >
+								<div class="list-item__center"></div>
+								<div v-if="viewOrEdit == 'VIEW'" class="list-item__right">{{homeSubAddress2}}</div>
+								<div v-else="viewOrEdit == 'EDIT'" class="list-item__right">
+									<input type="text" v-model="homeSubAddress" name="homeSubAddress" placeholder="请输入详细家庭地址（必填项）" maxlength="20">
+								</div>
+							</li>
+							<li class="list-item " >
+								<div class="list-item__center">通讯地址：</div>
+								<div v-if="viewOrEdit == 'VIEW'" class="list-item__right">{{postArea2}}</div>
+								<div v-else="viewOrEdit == 'EDIT'" class="list-item__right">
+									<input id="postAreaPickerid" type="text" readonly="readonly" v-model="postArea" name="postArea" placeholder="选择地区">
+								<ons-icon icon="ion-ios-arrow-forward" style="color: #bbb;"></ons-icon>&nbsp;&nbsp;
+								</div>
+							</li>
+							<li class="list-item" >
+								<div class="list-item__center"></div>
+								<div v-if="viewOrEdit == 'VIEW'" class="list-item__right">{{postSubAddress2}}</div>
+								<div v-else="viewOrEdit == 'EDIT'" class="list-item__right">
+									<input type="text" v-model="postSubAddress" name="postSubAddress" placeholder="请输入详细通讯地址" maxlength="20">
+								</div>
+							</li>
+							<li class="list-item" >
+								<div class="list-item__center">电子邮件1：</div>
+								<div v-if="viewOrEdit == 'VIEW'" class="list-item__right">{{email12}}</div>
+								<div v-else="viewOrEdit == 'EDIT'" class="list-item__right">
+									<input type="email" v-model="email1" name="email1" maxlength="40">
+								</div>
+							</li>
+							<li class="list-item" >
+								<div class="list-item__center">电子邮件2：</div>
+								<div v-if="viewOrEdit == 'VIEW'" class="list-item__right">{{email22}}</div>
+								<div v-else="viewOrEdit == 'EDIT'" class="list-item__right">
+									<input type="email" v-model="email2" name="email2" maxlength="40">
+								</div>
+							</li>
+							<li class="list-item" >
+								<div class="list-item__center">备注：</div>
+								<div v-if="viewOrEdit == 'VIEW'" class="list-item__right">{{remark2}}</div>
+								<div v-else="viewOrEdit == 'EDIT'" class="list-item__right">
+									<input type="text" v-model="remark" name="remark" maxlength="50">
+								</div>
+							</li>
+						</ul>
+						
+						<div class="title">
+							接种情况
+						</div>
+						<ul class="list">
+							<li class="list-item" >
+								<div class="list-item__center" style="width: 40%;">卡介苗接种日期：</div>
+								<div v-if="viewOrEdit == 'VIEW'" class="list-item__right">{{b001Date2}}</div>
+								<div v-else="viewOrEdit == 'EDIT'" class="list-item__right" style="width: 60%;">
+			                     	<input type="text" v-model="b001Date" id="b001Dateid" name="b001Date" 
+										readonly="readonly" >
+									<ons-icon icon="ion-calendar" class="datepic" style=""></ons-icon>
+								</div>
+							</li>
+							<li class="list-item" >
+								<div class="list-item__center" style="width: 40%;">乙肝1接种日期：</div>
+								<div v-if="viewOrEdit == 'VIEW'" class="list-item__right">{{b063Date2}}</div>
+								<div v-else="viewOrEdit == 'EDIT'" class="list-item__right" style="width: 60%;">
+									<input type="text" v-model="b063Date" id="b063Dateid" name="b063Date" 
+										readonly="readonly" >
+									<ons-icon icon="ion-calendar" class="datepic" style=""></ons-icon>
+								</div>
+							</li>
+						</ul>	
+					</div>
+				<div class="tabbar" v-if="viewOrEdit == 'VIEW'" >
+					<label class="tabbar__item" v-on:click="deleteZzdjChild()" style="border-right: solid 1px #CCCCCC;">
+					    <button class="tabbar__button" >
+					      <div class="tabbar__label">删除</div>
+					    </button>
+					 </label>
+					 <label class="tabbar__item" v-on:click="editZzdjChild()">
+					    <button class="tabbar__button" >
+					      <div class="tabbar__label">编辑</div>
+					    </button>
+					 </label>
+				</div>
+		</div>
+			<div id="sexPickerContainer" style="line-height: 1.5;"></div>	
+			<div id="bloodTypePickerContainer" style="line-height: 1.5;"></div>	
+			<div id="birthStatusPickerContainer" style="line-height: 1.5;"></div>	
+			<div id="residenceAreaPickerContainer" style="line-height: 1.5;"></div>
+			<div id="homeAreaPickerContainer" style="line-height: 1.5;"></div>
+			<div id="postAreaPickerContainer" style="line-height: 1.5;"></div>
+			<div id="birthdayContainer" style="line-height: 1.5;"></div>
+			<div id="b001DateContainer" style="line-height: 1.5;"></div>
+			<div id="b063DateContainer" style="line-height: 1.5;"></div>
+			<div id="stationNameContainer" style="line-height: 1.5;"></div>
+		<script>
+		var vm;var vm3;var datearr = getNowFormatDate3();
+		ons.getScriptPage().onInit = function() {
+			vm = new Vue({
+				el: "#zzdjchildtoolbar",
+				data: {
+					viewOrEdit: "VIEW"
+				},
+				methods:{
+					cancelEditZzdjChild:function(){
+						vm3.stationCode = vm3.stationCode2;
+						vm3.stationName = vm3.stationName2;
+						vm3.childName = vm3.childName2;
+						vm3.birthday = vm3.birthday2;
+						vm3.sex = vm3.sex2;
+						vm3.sexValue = vm3.sexValue2;
+						vm3.weight = vm3.weight2; 
+						vm3.bloodType = vm3.bloodType2;
+						vm3.bloodTypeValue = vm3.bloodTypeValue2;
+						vm3.idCard = vm3.idCard2;
+						vm3.birthHospital = vm3.birthHospital2;
+						vm3.birthDoctor = vm3.birthDoctor2;
+						vm3.birthCode = vm3.birthCode2;
+						vm3.birthStatus = vm3.birthStatus2;
+						vm3.birthStatusValue = vm3.birthStatusValue2;
+						vm3.parentName = vm3.parentName2;
+						vm3.parentCompany = vm3.parentCompany2;
+						vm3.parentIdCard = vm3.parentIdCard2;
+						vm3.montherName = vm3.montherName2;
+						vm3.montherCompany = vm3.montherCompany2;
+						vm3.montherIdCard = vm3.montherIdCard2;
+						vm3.mobileNumber = vm3.mobileNumber2;
+						vm3.phoneNumber = vm3.phoneNumber2;
+						vm3.residenceArea = vm3.residenceArea2;
+						vm3.residenceSubAddress = vm3.residenceSubAddress2;
+						vm3.homeArea = vm3.homeArea2;
+						vm3.homeSubAddress = vm3.homeSubAddress2;
+						vm3.postArea = vm3.postArea2;
+						vm3.postSubAddress = vm3.postSubAddress2;
+						vm3.email1 = vm3.email12;
+						vm3.email2 = vm3.email22;
+						vm3.remark = vm3.remark2;
+						vm3.b001Date = vm3.b001Date2;
+						vm3.b063Date = vm3.b063Date2;
+						changeViewOrEdit("VIEW"); 
+					},
+					saveEditZzdjChild:function(){
+						if(!vm3.stationCode) {
+							ons.notification.toast('请选择接种点！', toastOptions);
+							return false;
+						}
+						
+						if(!vm3.birthday) {
+							ons.notification.toast('请选择出生日期！', toastOptions);
+							return false;
+						}
+						
+						var weight = vm3.weight.trim();
+						if(weight && !isNumber(weight)) {
+							ons.notification.toast('请输入正确的出生体重！', toastOptions);
+							return false;
+						}
+						
+						if(weight && (weight < 300 || weight > 32766)) {
+							ons.notification.toast('出生体重范围为300~32766！', toastOptions);
+							return false;
+						}
+						
+						var idCard = vm3.idCard.trim();
+						if(idCard && !isCardNo(idCard)) {
+							ons.notification.toast('请输入正确的身份证号！', toastOptions);
+							return false;
+						}
+						
+						var parentIdCard = vm3.parentIdCard.trim();
+						if(parentIdCard && !isCardNo(parentIdCard)) {
+							ons.notification.toast('请输入正确的父亲身份证号！', toastOptions);
+							return false;
+						}
+						
+						var montherIdCard = vm3.montherIdCard.trim();
+						if(montherIdCard && !isCardNo(montherIdCard)) {
+							ons.notification.toast('请输入正确的母亲身份证号！', toastOptions);
+							return false;
+						}
+						
+						var mobileNumber = vm3.mobileNumber.trim();
+						if(!mobileNumber) {
+							ons.notification.toast('请输入移动电话！', toastOptions);
+							return false;
+						}
+						if(mobileNumber != vm3.mobileNumber2) {
+							if(!isMobileNumber(mobileNumber)) {
+								ons.notification.toast('请输入正确的移动电话！', toastOptions);
+								return false;
+							}
+						}
+						
+						var phoneNumber = vm3.phoneNumber.trim();
+						if(phoneNumber != vm3.phoneNumber2) {
+							if(phoneNumber && phoneNumber.trim() && !isTel(phoneNumber)) {
+								ons.notification.toast('请输入正确的固定电话！', toastOptions);
+								return false;
+							}
+						}
+						
+						var email1 = vm3.email1.trim();
+						if(email1 && !isEmail(email1)) {
+							ons.notification.toast('请输入正确的电子邮件1！', toastOptions);
+							return false;
+						}
+						
+						var email2 = vm3.email2.trim();
+						if(email2 && !isEmail(email2)) {
+							ons.notification.toast('请输入正确的电子邮件2！', toastOptions);
+							return false;
+						}
+						
+						if(!vm3.homeArea.trim() || !vm3.homeSubAddress.trim()) {
+							ons.notification.toast('请输入家庭地址！', toastOptions);
+							return false;
+						}
+						
+						if(vm3.b001Date.trim()&&vm3.b001Date.trim()<vm3.birthday.trim()) {
+							ons.notification.toast('卡介苗接种日期需要大于等于出生日期', toastOptions);
+							return false;
+						}
+						if(vm3.b063Date.trim()&&vm3.b063Date.trim()<vm3.birthday.trim()) {
+							ons.notification.toast('乙肝1接种日期需要大于等于出生日期', toastOptions);
+							return false;
+						}
+						
+						var params = genSaveChildParams();
+						
+						axiosGet(params, "/Encryption/Child/SaveUserChildDetails", function(data) {
+							if(data.code == '1') {//建档失败
+								ons.notification.toast(data.message);	
+							} else if(data.code == '0') {
+								setChildInfo();
+								ons.notification.toast('修改儿童建档成功！', toastOptions);
+								setTimeout(function() { top.backfunction(); }, 2000);
+							}
+						});
+				
+					}
+				}
+			});
+			
+			vm3 = new Vue({
+				el: ".modifyzzdjcontent",
+				data: {
+					viewOrEdit: vm.viewOrEdit,
+					fchildno: '',
+					is_allow_edit: '',
+					is_allow_delete: '',
+					stationCode: '',
+					stationCode2: '',
+					stationName: '',
+					stationName2: '',
+					childName: '',
+					childName2: '',
+					birthday: '',
+					birthday2: '',
+					sex: '男',
+					sex2: '',
+					sexValue: '1001',
+					sexValue2: '1001',
+					oldWeight: '',
+					weight2: '',
+					bloodType: '未检测',
+					bloodType2: '未检测',
+					bloodTypeValue: '',
+					bloodTypeValue2: '',
+					idCard: '',
+					idCard2: '',
+					birthHospital: '',
+					birthHospital2: '',
+					birthDoctor: '',
+					birthDoctor2: '',
+					birthCode: '',
+					birthCode2: '',
+					birthStatus: '顺产',
+					birthStatus2: '顺产',
+					birthStatusValue: '0',
+					birthStatusValue2: '0',
+					parentName: '',
+					parentName2: '',
+					parentCompany: '',
+					parentCompany2: '',
+					parentIdCard: '',
+					parentIdCard2: '',
+					montherName: '',
+					montherName2: '',
+					montherCompany: '',
+					montherCompany2: '',
+					montherIdCard: '',
+					montherIdCard2: '',
+					mobileNumber: '',
+					mobileNumber2: '',
+					phoneNumber: '',
+					phoneNumber2: '',
+					residenceArea: '',
+					residenceArea2: '',
+					residenceSubAddress: '',
+					residenceSubAddress2: '',
+					homeArea: '',
+					homeArea2: '',
+					homeSubAddress: '',
+					homeSubAddress2: '',
+					postArea: '',
+					postArea2: '',
+					postSubAddress: '',
+					postSubAddress2: '',
+					email1: '',
+					email12: '',
+					email2: '',
+					email22: '',
+					remark: '',
+					remark2: '',
+					b001Date: '',
+					b001Date2: '',
+					b063Date: '',
+					b063Date2: ''
+				},
+			    computed:{
+			        weight: {
+			            get: function() {
+			                return this.oldWeight;
+			            },
+			            set: function(newValue) {
+			                this.oldWeight = newValue.replace(/[^\d]/g,'');
+			                this.$forceUpdate();
+			            }
+			        }
+			    },
+			    methods:{
+					zzjdInstruction:function(){
+							top.document.querySelector('ons-navigator').pushPage("index/zzjdInstruction.html");
+					},
+					deleteZzdjChild:function(){//删除自助登记儿童
+						var btnArray = ['取消', '确定'];
+							ons.notification.confirm({
+							      message: '是否删除此儿童？',
+							      buttonLabels:btnArray,
+							      callback: function(idx) {
+							      	if(idx==1){
+										var is_allow_delete = vm3.is_allow_delete;
+										if(is_allow_delete == '1') {
+											axiosGet({child_code: vm3.fchildno}, "/Encryption/Child/DeleteUserSelfChild", function(data) {
+												if(data.code == '1') {
+													ons.notification.toast(data.message);	
+												} else if(data.code == '0') {
+													ons.notification.toast('删除自助建档儿童成功！', toastOptions);
+													var sessionBaby = JSON.parse(sessionStorage.getItem("baby"));
+													if(sessionBaby&&sessionBaby.child_code == vm3.fchildno) {
+														sessionStorage.removeItem("baby");
+													}
+													sessionStorage.setItem("babyrefresh",true);
+													setTimeout(function() { 
+														top.backfunction();
+													}, 2000);
+												}
+											});	
+										} else {
+											ons.notification.toast('不允许删除自助建档儿童！', toastOptions);		
+										}
+									}
+							      }
+					    	});
+				
+					},
+					editZzdjChild:function(){
+						var is_allow_edit = this.is_allow_edit;
+						if(is_allow_edit == '1') {
+							changeViewOrEdit("EDIT");
+						} else {
+							ons.notification.toast('不允许修改自助建档儿童！', toastOptions);		
+						};
+					}
+				},
+				created: function() {
+					var that = this;
+					var childCode = sessionStorage.getItem("mineBindChildCode");
+					axiosGet({child_code: childCode}, "/Encryption/Child/GetUserSelfChildDetails", function(data) {
+						if(data.code == '1') {
+							ons.notification.toast(data.message, toastOptions);	
+						} else if(data.code == '0') {
+							var respData = data.data;
+							
+							that.fchildno = respData.child_code;
+							that.is_allow_edit = respData.is_allow_edit;
+							that.is_allow_delete = respData.is_allow_delete;
+							
+							that.stationCode = respData.station_code;
+							that.stationCode2 = respData.station_code;
+							
+							that.stationName = respData.station_name;
+							that.stationName2 = respData.station_name;
+							
+							that.childName = respData.child_name;
+							that.childName2 = respData.child_name;
+							
+							that.birthday = respData.child_birth_date;
+							that.birthday2 = respData.child_birth_date;
+							
+							that.sex = respData.child_sex_name;
+							that.sex2 = respData.child_sex_name;
+							
+							that.sexValue = respData.child_sex;
+							that.sexValue2 = respData.child_sex;
+							
+							that.weight = respData.child_birth_weight; 
+							that.weight2 = respData.child_birth_weight; 
+							
+							that.bloodType = respData.child_blood_type_name;
+							that.bloodType2 = respData.child_blood_type_name;
+							
+							that.bloodTypeValue = respData.child_blood_type;
+							that.bloodTypeValue2 = respData.child_blood_type;
+							
+							that.idCard = respData.child_id_card;
+							that.idCard2 = respData.child_id_card;
+							
+							that.birthHospital = respData.child_birth_hospital;
+							that.birthHospital2 = respData.child_birth_hospital;
+							
+							that.birthDoctor = respData.child_birth_doctor;
+							that.birthDoctor2 = respData.child_birth_doctor;
+							
+							that.birthCode = respData.child_birth_code;
+							that.birthCode2 = respData.child_birth_code;
+							
+							that.birthStatus = respData.child_birth_status_name;
+							that.birthStatus2 = respData.child_birth_status_name;
+							
+							that.birthStatusValue = respData.child_birth_status;
+							that.birthStatusValue2 = respData.child_birth_status;
+							
+							that.parentName = respData.child_parent_name;
+							that.parentName2 = respData.child_parent_name;
+							
+							that.parentCompany = respData.child_parent_company;
+							that.parentCompany2 = respData.child_parent_company;
+							
+							that.parentIdCard = respData.child_parent_id_card;
+							that.parentIdCard2 = respData.child_parent_id_card;
+							
+							that.montherName = respData.child_monther_name;
+							that.montherName2 = respData.child_monther_name;
+							
+							that.montherCompany = respData.child_monther_company;
+							that.montherCompany2 = respData.child_monther_company;
+							
+							that.montherIdCard = respData.child_monther_id_card;
+							that.montherIdCard2 = respData.child_monther_id_card;
+							
+							that.mobileNumber = respData.child_mobile_number;
+							that.mobileNumber2 = respData.child_mobile_number;
+							
+							that.phoneNumber = respData.child_phone_number;
+							that.phoneNumber2 = respData.child_phone_number;
+							
+							
+							var residenceAddress = respData.child_residence_address; 
+							that.residenceArea = parseAddress(residenceAddress)[0];
+							that.residenceArea2 = that.residenceArea;
+							that.residenceArea2 = removePoint(that.residenceArea2);
+							
+							that.residenceSubAddress = parseAddress(residenceAddress)[1];
+							that.residenceSubAddress2 = that.residenceSubAddress;
+							
+							var homeAddress = respData.child_address;
+							that.homeArea = parseAddress(homeAddress)[0];
+							that.homeArea2 = that.homeArea;
+							
+							that.homeSubAddress = parseAddress(homeAddress)[1];
+							that.homeSubAddress2 = that.homeSubAddress;
+							
+							var postAddress = respData.child_post_address;
+							that.postArea = parseAddress(postAddress)[0];
+							that.postArea2 = that.postArea;
+							that.postArea2 = removePoint(that.postArea2);
+							
+							that.postSubAddress = parseAddress(postAddress)[1];
+							that.postSubAddress2 = that.postSubAddress;
+							
+							that.email1 = respData.child_email_1;
+							that.email12 = respData.child_email_1;
+							
+							that.email2 = respData.child_email_2;
+							that.email22 = respData.child_email_2;
+							
+							that.remark = respData.child_remark;
+							that.remark2 = respData.child_remark;
+							
+							that.b001Date = respData.b001_date;
+							that.b001Date2 = respData.b001_date;
+							
+							that.b063Date = respData.b063_date;
+							that.b063Date2 = respData.b063_date;
+							
+						}
+					});
+				},
+				updated:function(){
+					newDateselector();
+				}
+				
+			});
+			
+			setmuidatafocus();
+		};	
+		ons.ready(function() {
+					new MultiPicker({
+					        input: 'sexid',
+					        container: 'sexPickerContainer',
+					        jsonData:[{
+									code: '1001',
+									value: '男'
+								}, {
+									code: '1002',
+									value: '女'
+								}, {
+									code: '1003',
+									value: '未知'
+								}],
+					        success: function (items) {
+									vm3.sex = items[0].value;
+									vm3.sexValue = items[0].code;
+							}
+				    });
+				    new MultiPicker({
+					        input: 'bloodTypeid',
+					        container: 'bloodTypePickerContainer',
+					        jsonData:[{
+									code: '1005',
+									value: '未检测'
+								}, {
+									code: '1001',
+									value: 'A型'
+								}, {
+									code: '1002',
+									value: 'B型'
+								}, {
+									code: '1003',
+									value: 'O型'
+								}, {
+									code: '1004',
+									value: 'AB型'
+								}],
+					        success: function (items) {
+									vm3.bloodType = items[0].value;
+									vm3.bloodTypeValue = items[0].code; 
+							}
+				    });
+				    new MultiPicker({
+					        input: 'birthStatusid',
+					        container: 'birthStatusPickerContainer',
+					        jsonData:[{
+								code: '1001',
+								value: '顺产'
+							}, {
+								code: '1003',
+								value: '剖腹产'
+							}, {
+								code: '1002',
+								value: '难产'
+							}, {
+								code: '1004',
+								value: '其他'
+							}],
+					        success: function (items) {
+									vm3.birthStatus = items[0].value;
+									vm3.birthStatusValue = items[0].code;
+							}
+				    });
+				    new MultiPicker({
+					        input: 'residenceAreaPickerid',
+					        container: 'residenceAreaPickerContainer',
+					        jsonData:cityData3,
+					        success: function (items) {
+								vm3.residenceArea = _getParam1(items[0], 'value') + "." + _getParam1(items[1], 'value') + "." + _getParam1(items[2], 'value') + "."; 
+							}
+				    });
+				    new MultiPicker({
+					        input: 'homeAreaPickerid',
+					        container: 'homeAreaPickerContainer',
+					        jsonData:cityData3,
+					        success: function (items) {
+					        	vm3.homeArea = _getParam1(items[0], 'value') + "." + _getParam1(items[1], 'value') + "." + _getParam1(items[2], 'value') + "."; 
+							}
+				    });
+				    new MultiPicker({
+					        input: 'postAreaPickerid',
+					        container: 'postAreaPickerContainer',
+					        jsonData:cityData3,
+					        success: function (items) {
+					        	vm3.postArea = _getParam1(items[0], 'value') + "." + _getParam1(items[1], 'value') + "." + _getParam1(items[2], 'value') + "."; 
+							}
+				    });
+					   
+					var _getParam1 = function(obj, param) {
+						return obj[param] || '';
+					};
+				
+			});
+			
+			function genSaveChildParams() {
+				var params = {};
+				params.child_code = vm3.fchildno;
+				params.station_code = vm3.stationCode;
+				params.child_name = vm3.childName;
+				params.child_birth_date = vm3.birthday;
+				params.child_sex = vm3.sexValue;
+				params.child_birth_weight = vm3.weight;
+				params.child_blood_type = vm3.bloodTypeValue;
+				
+				params.child_id_card = vm3.idCard;
+				params.child_birth_hospital = vm3.birthHospital;
+				params.child_birth_doctor = vm3.birthDoctor;
+				params.child_birth_code = vm3.birthCode;
+				params.child_birth_status = vm3.birthStatusValue;
+				params.child_parent_name = vm3.parentName;
+				params.child_parent_company = vm3.parentCompany;
+				params.child_parent_id_card = vm3.parentIdCard;
+				params.child_monther_name = vm3.montherName;
+				params.child_monther_company = vm3.montherCompany;
+				params.child_monther_id_card = vm3.montherIdCard;
+					
+				params.child_mobile_number = vm3.mobileNumber;
+				params.child_phone_number = vm3.phoneNumber;
+				
+				params.child_residence_address = vm3.residenceArea + "." + vm3.residenceSubAddress;
+				params.child_address = vm3.homeArea + "."  + vm3.homeSubAddress;
+				
+				params.child_post_address = vm3.postArea + "."  + vm3.postSubAddress;
+				params.child_email_1 = vm3.email1;
+				params.child_email_2 = vm3.email2;
+				params.child_remark = vm3.remark;
+				params.b001_date = vm3.b001Date;
+				params.b063_date = vm3.b063Date;
+				
+				return params;
+			}
+			function setChildInfo(){
+				var sessionBaby = JSON.parse(sessionStorage.getItem("baby"));
+				if(sessionBaby&&sessionBaby.child_code == vm3.fchildno) {
+					sessionBaby.child_code = vm3.fchildno;
+					sessionBaby.station_code = vm3.stationCode;
+					sessionBaby.child_name = vm3.childName;
+					sessionBaby.child_birth_date = vm3.birthday;
+					sessionBaby.child_sex = vm3.sexValue;
+					sessionBaby.child_birth_weight = vm3.weight;
+					sessionBaby.child_blood_type = vm3.bloodTypeValue;
+					
+					sessionBaby.child_id_card = vm3.idCard;
+					sessionBaby.child_birth_hospital = vm3.birthHospital;
+					sessionBaby.child_birth_doctor = vm3.birthDoctor;
+					sessionBaby.child_birth_code = vm3.birthCode;
+					sessionBaby.child_birth_status = vm3.birthStatusValue;
+					sessionBaby.child_parent_name = vm3.parentName;
+					sessionBaby.child_parent_company = vm3.parentCompany;
+					sessionBaby.child_parent_id_card = vm3.parentIdCard;
+					sessionBaby.child_monther_name = vm3.montherName;
+					sessionBaby.child_monther_company = vm3.montherCompany;
+					sessionBaby.child_monther_id_card = vm3.montherIdCard;
+					
+					sessionBaby.child_mobile_number = vm3.mobileNumber;
+					
+					sessionBaby.child_phone_number = vm3.phoneNumber;
+
+					sessionBaby.child_residence_address = vm3.residenceArea + "." + vm3.residenceSubAddress;
+					sessionBaby.child_address = vm3.homeArea + "."  + vm3.homeSubAddress;
+					
+					sessionBaby.child_post_address = vm3.postArea + "."  + vm3.postSubAddress;
+					sessionBaby.child_email_1 = vm3.email1;
+					sessionBaby.child_email_2 = vm3.email2;
+					sessionBaby.child_remark = vm3.remark;
+					sessionBaby.b001_date = vm3.b001Date;
+					sessionBaby.b063_date = vm3.b063Date;
+					sessionStorage.setItem("baby",sessionBaby);
+				}
+			}
+			
+			function newDateselector(){
+				
+				if(vm.viewOrEdit=="EDIT"){
+	          	setmuidatafocus();
+					new DateSelector({
+					    input: 'birthdayid',
+					    container: 'birthdayContainer',
+					    type: 0,
+					    param: [1, 1, 1, 0, 0],
+					    beginTime: [1970,1,1],
+					    endTime: datearr,
+					    recentTime: [],
+					    success: function (arr, arr2) {
+					      	vm3.birthday = arr2.join("-");
+					    }
+					});
+						
+					 new DateSelector({
+					    input: 'b001Dateid',
+					    container: 'b001DateContainer',
+					    type: 0,
+					    param: [1, 1, 1, 0, 0],
+					    beginTime: [1970,1,1],
+					    endTime: datearr,
+					    recentTime: [],
+					    success: function (arr, arr2) {
+					      	vm3.b001Date = arr2.join("-");
+					    }
+					});
+					new DateSelector({
+					    input: 'b063Dateid',
+					    container: 'b063DateContainer',
+					    type: 0,
+					    param: [1, 1, 1, 0, 0],
+					    beginTime: [1970,1,1],
+					    endTime: datearr,
+					    recentTime: [],
+					    success: function (arr, arr2) {
+					      	vm3.b063Date = arr2.join("-");
+					    }
+					});
+						axiosGet({page_index: 0}, "/Encryption/Station/GetAllStation", function(data) {
+							if(data.code == '0') {
+								var stationData = JSON.stringify(data.data);
+								new MultiPicker({
+							        input: 'stationNameid',
+							        container: 'stationNameContainer',
+							        jsonData:eval(stationData),
+							        success: function (items) {
+							            vm3.stationName = items[1].value;
+										vm3.stationCode = items[1].code;
+							        }
+							    });
+							}
+						});	
+			
+					
+				}
+				
+			}
+			function changeViewOrEdit(value) {
+				vm.viewOrEdit = value; 
+				vm3.viewOrEdit = value;
+			}
+		</script>
+</ons-page>
+

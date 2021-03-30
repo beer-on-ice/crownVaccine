@@ -1,0 +1,142 @@
+		<ons-page>
+			<style>
+			.show-box {
+				margin: 10px;
+				padding: 0 20px;
+				width: calc(100% - 60px);
+				background: #f6fdff;
+				border: 2px dashed #ace6ff;
+				line-height: 20px;
+				border-radius: 10px;
+			}
+			.show-box-line {
+				margin: 20px 0;
+				display: flex;
+				justify-content: space-between;
+				align-items: flex-start;
+				width: 100%;
+			}
+			.show-box-left {
+				flex: 0 0 120px;
+				font-size: 16px;
+				color: #313233;
+				font-weight: bolder;
+			}
+			.show-box-right {
+				font-size: 16px;
+				color: #616161;
+				text-align: right;
+				white-space: pre-wrap;
+				word-break: break-all;
+				word-wrap: break-word;
+			}
+			.line-box {
+				margin: 20px 12px;
+				line-height: 20px;
+			}
+			.line-box-title {
+				background: url(./images/bactinfo_title.png);
+				width: 81px;
+				height: 26px;
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				color: white;
+				font-size: 16px;
+				margin-bottom: 10px;
+			}
+			.line-box-content {
+				color: #2e2d2c;
+				font-size: 16px;
+				line-height: 32px;
+				white-space: pre-wrap;
+				word-break: break-all;
+				word-wrap: break-word;
+			}
+			.toolbar__center{
+				margin-left: auto;
+				margin-right: auto;
+				padding-left: 60px;
+				padding-right: 60px;
+				overflow: hidden;
+				text-overflow: ellipsis;
+				text-align: center;
+			}
+			</style>
+			<ons-toolbar class="toolbar" id="fbackDetailHeader">
+			    <div class="left toolbar__left" onclick="backfunction()">
+					<ons-icon icon="ion-ios-arrow-back" style="color: white" size="24px"></ons-icon>
+				</div>
+			    <div class="center toolbar__center">
+			    	{{ymname}}
+			    </div>
+			</ons-toolbar>
+			<div id="fbackDetailContent" style="background-color: white !important; padding: 10px;height: calc(100% - 20px);overflow: auto !important;">
+				<div class="show-box">
+					<div class="show-box-line">
+						<div class="show-box-left">
+							药品名称
+						</div>
+						<div class="show-box-right" v-html="item.name">
+						</div>
+					</div>
+					<div class="show-box-line">
+						<div class="show-box-left">
+							接种方法
+						</div>
+						<div class="show-box-right" v-html="item.method">
+						</div>
+					</div>
+					<div class="show-box-line">
+						<div class="show-box-left">
+							预防疾病
+						</div>
+						<div class="show-box-right" v-html="item.prevent">
+						</div>
+					</div>
+				</div>
+				<div class="line-box">
+					<div class="line-box-title">
+						禁忌症
+					</div>
+					<div class="line-box-content" v-html="item.jinji">
+					</div>
+				</div>
+				<div class="line-box">
+					<div class="line-box-title">
+						注意事项
+					</div>
+					<div class="line-box-content" v-html="item.zysx">
+					</div>
+				</div>
+				<div class="line-box">
+					<div class="line-box-title">
+						不良反应
+					</div>
+					<div class="line-box-content" v-html="item.blfy">
+					</div>
+				</div>
+		    </div>
+		<script>
+			new Vue({
+		        el: '#fbackDetailHeader',
+		        data:{
+		        	ymname:sessionStorage.getItem("ymname"),
+		        },
+		    });
+		    new Vue({
+		        el: '#fbackDetailContent',
+		        data:{
+		        	item:{},
+		        },
+		        mounted:function(){
+		        	var ymenname = sessionStorage.getItem("ymenname");
+		        	var that = this;
+	            	axios.get("json"+ymenname+".json?"+Math.random()).then(function(response){
+					  	that.item = response.data;
+					});
+		        }
+		    });
+		</script>
+		</ons-page>
+		

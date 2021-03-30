@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+
+    <meta
+      http-equiv="Cache-Control"
+      content="no-cache, no-store, must-revalidate"
+    />
+
+    <meta http-equiv="Pragma" content="no-cache" />
+
+    <meta http-equiv="Expires" content="0" />
+
+    <meta
+      name="viewport"
+      content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no"
+    />
+
+    <title>金苗宝</title>
+
+    <script src="js/onsenui.min.js?version=v1.0.1"></script>
+
+    <link
+      href="css/onsen-css-components.min.css?version=v1.0.8"
+      rel="stylesheet"
+    />
+
+    <link href="css/onsenui-core.min.css?version=v1.0.0" rel="stylesheet" />
+
+    <link
+      href="css/ionicons/css/ionicons.min.css?version=v1.0.0"
+      rel="stylesheet"
+    />
+
+    <link href="css/calendar.css?version=v1.0.1" rel="stylesheet" />
+
+    <script src="js/vue.min.js?version=v1.0.0"></script>
+
+    <script src="js/axios.min.js?version=v1.0.0"></script>
+
+    <script src="js/Util.js?version=v1.0.23"></script>
+
+    <script src="js/calendar.js?version=v1.0.3"></script>
+
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="multi-picker-master/DateSelector/DateSelector.css?version=v1.0.2"
+    />
+
+    <script
+      type="text/javascript"
+      src="multi-picker-master/DateSelector/DateSelector.js?version=v1.0.3"
+    ></script>
+
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="multi-picker-master/MultiPicker/MultiPicker.css?version=v1.0.2"
+    />
+
+    <script
+      type="text/javascript"
+      src="multi-picker-master/MultiPicker/MultiPicker.js?version=v1.0.2"
+    ></script>
+
+    <script
+      type="text/javascript"
+      src="multi-picker-master/MultiPicker/city.data-3.js?version=v1.0.2"
+    ></script>
+
+    <script src="./js/baidumap.js?version=v1.0.0"></script>
+
+    <script src="./js/convertor.js?version=v1.0.0"></script>
+
+    <link
+      type="text/css"
+      href="dialog/dialog.css?version=v1.0.1"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" href="./viewer/viewer.css" />
+
+    <script src="./viewer/viewer.js"></script>
+
+    <script src="js/crypto-js.js"></script>
+
+    <script src="./js/md5.min.js?version=v1.0.0"></script>
+
+    <style>
+      body {
+        width: auto !important;
+
+        height: auto !important;
+      }
+
+      iframe {
+        width: 100vw;
+
+        height: calc(100vh - 55px);
+
+        border: 0;
+      }
+
+      :checked + .tabbar__button {
+        color: #0076ff !important;
+      }
+
+      .dialog-content-hd .dialog-content-title {
+        text-align: center;
+      }
+
+      [data-style='android'] .dialog-content-ft {
+        display: flex !important;
+      }
+
+      .toast {
+        z-index: 9999;
+      }
+
+      .dialog {
+        z-index: 50 !important;
+      }
+    </style>
+  </head>
+
+  <body>
+    <ons-navigator
+      id="myNavigator"
+      animation="fade-ios"
+      page="indexpage.html"
+    ></ons-navigator>
+
+    <template id="indexpage.html">
+      <ons-page>
+        <ons-tabbar id="mainTab">
+          <ons-tab
+            page="index/index.html"
+            label="首页"
+            icon="ion-home"
+          ></ons-tab>
+
+          <!--<ons-tab page="station/stationView.html" label="接种门诊" icon="ion-map" onclick="if(changeData)changeData();if(setStationViewFlag)setStationViewFlag();"></ons-tab>-->
+
+          <ons-tab
+            page="mine/mine.html"
+            label="我的"
+            icon="ion-person"
+            onclick="if(setBillFlag)setBillFlag();"
+          ></ons-tab>
+        </ons-tabbar>
+
+        <script>
+          function GetQueryString(name) {
+            var reg = new RegExp('(^|&)' + name + '=([^&]*)(&|$)')
+
+            var r = window.location.search.substr(1).match(reg)
+
+            if (r != null) return unescape(r[2])
+            return null
+          }
+
+          if (GetQueryString('token')) {
+            sessionStorage.setItem('token', GetQueryString('token'))
+          }
+
+          if (GetQueryString('x') && GetQueryString('y')) {
+            sessionStorage.setItem('user_x', GetQueryString('x'))
+
+            sessionStorage.setItem('user_y', GetQueryString('y'))
+          }
+
+          var pageEndFlags = [false, false]
+          function setPage() {
+            var flag = false
+
+            for (var i = 0; i < pageEndFlags.length; i++) {
+              flag = flag || pageEndFlags[i]
+            }
+
+            if (!flag) {
+              return
+            }
+
+            var indexId = sessionStorage.getItem('backBarId')
+
+            sessionStorage.removeItem('backBarId')
+
+            var tabIndex
+
+            if (indexId == 'index.html') {
+              tabIndex = 0
+            } /*else if(indexId == "stationView") {
+
+
+			    			tabIndex = 1;
+
+
+			    			setStationViewFlag();
+
+
+			    		}*/ else if (
+              indexId == 'minehtml'
+            ) {
+              tabIndex = 1
+              if (window.setBillFlag) window.setBillFlag()
+            } else {
+              tabIndex = 0
+            }
+
+            document
+              .getElementById('mainTab')
+              .setActiveTab(tabIndex, { animation: 'none' })
+          }
+        </script>
+      </ons-page>
+    </template>
+
+    <script type="text/javascript" charset="utf-8">
+      var pageBackFuncs = {}
+
+      function backIndex() {
+        top.document
+          .querySelector('ons-navigator')
+          .resetToPage('indexpage.html')
+
+        //window.location.reload();
+      }
+
+      function backToPrevPage(pagename) {
+        top.document
+          .querySelector('ons-navigator')
+          .removePage(
+            top.document.querySelector('ons-navigator').pages.length - 2
+          )
+
+        top.document.querySelector('ons-navigator').pushPage(pagename, {
+          callback: function() {
+            top.document
+              .querySelector('ons-navigator')
+              .removePage(
+                top.document.querySelector('ons-navigator').pages.length - 2
+              )
+
+            if (top.pageBackFuncs[pagename]) {
+              top.backfunction = top.pageBackFuncs[pagename]
+            }
+          }
+        })
+      }
+
+      document
+        .querySelector('ons-navigator')
+        .addEventListener('prepop', setBackFuncPoP)
+
+      document
+        .querySelector('ons-navigator')
+        .addEventListener('postpop', setBackFunc)
+
+      document
+        .querySelector('ons-navigator')
+        .addEventListener('prepush', setPrePushFunc)
+
+      document
+        .querySelector('ons-navigator')
+        .addEventListener('postpush', setBackFunc)
+
+      function setPrePushFunc(evt) {
+        var pageid = evt.currentPage.pushedOptions
+          ? evt.currentPage.pushedOptions.page
+          : ''
+
+        if (pageid == 'indexpage.html') {
+          vmbaby2.clearSlide()
+        }
+
+        /*if(!isAndroid_ios()){
+
+
+			setTimeout(appRemoveLoading,500);
+
+
+		}*/
+      }
+
+      function setBackFuncPoP(evt) {
+        pageloadingflag = true
+
+        var pageid = evt.enterPage.pushedOptions
+          ? evt.enterPage.pushedOptions.page
+          : ''
+
+        if (top.pageBackFuncs[pageid]) {
+          top.backfunction = top.pageBackFuncs[pageid]
+        }
+
+        if (pageid == 'indexpage.html') {
+          pageEndFlags = [false, false, false]
+        }
+      }
+
+      var pageloadingflag
+
+      function setBackFunc(evt) {
+        var pageid = evt.enterPage.pushedOptions
+          ? evt.enterPage.pushedOptions.page
+          : ''
+
+        if (pageid == 'indexpage.html') {
+          backfunction = function() {
+            backWeixin()
+          }
+
+          top.reloadIndex()
+        } else {
+          backfunction = function() {
+            setBlur()
+
+            top.document.querySelector('ons-navigator').popPage()
+          }
+        }
+
+        if (evt.enterPage.pushedOptions) {
+          evt.enterPage.pushedOptions.callback = null
+        }
+
+        pageloadingflag = false
+      }
+
+      function setBackFuncAfterLoading(func) {
+        if (pageloadingflag) {
+          setTimeout(function() {
+            setBackFuncAfterLoading(func)
+          })
+        } else {
+          backfunction = func
+        }
+      }
+
+      backfunction = function() {
+        backWeixin()
+      }
+
+      var radiochangvalue1 = ''
+
+      function changevaue1(t) {
+        if (t.checked) {
+          radiochangvalue1 = t.value
+        }
+      }
+
+      function setDialog(opts) {
+        $(document).dialog(opts)
+      }
+
+      function muiback() {
+        //调查问卷回答完毕后调用，muiBack.html页面(嵌入到调查问卷页面)最终调用
+
+        top.backIndex()
+      }
+
+      function reloadIndex() {
+        sessionStorage.removeItem('starttime')
+
+        if (top.indexIFrame && top.indexIFrame.window) {
+          startloading()
+
+          top.indexIFrame.window.location.reload()
+        }
+      }
+
+      //获取一个唯一标识
+
+      function getUid() {
+        return Math.random().toString(36)
+      }
+
+      //在对象中属性是否存在
+
+      function has(obj, value) {
+        return obj.hasOwnProperty(value)
+      }
+
+      //为一个对象添加key属性
+
+      function hide(obj, value) {
+        Object.defineProperties(obj, {
+          mapKey: {
+            value: value,
+
+            writable: true
+          }
+        })
+      }
+
+      //是否为一个对象
+
+      function isObject(it) {
+        return typeof it === 'object' ? it !== null : typeof it === 'function'
+      }
+
+      //获取map某数据key值
+
+      function fastKey(it, create) {
+        if (!isObject(it)) {
+          return typeof it == 'symbol'
+            ? it
+            : (typeof it == 'string' ? 'S' : 'P') + it
+        }
+
+        if (has(it, 'mapKey')) {
+          return it['mapKey']
+        } else {
+          if (create) {
+            var uid = getUid()
+
+            hide(it, uid)
+
+            return uid
+          } else {
+            return false
+          }
+        }
+      }
+
+      //获取map某个数据的实体
+
+      function getEntry(that, key) {
+        var index = fastKey(key)
+
+        if (index) {
+          return that.data[index]
+        }
+
+        for (var d in that.data) {
+          if (d.i === index) return d
+        }
+
+        return false
+      }
+
+      //声明map对象
+
+      function Map() {
+        this.data = {}
+
+        this.size = 0
+      }
+
+      //get方法
+
+      Map.prototype.get = function(key) {
+        var entry = getEntry(this, key)
+
+        if (entry) {
+          return entry.v
+        }
+
+        return false
+      }
+
+      //清除方式
+
+      Map.prototype.clear = function() {
+        this.data = {}
+
+        this.size = 0
+      }
+
+      //是否存在
+
+      Map.prototype.has = function(key) {
+        var entry = getEntry(this, key)
+
+        return entry ? true : false
+      }
+
+      //删除
+
+      Map.prototype.remove = function(key) {
+        var entry = getEntry(this, key)
+
+        if (entry) {
+          delete this.data[entry.i]
+
+          this.size--
+
+          return true
+        }
+
+        return false
+      }
+
+      //添加
+
+      Map.prototype.set = function(key, value) {
+        var entry = getEntry(this, key)
+
+        if (entry) {
+          entry.v = value
+        } else {
+          var index = fastKey(key, true)
+
+          this.data[index] = {
+            i: index,
+
+            v: value
+          }
+
+          this.size++
+        }
+      }
+
+      //获取大小
+
+      Map.prototype.size = function() {
+        return this.size
+      }
+
+      var viewer
+
+      //图片点击放大
+
+      function setViewer(img, name) {
+        if (!name) {
+          name = 'origin-src'
+        }
+
+        if (!viewer) {
+          viewer = new Viewer(img, {
+            url: name,
+
+            button: false
+          })
+        }
+
+        viewer.show()
+      }
+
+      function setImg(child) {
+        var body = document.body
+
+        var shadow = document.createElement('div')
+
+        shadow.id = 'imgshadow'
+
+        shadow.style.width = '100vw'
+
+        shadow.style.height = '100vh'
+
+        shadow.style.backgroundColor = 'black'
+
+        shadow.style.zIndex = '99'
+
+        shadow.style.position = 'absolute'
+
+        shadow.style.left = '0'
+
+        shadow.style.top = '0'
+
+        shadow.style.display = 'flex'
+
+        shadow.style.alignContent = 'center'
+
+        shadow.style.alignItems = 'center'
+
+        var wrapper = document.createElement('div')
+
+        wrapper.className = 'mui-zoom-wrapper'
+
+        var scroller = document.createElement('div')
+
+        scroller.className = 'mui-zoom-scroller'
+
+        var img = document.createElement('img')
+
+        img.className = 'mui-zoom'
+
+        img.style.width = '100vw'
+
+        img.setAttribute('src', './images/mianyijihua_big.png')
+
+        document.body.appendChild(shadow)
+
+        shadow.appendChild(wrapper)
+
+        wrapper.appendChild(scroller)
+
+        scroller.appendChild(img)
+
+        document
+          .getElementById('imgshadow')
+          .addEventListener('tap', function(evt) {
+            document.body.removeChild(shadow)
+
+            if (window.event) {
+              // Chrome,IE6,Opera
+
+              window.event.cancelBubble = true
+            } else {
+              // FireFox 3
+
+              evt.stopPropagation()
+            }
+
+            setTimeout(function() {
+              child.nobubbleflag = false
+            }, 300)
+          })
+      }
+
+      function backWeixin() {
+        /*if(typeof(WeixinJSBridge) != "undefined") {
+
+
+				WeixinJSBridge.call('closeWindow');
+
+
+			} else {
+
+
+				if(navigator.userAgent.indexOf("MSIE") > 0) {
+
+
+					if(navigator.userAgent.indexOf("MSIE 6.0") > 0) {
+
+
+						window.opener = null;
+
+
+						window.close();
+
+
+					} else {
+
+
+						window.open('', '_top');
+
+
+						window.top.close();
+
+
+					}
+
+
+				} else if(navigator.userAgent.indexOf("Firefox") > 0) {
+
+
+					window.location.href = 'about:blank ';
+
+
+				} else {
+
+
+					window.opener = null;
+
+
+					window.open('', '_self', '');
+
+
+					window.close();
+
+
+				}
+
+
+			}*/
+
+        window.history.go(-1)
+      }
+
+      var stationViewFlag
+
+      function setStationViewDisplay(flag) {
+        stationViewFlag = flag
+      }
+
+      var movingflag = false
+    </script>
+  </body>
+</html>

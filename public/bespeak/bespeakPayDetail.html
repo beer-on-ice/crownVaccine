@@ -1,0 +1,232 @@
+<ons-page>
+<style>
+    [v-cloak] {
+      display: none;
+    }
+    #BesPayDetail_content{
+    	height: calc(100vh - 50px);
+		background-color: #EFEFF4;
+		overflow-y:auto;
+    }
+    .chidinfo{
+            	margin-top: 10px;
+    }
+    .chidinfo label{
+    	color:#666;
+    }
+    .column{
+    	display: flex;
+    	justify-content: center;
+    	flex-direction: column;
+    }
+    .row_space_between{
+    	display: flex;
+    	justify-content: space-between;
+    	flex-direction: row;
+    	margin-top: 10px;
+    	margin-right: 20px;
+    }
+    
+    .row_flex_start{
+    	display: flex;
+    	justify-content: flex-start;
+    	flex-direction: row;
+    }
+    .info_msg{
+		font-size: 18px;
+		font-weight: bold;
+		text-align: center;
+	}
+	.button--large--cta{
+		margin-left: 5%;
+		background-color: #6798FF;
+		font-size: 18px;
+		color:#fff;
+		width: 90%;
+	}
+	.button--cta{
+		background-color: #6798FF;
+		font-size: 18px;
+		width: 40%;
+		color:#fff;
+	}
+</style>
+	<ons-toolbar class="toolbar">
+  	    <div class="left toolbar__left" onclick="backfunction()">
+			<ons-icon icon="ion-ios-arrow-back" style="color: white" size="24px"></ons-icon>
+		</div>
+	    <div class="center toolbar__center">
+	    	预约
+	    </div>
+	    <div class="right toolbar__right" >
+      	<img id="indexPng" src="images/ic_appoint_ment.png" style="width: 24px;height: 24px;vertical-align: middle;"  onclick="goBespeakListPay()">
+	    </div>
+ 	</ons-toolbar>
+	 <div id="BesPayDetail_content" class="content" style="overflow-y:auto; height:calc(100vh - 50px);" v-cloak >
+        	
+        	<div style="display: flex;flex-direction: row;justify-content: flex-start;padding: 10px;" v-show="ispayflag">
+	        	<div class="info_msg">
+	        		{{bespeakInfo.pay_status_desc}}
+	        	</div>
+        	</div>
+        	
+        	<div style="margin: 10px;padding: 10px; background-color: #fffde9;color: red;display: flex;justify-content: flex-end;flex-direction: row;"
+        		v-if="bespeakInfo.reservation_status=='1004'">
+        		<div style="word-break:keep-all;white-space:nowrap; " v-if="stationszflag">签到提醒：</div><div v-if="stationszflag">请在预约时间段内到门诊签到！去接种门诊之前，请量好孩子的体温并做好记录。</div>
+        		<div style="word-break:keep-all;white-space:nowrap; " v-if="!stationszflag">预约提醒：</div><div v-if="!stationszflag">请在预约时间段内到门诊！去接种门诊之前，请量好孩子的体温并做好记录。</div>
+        	</div>
+        	<div style="margin-top: 10px;margin-left: 10px;margin-right: 10px;">
+	        	<div class="chidinfo">
+	        		<label>儿童姓名：</label>{{bespeakInfo.child_name}}
+	        	</div>
+	        	<div class="chidinfo">
+	        		<label>儿童编码：</label>{{bespeakInfo.child_code}}
+	        	</div>
+	        	<div class="chidinfo">
+	        		<label>预约门诊：</label>{{bespeakInfo.station_name}}
+	        	</div>
+	        	<div class="chidinfo">
+	        		<label>预约时间：</label>{{bespeakInfo.yydate}}&nbsp;{{bespeakInfo.begin_time}}-{{bespeakInfo.end_time}}
+	        	</div>
+	        	<div class="chidinfo">
+	        		<label>接种疫苗：</label>
+	        		<div style="background: #fff;margin-top:5px ;" >
+	        			<div v-for="vaccine in bespeakInfo.vaccine_list">
+			        		<div class="column" style="margin-left:5px;">
+			        			<div class="row_space_between">
+			        				<div style="color: #666;">{{vaccine.vaccine_name}}<span v-if="vaccine.vaccine_producer">-{{vaccine.vaccine_producer}}</span>(第{{vaccine.vaccine_count}}剂次)
+			        						<span v-if="vaccine.jz_status=='0'">（未接种）</span><span v-if="vaccine.jz_status=='1'">（已接种）</span></div>
+			        				<div v-if="vaccine.vaccine_price">￥{{vaccine.vaccine_price}}</div>
+			        			</div>
+			        			<div>{{vaccine.vaccine_spec}}</div>
+			        			<div class="row_space_between" v-for="other in vaccine.other_cost_list">
+			        				<div style="color: #666;">{{other.other_cost_name}}</div><div>￥{{other.other_cost_price}}</div>
+			        			</div>
+			        			<div class="row_space_between" v-if="bespeakInfo.pay_status!='2001'">
+			        				<div style="color: #666;" v-if="vaccine.total_price!=null&&vaccine.total_price!=''">小计</div><div v-if="vaccine.total_price!=null&&vaccine.total_price!=''">￥{{vaccine.total_price}}</div>
+			        			</div>
+			        		</div>
+		        		</div>
+		        		
+	        		</div>
+	        		<div class="row_space_between">
+	        			<div style="color: #666;">总计：</div>
+	        			<div>
+	        				<span v-if="!!bespeakInfo.vaccine_all_price">￥{{bespeakInfo.vaccine_all_price}}</span>
+	        				<span v-else>￥0</span>
+	        			</div>
+	        		</div>
+	        	</div>
+	        	<div class="chidinfo" v-if="bespeakInfo.pay_no!=undefined&&bespeakInfo.pay_no!=''">
+	        		<label>订单号：</label>{{bespeakInfo.pay_no}}
+	        	</div>
+        	</div>
+        	<div style="margin-top: 10px;margin-bottom: 20px;text-align: center;" v-if="bespeakInfo.is_cancel_refund==undefined||bespeakInfo.is_cancel_refund=='0'">
+                <template v-if="ispayflag">
+	                <template v-if="bespeakInfo.is_allow_cancel=='1'||bespeakInfo.is_go_pay=='1'">
+	                	<button class="button--cta" v-on:click="cancelYY()" v-bind:disabled="bespeakInfo.is_allow_cancel=='1'?false:true">取消预约</button>
+		                &nbsp;&nbsp;
+		                <button class="button--cta" v-on:click="goPay()" v-bind:disabled="bespeakInfo.is_go_pay=='1'?false:true">去支付</button>
+	                </template>
+                </template>
+                <template v-else>
+                    <div v-if="bespeakInfo.is_allow_cancel=='1'||bespeakInfo.is_go_pay=='1'">
+	                	<button class="button--large--cta" v-on:click="cancelYY()" v-bind:disabled="bespeakInfo.is_allow_cancel=='1'?false:true">取消预约</button>
+               	    </div>
+                </template>
+           	</div>
+           	<div style="margin-top: 10px;margin-bottom: 20px;" v-else>
+                	<button class="button--large--cta" v-on:click="cancelRefundYY()" >取消预约并申请退款</button>
+           	</div>
+        </div>
+        
+          <script>
+	          	      	new Vue({
+			        		el:'#BesPayDetail_content',
+			        		data:{
+			        			bespeakInfo:{},
+			                    stationszflag:false,
+			                    ispayflag:payflag
+			        		},
+			        		created:function(){
+			        			var that=this;
+			        			that.sessionBaby = JSON.parse(sessionStorage.getItem("baby"));
+			        			axiosGet({"reservation_code":sessionStorage.getItem("reservation_code")},
+				                    "/Encryption/Reservation/GetReservationDetailsWithPay",function(data){
+				                    if(data.code=='0'){
+				                        that.bespeakInfo=data.data;
+				                        that.stationszflag=data.data.station_digital=="1";
+				                    }
+				                });
+			        		},
+			        		methods:{
+			        			cancelYY:function(){
+					                var btnArray = ['否', '是'];
+					                 ons.notification.confirm('是否取消预约？', {
+					                 	buttonLabels:btnArray,
+					                 	title:"提示",
+					                 	callback: function(idx) {
+									      	if(idx==1){
+				                                var senddata={"reservation_code":sessionStorage.getItem("reservation_code")};
+				                                axiosGet(senddata,"/Encryption/Reservation/CancelReservation",function(data){
+				                                    if(data.code=='0'){
+				                                    	ons.notification.toast(data.message, toastOptions);
+						                        		setTimeout(function(){
+									                        top.backIndex();
+						                        		},1000);
+				                                    }else{
+				                                    	ons.notification.toast(data.message, toastOptions);
+				                                    }
+				                                });
+			                                }
+									    }
+					                 });
+					                
+			        			},
+			        			goPay:function(){
+			        				sessionStorage.setItem("fk_type","next");
+			        				sessionStorage.setItem("isdirectpay",true);
+			                        top.document.querySelector('ons-navigator').pushPage("bespeak/checkPayDetail.html",{callback:function(){
+										backfunction = function(){
+											backToPrevPage("bespeak/bespeakPayDetail.html");
+										};
+										pageBackFuncs["bespeak/checkPayDetail.html"] = backfunction;
+									}});
+				               },
+				               cancelRefundYY:function(){
+					                var btnArray = ['取消', '确定'];
+					                ons.notification.confirm('退款将在您取消预约的7个工作日内汇入到您原有账户！', {
+					                 	buttonLabels:btnArray,
+					                 	title:"提示",
+					                 	callback: function(idx) {
+				                            if (idx == 1) {
+				                                var senddata={"reservation_code":sessionStorage.getItem("reservation_code")};
+				                                axiosGet(senddata,"/Encryption/Reservation/RefundReservation",function(data){
+				                                    if(data.code=='0'){
+				                                    	ons.notification.toast(data.message, toastOptions);
+						                        		setTimeout(function(){
+						                        			top.backIndex();
+						                        		},1000);
+				                                    }else{
+				                                    	ons.notification.toast(data.message, toastOptions);
+				                                    }
+				                                });
+				                            }
+				                        }
+					                 });
+				               }
+			        		}
+			        	});
+  	
+		function goBespeakListPay(){
+			//backToPrevPage("bespeak/bespeakdetail.html");
+			top.document.querySelector('ons-navigator').pushPage("bespeak/bespeak_list.html",{callback:function(){
+				backfunction = function(){
+					backToPrevPage("bespeak/bespeakPayDetail.html");
+				};
+				pageBackFuncs["bespeak/bespeak_list.html"] = backfunction;
+			}});
+		}
+        </script>
+</ons-page>
+

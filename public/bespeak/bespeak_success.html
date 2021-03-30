@@ -1,0 +1,123 @@
+<ons-page>
+	<style>
+		[v-cloak] {
+	      display: none;
+	    }
+		.info_msg{
+			font-size: 18px;
+			font-weight: bold;
+			text-align: center;
+			margin-top: 15px;
+		}
+		.chidinfo{
+	    	margin-top: 10px;
+	    	margin-left: 10px;
+	    	display: flex;
+	    	justify-content: flex-start;
+	    	flex-direction: row;
+	    }
+	    .chidinfo .label{
+	    	color:#666;
+	    	word-break:keep-all;
+	    	white-space:nowrap;
+	    }
+        #suc_content{
+        	height: calc(100vh - 44px);
+        	background-color: #EFEFF4;
+        	overflow-y:auto;
+        }
+	</style>
+		
+		<ons-toolbar class="toolbar">
+		    <div class="center toolbar__center">
+		    	预约成功
+		    </div>
+		    <div class="right toolbar__right">
+		  		<img src="images/ic_home.png" style="width: 24px;height: 24px;vertical-align: middle;" onclick="backIndex();">
+		    </div>
+	 	</ons-toolbar>
+	
+	    <div id="suc_content" class="content">
+         	<div class="info_msg">恭喜您！预约成功</div>
+        	<div style="margin: 10px;padding: 10px; background-color: #fffde9;color: red;display: flex;justify-content: flex-end;flex-direction: row;">
+        		<div style="word-break:keep-all;white-space:nowrap; " v-if="stationszflag">签到提醒：</div><div v-if="stationszflag">请在预约时间段内到门诊签到！去接种门诊之前，请量好孩子的体温并做好记录。</div>
+        		<div style="word-break:keep-all;white-space:nowrap; " v-if="!stationszflag">预约提醒：</div><div v-if="!stationszflag">请在预约时间段内到门诊！去接种门诊之前，请量好孩子的体温并做好记录。</div>
+        	</div>
+        	<div>
+        		<div class="chidinfo">
+	        		<div class="label">儿童姓名：</div>
+	        		<div>{{bespeakInfo.child_name}}</div>
+	        	</div>
+	        	<div class="chidinfo">
+	        		<div class="label">儿童编码：</div><div>{{bespeakInfo.child_code}}</div>
+	        	</div>
+	        	<div class="chidinfo">
+	        		<div class="label">预约门诊：</div>
+	        		<div>{{bespeakInfo.station_name}}</div>
+	        	</div>
+	        	<div class="chidinfo">
+	        		<div class="label">接种疫苗：</div>
+	        		<div><div v-for="bespeak in vaccine_name">{{bespeak}}</div></div>
+	        	</div>
+	        	<div class="chidinfo">
+	        		<div class="label">预约时间：</div>
+	        		<div>{{bespeakInfo.reservation_date}}&nbsp;{{bespeakInfo.reservation_begin_time}}-{{bespeakInfo.reservation_end_time}}</div>
+	        	</div>
+        	</div>
+        	<div style="margin-top:30px;text-align: center;">
+	        	<button class="button button--light" style="background-color: #FFF;width: 90%;color:#666;
+	        			padding-top: 8px;padding-bottom: 8px;font-size: 18px;margin: 0 auto;" v-on:click="backToIndex();">返回</button>
+        	</div>
+        	<div class="info_msg" style="color: #6798FF;padding-top: 5px;padding-bottom: 5px;font-size: normal;" v-on:click="goRemind();">温馨提示</div>
+        </div>
+	
+	 <script>
+    	 var vm = new Vue({
+            el: '#suc_content',
+            data: {
+                bespeakInfo:{},
+                stationszflag:false
+            },
+            computed: {
+				vaccine_name: function() {
+					if(this.bespeakInfo.vaccine_name!=undefined&&this.bespeakInfo.vaccine_name!=''){
+						var vName=this.bespeakInfo.vaccine_name.split(',');
+						for(var v in vName){
+							var tmp = vName[v];
+							if(tmp&&tmp.length>5){
+								vName[v]=tmp.substr(0,vName[v].length-5);
+							}
+						}
+						return vName;
+					}
+					return [];
+				}
+			},
+            created: function() {
+                var that=this;
+                if(sessionStorage.getItem("reservation_code")==undefined||sessionStorage.getItem("reservation_code")==''){
+                	top.backIndex();
+                	return;
+                }
+                that.sessionBaby = JSON.parse(sessionStorage.getItem("baby"));
+                var senddata={"reservation_code":sessionStorage.getItem("reservation_code")};
+            	axiosGet(senddata,"/Encryption/Reservation/GetReservationDetails",function(data){
+                    if(data.code=='0'){
+                        that.bespeakInfo=data.data;
+                        that.stationszflag=data.data.station_digital=="1";
+                    }
+                });
+            },
+            methods:{
+            	backToIndex:function(){
+            		top.backIndex();
+            	},
+            	goRemind:function(){
+                    top.document.querySelector('ons-navigator').pushPage("bespeak/tips.html");
+            	}
+            }
+        });
+        	
+    </script>
+</ons-page>
+

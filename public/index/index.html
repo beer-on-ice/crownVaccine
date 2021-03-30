@@ -1,0 +1,1380 @@
+<ons-page>
+  <style>
+    .indexcontent {
+      top: 56px !important;
+
+      position: absolute !important;
+    }
+
+    #innerSliderindex {
+      position: absolute;
+
+      left: 0;
+
+      top: 0;
+
+      width: 10000px;
+    }
+
+    #sliderindex {
+      overflow: hidden;
+    }
+
+    #sliderindex,
+    .each-slider {
+      width: 100vw;
+
+      height: 115px;
+
+      position: relative;
+
+      display: inline-block;
+
+      font-size: 0;
+    }
+
+    .each-slider img {
+      width: 100vw;
+
+      padding: 1px;
+    }
+
+    #circles {
+      position: absolute;
+
+      bottom: 0;
+
+      left: 0;
+
+      width: 100vw;
+
+      height: 40px;
+
+      line-height: 40px;
+
+      display: flex;
+
+      align-items: center;
+
+      justify-content: center;
+    }
+
+    .circle {
+      position: relative;
+
+      width: 6px;
+
+      height: 6px;
+
+      border-radius: 3px;
+
+      background-color: #aaa;
+
+      margin: 5px;
+    }
+
+    .circle-active {
+      background-color: white;
+    }
+
+    .iconsli {
+      margin: 0;
+
+      padding: 10px 0;
+
+      width: 33.33333333%;
+    }
+
+    .mui-badge {
+      position: absolute;
+
+      right: 35px;
+
+      top: 0;
+
+      font-size: 12px;
+
+      line-height: 12px;
+
+      display: inline-block;
+
+      padding: 3px 6px;
+
+      border-radius: 100px;
+
+      color: #fff;
+
+      background-color: #dd524d;
+
+      top: 2px;
+
+      z-index: 999;
+    }
+
+    /*.toolbar{
+
+
+		
+
+
+			line-height: -moz-block-height;
+
+
+		}*/
+
+    .toolbar__left {
+      padding-top: 15px;
+
+      line-height: normal;
+    }
+
+    .toolbar__center {
+      padding-top: 17px;
+
+      line-height: normal;
+    }
+
+    .toolbar__right {
+      padding-top: 15px;
+
+      line-height: normal;
+    }
+  </style>
+
+  <ons-toolbar class="toolbar">
+    <!--<div class="left toolbar__left" onclick="backWeixin()" >
+
+
+			<ons-icon icon="ion-ios-arrow-back" style="color: white" size="24px"></ons-icon>
+
+
+		</div>-->
+
+    <div class="left toolbar__left"></div>
+
+    <div class="center toolbar__center">
+      金苗宝
+    </div>
+
+    <div class="right toolbar__right">
+      <img
+        id="toBindChildBtn"
+        src="./images/ic_add_child.png"
+        style="width: 24px;height: 24px;vertical-align: middle;"
+      />
+    </div>
+  </ons-toolbar>
+
+  <div class="content indexcontent">
+    <div
+      id="myBabys"
+      style="background-color: #6E89FF;height: 105px; display: flex; justify-content:space-between; flex-direction: row"
+    >
+      <div
+        style="width: 50px; display: flex;flex-direction: column;justify-content:center;"
+      >
+        <div
+          v-show="showBabyIndex > 0"
+          style="display: flex;flex-direction: row;justify-content:center;"
+        >
+          <img
+            id="preBabyImg"
+            src="./images/btn_left.png"
+            style="width: 30px;height: 30px;"
+          />
+        </div>
+      </div>
+
+      <div
+        class="babyDiv"
+        style="display: flex;flex-direction: row;justify-content:center;width:calc(100vw - 100px);"
+      >
+        <div
+          style="display: flex;flex-direction: column;justify-content:center;margin: 5px;"
+          v-on:click="gotoBaby"
+        >
+          <img
+            src="./images/img_user_avatar.png"
+            style="width:80px;height: 80px;"
+          />
+        </div>
+
+        <div
+          style="color: white;display: flex;flex-direction: column;justify-content:center;"
+        >
+          <div>
+            <div
+              v-cloak
+              style="max-width: calc(100vw - 220px);overflow: hidden;text-overflow: ellipsis;word-break: keep-all;"
+            >
+              {{baby.child_name ? baby.child_name : baby.child_code}}
+            </div>
+          </div>
+
+          <div>
+            <div v-cloak>{{baby.age}}</div>
+          </div>
+        </div>
+
+        <div
+          style="display: flex;flex-direction: column;justify-content:center;margin-left: 5px ;"
+        >
+          <!--<div class="button" v-on:click="babySignIn"
+
+
+						 style="background-color:  #78CAEC;border-color: #78CAEC;"
+
+
+						 v-if="baby.isdigital == '1' ">
+
+
+						签到
+
+
+					</div>-->
+        </div>
+      </div>
+
+      <div
+        style="width: 50px;display: flex;flex-direction: column;justify-content:center;"
+      >
+        <div
+          v-show="showBabyIndex < childnum - 1"
+          style="display: flex;flex-direction: row;justify-content:center;"
+        >
+          <img
+            id="nextBabyView"
+            src="./images/btn_right.png"
+            style="width: 30px;height: 30px;"
+          />
+        </div>
+      </div>
+    </div>
+
+    <div id="sliderindex" style="position: relative;">
+      <div
+        id="innerSliderindex"
+        @touchstart="touchStart"
+        @touchmove="touchMove"
+        @touchend="touchEnd"
+      >
+        <div v-for="bannerImgUrl in bannerImgUrls" class="each-slider">
+          <a href="#">
+            <img
+              v-bind:src="bannerImgUrl.pic_url"
+              onerror="setErrorImg(this)"
+            />
+          </a>
+        </div>
+
+        <div class="each-slider last">
+          <a href="#">
+            <img
+              v-bind:src="bannerImgUrls[0].pic_url"
+              onerror="setErrorImg(this)"
+            />
+          </a>
+        </div>
+      </div>
+
+      <div id="circles">
+        <template v-for="bannerImgUrl in bannerImgUrls">
+          <div
+            class="circle"
+            v-bind:class="{'circle-active': bannerImgUrl.active}"
+          ></div>
+        </template>
+      </div>
+    </div>
+
+    <div id="remindContentIndex" style="padding: 0px 5px;" v-cloak>
+      <div
+        v-if="remindContentIndex != ''"
+        style="display: flex;flex-direction: row;justify-content:flex-start;"
+      >
+        <div
+          style="display: flex;flex-direction: row;justify-content:flex-start;"
+        >
+          <div
+            style="display: flex;flex-direction: row;justify-content:center;padding-top: 6px;padding-right: 2px;"
+          >
+            <img
+              src="./images/ic_kindly_reminder.png"
+              style="width: 20px;height: 20px;"
+            />
+          </div>
+
+          <div
+            style="display: flex;flex-direction: row;justify-content:center;color:#FBB04E;white-space:nowrap; padding-top: 5px;padding-bottom: 5px;font-size: small;"
+          >
+            温馨提示：
+          </div>
+        </div>
+
+        <div
+          id="remindContentIndexDetail"
+          style="display: flex;flex-direction: row;justify-content:flex-start;color:#FBB04E;padding-top: 5px;padding-bottom: 5px;font-size: small;"
+        >
+          <marquee scrollamount="3" style="width: calc(100vw - 100px);"
+            >{{remindContentIndex}}</marquee
+          >
+        </div>
+      </div>
+    </div>
+
+    <div id="menus" class="inner-content">
+      <ul style="margin-top: 0px;z-index: 999;">
+        <li class="iconsli" v-on:click="yyMenu();">
+          <a href="#">
+            <img
+              src="./images/ic_appointment.png"
+              style="width:40px;height: 40px;"
+            />
+
+            <div>预约</div>
+          </a>
+        </li>
+
+        <li class="iconsli" v-on:click="shotInfoMenu();">
+          <a href="#">
+            <img
+              src="./images/ic_vaccination_information.png"
+              style="width:40px;height: 40px;"
+            />
+
+            <div>接种信息</div>
+          </a>
+        </li>
+
+        <li class="iconsli" v-on:click="fbactInfo();">
+          <a href="#">
+            <img
+              src="./images/ic_vaccine_knowledge.png"
+              style="width:40px;height: 40px;"
+            />
+
+            <div>疫苗知识</div>
+          </a>
+        </li>
+      </ul>
+
+      <ul style="margin-top: 0px;z-index: 50;">
+        <li class="iconsli" style="position: relative;">
+          <!-- HAINANZHYYJMBWeb 上线修改 -->
+          <a href="/HAINANZHYYJMBWeb/index.html?type=1">
+            <!-- <a href="/index.html?type=1"> -->
+            <img
+              src="./images/icon_crown1.png"
+              style="width:40px;height: 40px;"
+            />
+            <div>新冠疫苗接种预约</div>
+          </a>
+        </li>
+        <li class="iconsli" style="position: relative;">
+          <!-- HAINANZHYYJMBWeb 上线修改 -->
+          <a href="/HAINANZHYYJMBWeb/index.html?type=4">
+            <!-- <a href="/index.html?type=4"> -->
+            <img
+              src="./images/icon_crown4.png"
+              style="width:40px;height: 40px;"
+            />
+            <div>接种意愿调查</div>
+          </a>
+        </li>
+
+        <li class="iconsli" v-on:click="msgMenu();" style="position: relative;">
+          <a href="#">
+            <img
+              src="./images/ic_message.png"
+              style="width:40px;height: 40px;"
+            />
+
+            <div v-if="msg_num>0" class="mui-badge" style="">
+              <span v-cloak>{{msg_num}}</span>
+            </div>
+
+            <div>消息</div>
+          </a>
+        </li>
+      </ul>
+      <ul style="margin-top: 0px;z-index: 50;">
+        <!--<li class="iconsli" v-on:click="shotFeedBack();">
+
+
+					<a href="#">
+
+
+						<img src="./images/ic_feed_back.png" style="width:40px;height: 40px;" />
+
+
+						<div>接种反馈</div>
+
+
+					</a>
+
+
+				</li>-->
+
+        <li class="iconsli" v-on:click="more();">
+          <a href="#">
+            <img
+              src="./images/ic_more_service.png"
+              style="width:40px;height: 40px;"
+            />
+
+            <div>更多服务</div>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <script>
+    var vmmsgbaby = new Vue({
+      el: '#menus',
+
+      data: {
+        msg_num: 0
+      },
+
+      methods: {
+        refreshMsg: function() {
+          var that = this
+
+          axiosGet(
+            {
+              child_code: vmbaby.baby.child_code,
+
+              message_type_code: '1003'
+            },
+            '/Encryption/Message/GetMessageCount?' + Math.random(),
+            function(data) {
+              if (data.code == '0') {
+                that.msg_num = data.data.no_read_count
+              }
+            }
+          )
+        },
+
+        yyMenu: function(event) {
+          sessionStorage.setItem('backBarId', 'index.html')
+
+          toYYViewIndex()
+        },
+
+        shotInfoMenu: function(event) {
+          /*if(!isAndroid_ios()){
+
+
+						setTimeout(appRemoveLoading,500);
+
+
+					}*/
+
+          sessionStorage.setItem('backBarId', 'index.html')
+
+          if (
+            vmbaby.baby.child_code == undefined ||
+            vmbaby.baby.child_code == ''
+          ) {
+            top.ons.notification.toast('请先绑定儿童', toastOptions)
+
+            return
+          }
+
+          setTimeout(function() {
+            top.document
+              .querySelector('ons-navigator')
+              .pushPage('index/shotInfo.html', {
+                callback: function() {
+                  top.backfunction = function() {
+                    setBlur()
+
+                    top.backIndex()
+                  }
+
+                  top.pageBackFuncs['index/shotInfo.html'] = top.backfunction
+                }
+              })
+          }, 350)
+        },
+
+        fbactInfo: function(event) {
+          sessionStorage.setItem('backBarId', 'index.html')
+
+          top.document
+            .querySelector('ons-navigator')
+            .pushPage('index/fbactInfo.html')
+        },
+        goCrownPage: function(event) {
+          // sessionStorage.setItem('backBarId', 'index.html')
+          // window.location.href = '../index'
+          // top.document.querySelector('ons-navigator').pushPage('../index.html')
+        },
+        msgMenu: function(event) {
+          sessionStorage.setItem('backBarId', 'index.html')
+
+          top.document
+            .querySelector('ons-navigator')
+            .pushPage('message/msg.html')
+        },
+
+        shotFeedBack: function(event) {
+          sessionStorage.setItem('backBarId', 'index.html')
+
+          if (
+            vmbaby.baby.child_code == undefined ||
+            vmbaby.baby.child_code == ''
+          ) {
+            top.ons.notification.toast('请先绑定儿童', toastOptions)
+
+            return
+          }
+
+          setTimeout(function() {
+            top.document
+              .querySelector('ons-navigator')
+              .pushPage('index/shotFeedBack.html', {
+                callback: function() {
+                  top.backfunction = function() {
+                    setBlur()
+
+                    top.backIndex()
+                  }
+
+                  top.pageBackFuncs['index/shotFeedBack.html'] =
+                    top.backfunction
+                }
+              })
+          }, 350)
+        },
+
+        more: function(event) {
+          /*if(!isAndroid_ios()){
+
+
+						setTimeout(appRemoveLoading,500);
+
+
+					}*/
+
+          //top.document.querySelector('ons-navigator').pushPage("bespeak/action-sheet.html");
+
+          top.ons.notification.toast('请期待更多服务', toastOptions)
+        }
+      }
+    })
+
+    document
+      .getElementById('toBindChildBtn')
+      .addEventListener('tap', function() {
+        top.document
+          .querySelector('ons-navigator')
+          .pushPage('index/bindChild.html', {
+            callback: function() {
+              top.backfunction = function() {
+                setBlur()
+
+                top.backIndex()
+              }
+
+              top.pageBackFuncs['index/bindChild.html'] = top.backfunction
+            }
+          })
+      })
+
+    function backWeixin() {
+      /*if(typeof(WeixinJSBridge) != "undefined") {
+
+
+				WeixinJSBridge.call('closeWindow');
+
+
+			} else {
+
+
+				if(navigator.userAgent.indexOf("MSIE") > 0) {
+
+
+					if(navigator.userAgent.indexOf("MSIE 6.0") > 0) {
+
+
+						window.opener = null;
+
+
+						window.close();
+
+
+					} else {
+
+
+						window.open('', '_top');
+
+
+						window.top.close();
+
+
+					}
+
+
+				} else if(navigator.userAgent.indexOf("Firefox") > 0) {
+
+
+					window.location.href = 'about:blank ';
+
+
+				} else {
+
+
+					window.opener = null;
+
+
+					window.open('', '_self', '');
+
+
+					window.close();
+
+
+				}
+
+
+			}*/
+
+      window.history.go(-1)
+    }
+
+    var vmbaby = new Vue({
+      el: '#myBabys',
+
+      data: {
+        babys: [],
+
+        baby: {},
+
+        showBabyIndex: 0,
+
+        childnum: 0
+      },
+
+      created: function() {
+        var that = this
+
+        var sessionBaby = JSON.parse(sessionStorage.getItem('baby'))
+
+        axiosGet(
+          {},
+          '/Encryption/Child/GetUserChildList?' + Math.random(),
+          function(data) {
+            if (data.code == '0') {
+              var babays = []
+
+              for (var i = 0; i < data.data.length; i++) {
+                var child = data.data[i]
+
+                if (child.child_type == '1001') babays.push(child)
+              }
+
+              that.babys = babays
+
+              var babysLen = that.babys.length
+
+              if (babysLen > 0) {
+                if (sessionBaby) {
+                  for (var i = 0; i < babysLen; i++) {
+                    if (sessionBaby.child_code == that.babys[i].child_code) {
+                      that.showBabyIndex = i
+
+                      sessionStorage.setItem(
+                        'baby',
+                        JSON.stringify(that.babys[i])
+                      )
+
+                      that.baby = that.babys[i]
+
+                      top.setStationViewDisplay(true)
+
+                      break
+                    }
+                  }
+                } else {
+                  that.baby = that.babys[0]
+
+                  top.setStationViewDisplay(true)
+                }
+
+                that.childnum = babysLen
+              } else {
+                top.setStationViewDisplay(false)
+              }
+
+              vmmsgbaby.refreshMsg()
+            }
+          }
+        )
+      },
+
+      watch: {
+        baby: function(newBaby, oldBaby) {
+          if (newBaby) {
+            top.setStationViewDisplay(true)
+          } else {
+            top.setStationViewDisplay(false)
+          }
+
+          sessionStorage.setItem('baby', JSON.stringify(newBaby))
+
+          showRemind()
+        }
+      },
+
+      methods: {
+        gotoBaby: function() {
+          sessionStorage.setItem('backBarId', 'index.html')
+
+          if (this.baby.child_code == undefined || this.baby.child_code == '') {
+            top.ons.notification.toast('请先绑定儿童', toastOptions)
+
+            return
+          }
+
+          top.document
+            .querySelector('ons-navigator')
+            .pushPage('index/shotInfo.html')
+        },
+
+        babySignIn: function() {
+          axiosGet(
+            {
+              child_code: vmbaby.baby.child_code
+            },
+            '/Encryption/Reservation/GetReservationSignList?' + Math.random(),
+            function(data) {
+              if (data.code == '0' && data.data) {
+                var curData = data.data
+
+                reservation_code = curData[0].reservation_code
+              } else {
+                top.ons.notification.toast(data.message, toastOptions)
+              }
+            }
+          )
+        }
+      }
+    })
+
+    sessionStorage.setItem('shotInfoToBespeak', true)
+
+    var babyrefresh = sessionStorage.getItem('babyrefresh')
+
+    if (babyrefresh) {
+      sessionStorage.removeItem('babyrefresh')
+
+      axiosGet(
+        {},
+        '/Encryption/Child/GetUserChildList?' + Math.random(),
+        function(data) {
+          if (data.code == '0') {
+            var babays = []
+
+            for (var i = 0; i < data.data.length; i++) {
+              var child = data.data[i]
+
+              if (child.child_type == '1001') babays.push(child)
+            }
+
+            vmbaby.babys = babays
+
+            var babysLen = vmbaby.babys.length
+
+            if (babysLen > 0) {
+              vmbaby.baby = vmbaby.babys[0]
+
+              vmbaby.childnum = babysLen
+            }
+          }
+        }
+      )
+    }
+
+    var vmbaby2 = new Vue({
+      el: '#sliderindex',
+
+      data: {
+        bannerImgUrls: [
+          {
+            pic_url: './images/banner2.jpg',
+
+            active: true
+          },
+
+          {
+            pic_url: './images/banner3.jpg',
+
+            active: false
+          },
+
+          {
+            pic_url: './images/banner4.jpg',
+
+            active: false
+          }
+        ],
+
+        bannerNum: 3,
+
+        timeout: null,
+
+        interval: null,
+
+        pos: 0,
+
+        min: 0,
+
+        max: 0
+      },
+
+      created: function() {
+        var that = this
+
+        axiosGet({}, '/Encryption/Home/NoteBarPicList', function(data) {
+          if (data.code == '0') {
+            var banners = data.data
+
+            var banner = null
+
+            if (banners && banners.length > 0) {
+              var bannersLen = banners.length
+
+              for (var i = 0; i < banners.length; i++) {
+                banner = banners[i]
+
+                if (i == 0) {
+                  banner.active = true
+                } else {
+                  banner.active = false
+                }
+              }
+
+              that.bannerImgUrls = banners
+
+              that.bannerNum = bannersLen
+            }
+
+            if (that.bannerNum > 1) {
+              that.startSlider()
+            }
+          }
+        })
+      },
+
+      actived: function() {
+        this.startSlider()
+      },
+
+      methods: {
+        touchStart: function(e) {
+          clearInterval(this.interval)
+
+          this.pos = e.targetTouches[0].pageX
+        },
+
+        touchMove: function(e) {
+          var tmp = e.targetTouches[0].pageX - this.pos
+
+          document.getElementById('innerSliderindex').style.left =
+            parseInt(
+              document.defaultView.getComputedStyle(
+                document.getElementById('innerSliderindex'),
+                null
+              ).left
+            ) +
+            tmp +
+            'px'
+
+          this.pos = e.targetTouches[0].pageX
+
+          var count = Math.round(
+            -parseInt(
+              document.defaultView.getComputedStyle(
+                document.getElementById('innerSliderindex'),
+                null
+              ).left
+            ) / this.min
+          )
+
+          count =
+            count > this.bannerNum - 1
+              ? 0
+              : count < 0
+              ? this.bannerNum - 1
+              : count
+
+          for (var i = 0; i < this.bannerImgUrls.length; i++) {
+            banner = this.bannerImgUrls[i]
+
+            if (i == count) {
+              banner.active = true
+            } else {
+              banner.active = false
+            }
+          }
+
+          if (
+            parseInt(
+              document.defaultView.getComputedStyle(
+                document.getElementById('innerSliderindex'),
+                null
+              ).left
+            ) <=
+            -this.min - this.max
+          ) {
+            document.getElementById('innerSliderindex').style.left = 0 + 'px'
+          } else if (
+            parseInt(
+              document.defaultView.getComputedStyle(
+                document.getElementById('innerSliderindex'),
+                null
+              ).left
+            ) >= 0
+          ) {
+            document.getElementById('innerSliderindex').style.left =
+              -this.min - this.max + 'px'
+          }
+        },
+
+        touchEnd: function(e) {
+          this.pos = 0
+
+          var count1 = Math.round(
+            -parseFloat(
+              document.defaultView.getComputedStyle(
+                document.getElementById('innerSliderindex'),
+                null
+              ).left
+            ) / this.min
+          )
+
+          var count2 = Math.floor(
+            -parseFloat(
+              document.defaultView.getComputedStyle(
+                document.getElementById('innerSliderindex'),
+                null
+              ).left
+            ) / this.min
+          )
+
+          if (count1 == count2) {
+            this.sliderAnimation(-count1 * this.min, this.min / 100, 0, true)
+
+            this.startSlider()
+          } else {
+            this.startSlider(true)
+          }
+
+          var count =
+            count1 > this.bannerNum - 1
+              ? 0
+              : count1 < 0
+              ? this.bannerNum - 1
+              : count1
+
+          for (var i = 0; i < this.bannerImgUrls.length; i++) {
+            banner = this.bannerImgUrls[i]
+
+            if (i == count) {
+              banner.active = true
+            } else {
+              banner.active = false
+            }
+          }
+        },
+
+        startSlider: function(flag) {
+          var that = this
+
+          var style = document.defaultView.getComputedStyle(
+            document.querySelector('.last'),
+            null
+          )
+
+          var width =
+            parseInt(style.width) +
+            parseInt(style.marginLeft) +
+            parseInt(style.marginRight)
+
+          this.min = width
+
+          var max = width * (that.bannerNum - 1)
+
+          this.max = max
+
+          this.clearSlide()
+
+          this.interval = setInterval(function() {
+            if (that.timeout) {
+              return
+            }
+
+            try {
+              var now = parseInt(
+                document.defaultView.getComputedStyle(
+                  document.querySelector('#innerSliderindex'),
+                  null
+                ).left
+              )
+
+              var count = Math.floor(-now / width)
+
+              that.sliderAnimation((-count - 1) * width, width / 100, -max)
+
+              count = count > that.bannerNum - 2 ? -1 : count
+
+              for (var i = 0; i < that.bannerImgUrls.length; i++) {
+                banner = that.bannerImgUrls[i]
+
+                if (i == count + 1) {
+                  banner.active = true
+                } else {
+                  banner.active = false
+                }
+              }
+            } catch (e) {}
+          }, 3000)
+
+          if (flag) {
+            var now = parseInt(
+              document.defaultView.getComputedStyle(
+                document.querySelector('#innerSlider'),
+                null
+              ).left
+            )
+
+            var max = width * (that.bannerNum - 1)
+
+            var count = Math.floor(-now / width)
+
+            that.sliderAnimation((-count - 1) * width, width / 100, -max)
+          }
+        },
+
+        sliderAnimation: function(next, each, max, leftflag) {
+          var that = this
+
+          that.timeout = null
+
+          if (leftflag) {
+            document.getElementById('innerSliderindex').style.left =
+              parseInt(
+                document.defaultView.getComputedStyle(
+                  document.getElementById('innerSliderindex'),
+                  null
+                ).left
+              ) +
+              each +
+              'px'
+
+            if (
+              parseInt(
+                document.defaultView.getComputedStyle(
+                  document.getElementById('innerSliderindex'),
+                  null
+                ).left
+              ) < next
+            ) {
+              that.timeout = setTimeout(function() {
+                that.sliderAnimation(next, each, max, true)
+              }, 5)
+            } else if (next > max) {
+              document.getElementById('innerSliderindex').style.left =
+                -this.min - this.max + 'px'
+            }
+          } else {
+            document.getElementById('innerSliderindex').style.left =
+              parseInt(
+                document.defaultView.getComputedStyle(
+                  document.getElementById('innerSliderindex'),
+                  null
+                ).left
+              ) -
+              each +
+              'px'
+
+            if (
+              parseInt(
+                document.defaultView.getComputedStyle(
+                  document.getElementById('innerSliderindex'),
+                  null
+                ).left
+              ) > next
+            ) {
+              that.timeout = setTimeout(function() {
+                that.sliderAnimation(next, each, max)
+              }, 5)
+            } else if (next < max) {
+              document.getElementById('innerSliderindex').style.left = '0px'
+            }
+          }
+        },
+
+        clearSlide: function() {
+          if (this.interval) {
+            clearInterval(this.interval)
+
+            this.interval = null
+          }
+        }
+      }
+    })
+
+    function setErrorImg(img) {
+      var src = img.getAttribute('src')
+
+      var newsrc = './images/errordefault.png'
+
+      for (var i = 0; i < vmbaby2.bannerImgUrls.length; i++) {
+        var item = vmbaby2.bannerImgUrls[i]
+
+        if (item.pic_url == src) {
+          item.pic_url = newsrc
+        }
+      }
+
+      img.setAttribute('src', newsrc)
+    }
+
+    var vmbaby3 = new Vue({
+      el: '#remindContentIndex',
+
+      data: {
+        remindContentIndex: '',
+
+        reservation_code: '',
+
+        vaccine_message_type: ''
+      },
+
+      created: function() {
+        var that = this
+
+        var sessionBaby = vmbaby.baby
+
+        if (!sessionBaby.child_code) {
+          return false
+        }
+
+        axiosGet(
+          {
+            child_code: sessionBaby.child_code,
+
+            type: '0'
+          },
+          '/Encryption/Vaccine/GetChildVaccineMessage',
+          function(data) {
+            if (data.code == '0') {
+              /*var curData = data.data;
+
+
+							
+
+
+						if(curData != null) {
+
+
+							that.remindContentIndex = curData.vaccine_message;
+
+
+							that.reservation_code = curData.reservation_code;
+
+
+							that.vaccine_message_type = curData.vaccine_message_type;
+
+
+						}*/
+
+              setRemind(data, that)
+            }
+          }
+        )
+      }
+    })
+
+    function showRemind() {
+      var that = vmbaby3
+
+      var sessionBaby = vmbaby.baby
+
+      if (!sessionBaby.child_code) {
+        return false
+      }
+
+      axiosGet(
+        {
+          child_code: sessionBaby.child_code,
+
+          type: '0'
+        },
+        '/Encryption/Vaccine/GetChildVaccineMessage?' + Math.random(),
+        function(data) {
+          if (data.code == '0') {
+            setRemind(data, that)
+          }
+        }
+      )
+    }
+
+    function setRemind(data, obj) {
+      var that = obj
+
+      var curData = data.data
+
+      if (curData != null) {
+        that.remindContentIndex = curData.vaccine_message
+
+        that.reservation_code = curData.reservation_code
+
+        that.vaccine_message_type = curData.vaccine_message_type
+
+        setTimeout(function() {
+          document
+            .getElementById('remindContentIndexDetail')
+            .addEventListener('tap', function() {
+              var vaccine_message_type = vmbaby3.vaccine_message_type
+
+              if (vaccine_message_type == '1002') {
+              } else if (vaccine_message_type == '1003') {
+                top.document
+                  .querySelector('ons-navigator')
+                  .pushPage('bespeak/bespeakOns.html')
+              } else if (vaccine_message_type == '1004') {
+                toYYViewIndex()
+              }
+            })
+        }, 0)
+      } else {
+        that.remindContentIndex = ''
+      }
+    }
+
+    document.getElementById('preBabyImg').addEventListener('tap', function() {
+      var curBabyIndex = vmbaby.showBabyIndex
+
+      if (curBabyIndex > 0) {
+        /*app.data.child_code=that.globalData.babys[curBabyIndex - 1].child_code;*/
+
+        vmbaby.showBabyIndex = curBabyIndex - 1
+
+        vmbaby.baby = vmbaby.babys[vmbaby.showBabyIndex]
+
+        vmmsgbaby.refreshMsg()
+      }
+    })
+
+    document.getElementById('nextBabyView').addEventListener('tap', function() {
+      var curBabyIndex = vmbaby.showBabyIndex
+
+      if (curBabyIndex < vmbaby.childnum - 1) {
+        /*app.data.child_code=that.globalData.babys[curBabyIndex + 1].child_code;*/
+
+        vmbaby.showBabyIndex = curBabyIndex + 1
+
+        vmbaby.baby = vmbaby.babys[vmbaby.showBabyIndex]
+
+        vmmsgbaby.refreshMsg()
+      }
+    })
+
+    var reservation_code
+
+    function toYYViewIndex() {
+      /*if(!isAndroid_ios()){
+
+
+				setTimeout(appRemoveLoading,500);
+
+
+			}*/
+
+      if (
+        !vmbaby.baby ||
+        vmbaby.baby.child_code == undefined ||
+        vmbaby.baby.child_code == ''
+      ) {
+        top.ons.notification.toast('请先绑定儿童', toastOptions)
+
+        return
+      }
+
+      if (vmbaby.baby.isbespeak == 0) {
+        top.ons.notification.toast('所属接种点未开通服务', toastOptions)
+
+        return
+      }
+
+      axiosGet(
+        {
+          child_code: vmbaby.baby.child_code,
+
+          flag: '0'
+        },
+        '/Encryption/Vaccine/CheckChildHasVaccine?' + Math.random(),
+        function(data) {
+          if ((data.code = '0')) {
+            if (data.data.is_has_vaccine == '0') {
+              top.document
+                .querySelector('ons-navigator')
+                .pushPage('bespeak/bespeakOns.html', {
+                  callback: function() {
+                    top.backfunction = function() {
+                      top.backIndex()
+                    }
+
+                    top.pageBackFuncs['bespeak/bespeakOns.html'] =
+                      top.backfunction
+                  }
+                })
+            } else {
+              sessionStorage.setItem(
+                'reservation_code',
+                data.data.reservation_code
+              )
+
+              if (vmbaby.baby.ispay == '1') {
+                top.document
+                  .querySelector('ons-navigator')
+                  .pushPage('bespeak/bespeakPayDetail.html', {
+                    callback: function() {
+                      top.backfunction = function() {
+                        top.backIndex()
+                      }
+
+                      top.pageBackFuncs['bespeak/bespeakPayDetail.html'] =
+                        top.backfunction
+                    }
+                  })
+              } else {
+                top.document
+                  .querySelector('ons-navigator')
+                  .pushPage('bespeak/bespeakdetail.html', {
+                    callback: function() {
+                      top.backfunction = function() {
+                        top.backIndex()
+                      }
+
+                      top.pageBackFuncs['bespeak/bespeakdetail.html'] =
+                        top.backfunction
+                    }
+                  })
+              }
+            }
+          }
+        }
+      )
+    }
+
+    top.pageEndFlags[0] = true
+
+    setTimeout(() => {
+      top.setPage()
+    }, 100)
+  </script>
+</ons-page>

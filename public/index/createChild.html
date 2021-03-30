@@ -1,0 +1,678 @@
+<ons-page>
+	<style>
+			.title{
+				margin: 20px 15px 7px;
+				color: #6d6d72;
+				font-size: 14px;
+			}
+			
+			#childForm li input {
+				border-width: 0px;
+				font-size: 14px;
+			}
+			
+			#childForm .list-item__center{
+				padding: 0px !important;
+				font-size: 14px;
+			}
+			#childForm .list-item__left{
+				width:30%;
+				padding: 0px !important;
+			}
+			#childForm .list-item__right{
+				width:70%;
+				padding: 0px !important;
+			}
+			ul{
+				display:block;
+			}
+			.datepic{
+				position:absolute;right:18px;top:11px;opacity: 0.7;
+			}
+			.button--large--cta{
+				padding: 0 !important;
+				background-color: #6798FF;
+				color:#fff;
+				height: 40px;
+				line-height: 43px;
+		    }
+			#childForm .list-item{
+			     text-align:left;
+			}
+	</style>
+	
+		<ons-toolbar class="toolbar" style="box-shadow:0 0px 0px 0 !important;te">
+		    <div class="left toolbar__left" onclick="backfunction()">
+		      	<ons-icon icon="ion-ios-arrow-back" style="color: white" size="24px"></ons-icon>
+		    </div>
+		    <div class="center toolbar__center">
+		    	儿童建档
+		    </div>
+	  	</ons-toolbar>
+
+
+    <div class="content createChildcontent" ontouchmove="movingflag = true;" ontouchend="movingflag = false;">
+	    <div class="card--material"  v-on:click="zzjdInstruction();" style="height:40px;text-align: center;line-height: 40px;background-color: #F7F7F7;overflow-y: hidden;">
+		    <div style="color:#5FC5EA;font-size: 14px;">自助建档说明</div>
+		</div>
+		<div id="childForm" style="padding-bottom: 70px;height: calc(100vh - 218px); overflow-y: auto;">
+			<div class="title">
+				选择接种点
+			</div>
+			<ul class="list">
+			  <li class="list-item">
+			    <div class="list-item__center">接种点：</div>
+				<div class="list-item__right">
+					<input autofocus readonly="readonly" v-model="stationName" id="stationNameid" type="text" name="stationName" placeholder="请选择接种点（必填项）">
+					<ons-icon icon="ion-ios-arrow-forward" style="color: #bbb;"></ons-icon>&nbsp;&nbsp;			
+				</div>
+			  </li>
+			</ul>
+			
+			<div class="title">
+				儿童基本情况
+			</div>
+			
+			<ul class="list">
+				  <li class="list-item">
+				  	<div class="list-item__center">
+				  	 	儿童姓名：
+				  	</div>
+				    <div class="list-item__right"><input type="text" v-model="childName" name="childName" maxlength="15"></div>
+				  </li>
+				  <li class="list-item">
+				    <div class="list-item__center">出生日期：</div>
+				    <div class="list-item__right">
+						<input type="text" v-model="birthday" id="birthdayid" name="birthday" 
+							readonly="readonly" placeholder="请选择（必填项）">
+						<ons-icon id="birthdayid-icon" icon="ion-calendar" class="datepic" style=""></ons-icon>
+				    </div>
+				  </li>
+				  <li class="list-item">
+				    <div class="list-item__center">性别：</div>
+				    <div class="list-item__right">
+				    	<input type="text" v-model="sex" id="sexid" name="sex" readonly="readonly">
+				    </div>
+				  </li>
+				  <li class="list-item">
+				    <div class="list-item__center">出生体重(克)：</div>
+				    <div class="list-item__right">
+				    	<input type="tel" v-model="weight" id="weight" name="weight" maxlength="5">
+				    </div>
+				  </li>
+				  <li class="list-item">
+				    <div class="list-item__center">血型：</div>
+				    <div class="list-item__right">
+				    	<input type="text" v-model="bloodType" id="bloodTypeid" name="bloodType" readonly="readonly">
+				    </div>
+				  </li>
+				  <li class="list-item">
+				    <div class="list-item__center">身份证号：</div>
+				    <div class="list-item__right">
+				    	<input type="text" v-model="idCard" name="idCard" maxlength="18">
+				    </div>
+				  </li>
+				  <li class="list-item">
+				    <div class="list-item__center">出生医院：</div>
+				    <div class="list-item__right">
+				    	<input type="text" v-model="birthHospital" name="birthHospital" maxlength="25">
+				    </div>
+				  </li>
+				  <li class="list-item">
+				    <div class="list-item__center">接生医生：</div>
+				    <div class="list-item__right">
+				    	<input type="text" v-model="birthDoctor" name="birthDoctor" maxlength="10">
+				    </div>
+				  </li>
+				  <li class="list-item">
+				    <div class="list-item__center">出生证号：</div>
+				    <div class="list-item__right">
+				    	<input type="text" v-model="birthCode" name="birthCode" maxlength="20">
+				    </div>
+				  </li>
+				  <li class="list-item">
+				    <div class="list-item__center">出生情况：</div>
+				    <div class="list-item__right">
+				    	<input type="text" v-model="birthStatus" id="birthStatusid" name="birthStatus" readonly="readonly">
+				    </div>
+				  </li>
+			</ul>
+			
+			<div class="title">
+				家庭情况
+			</div>
+			<ul class="list">
+				<li class="list-item">
+				    <div class="list-item__center">父亲姓名：</div>
+				    <div class="list-item__right">
+				    	<input type="text" v-model="parentName" name="parentName" maxlength="10">
+				    </div>
+				</li>
+				<li class="list-item">
+				    <div class="list-item__center">父亲单位：</div>
+				    <div class="list-item__right">
+				    	<input type="text" v-model="parentCompany" name="parentCompany" maxlength="25">
+				    </div>
+				</li>
+				<li class="list-item">
+				    <div class="list-item__center">父亲身份证号：</div>
+				    <div class="list-item__right">
+				    	<input type="text" v-model="parentIdCard" name="parentIdCard" maxlength="18">
+				    </div>
+				</li>
+				<li class="list-item">
+				    <div class="list-item__center">母亲姓名：</div>
+				    <div class="list-item__right">
+				    	<input type="text" v-model="montherName" name="montherName" maxlength="10">
+				    </div>
+				</li>
+				<li class="list-item">
+				    <div class="list-item__center">母亲单位：</div>
+				    <div class="list-item__right">
+				    	<input type="text" v-model="montherCompany" name="montherCompany" maxlength="25">
+				    </div>
+				</li>
+				<li class="list-item">
+				    <div class="list-item__center">母亲身份证号：</div>
+				    <div class="list-item__right">
+				    	<input type="text" v-model="montherIdCard" name="montherIdCard" maxlength="18">
+				    </div>
+				</li>
+				<li class="list-item">
+				    <div class="list-item__center">移动电话：</div>
+				    <div class="list-item__right">
+				    	<input type="tel" v-model="mobileNumber" name="mobileNumber" placeholder="（必填项）" maxlength="11">
+				    </div>
+				</li>
+				<li class="list-item">
+				    <div class="list-item__center">固定电话：</div>
+				    <div class="list-item__right">
+				    	<input type="text" v-model="phoneNumber" name="phoneNumber" maxlength="20">
+				    </div>
+				</li>
+				<li class="list-item">
+				    <div class="list-item__center">户籍地址：</div>
+				    <div class="list-item__right">
+				    	<input id="residenceAreaPickerid" type="text" readonly="readonly" v-model="residenceArea" name="residenceArea" placeholder="选择地区">
+				   <ons-icon icon="ion-ios-arrow-forward" style="color: #bbb;"></ons-icon>&nbsp;&nbsp;		
+				    </div>
+				</li>
+				<li class="list-item">
+				    <div class="list-item__center"></div>
+				    <div class="list-item__right">
+				    	<input type="text" v-model="residenceSubAddress" name="residenceSubAddress" placeholder="请输入详细户籍地址" maxlength="20">
+				    </div>
+				</li>
+				
+				<li class="list-item" >
+					<div class="list-item__center">家庭地址：</div>
+					<div class="list-item__right">
+						<input id="homeAreaPickerid" type="text" readonly="readonly" v-model="homeArea" name="homeArea" placeholder="选择地区（必填项）">
+					<ons-icon icon="ion-ios-arrow-forward" style="color: #bbb;"></ons-icon>&nbsp;&nbsp;		
+					</div>
+				</li>
+				<li class="list-item" >
+					<div class="list-item__center"></div>
+					<div class="list-item__right">
+						<input type="text" v-model="homeSubAddress" name="homeSubAddress" placeholder="请输入详细家庭地址（必填项）" maxlength="20">
+					</div>
+				</li>
+				<li class="list-item" >
+					<div class="list-item__center">通讯地址：</div>
+					<div class="list-item__right">
+						<input id="postAreaPickerid" type="text" readonly="readonly" v-model="postArea" name="postArea" placeholder="选择地区">
+					<ons-icon icon="ion-ios-arrow-forward" style="color: #bbb;"></ons-icon>&nbsp;&nbsp;		
+					</div>
+				</li>
+				<li class="list-item" >
+					<div class="list-item__center"></div>
+					<div class="list-item__right">
+						<input type="text" v-model="postSubAddress" name="postSubAddress" placeholder="请输入详细通讯地址" maxlength="20">
+					</div>
+				</li>
+				<li class="list-item" >
+					<div class="list-item__center">电子邮件1：</div>
+					<div class="list-item__right">
+						<input type="email" v-model="email1" name="email1" maxlength="40">
+					</div>
+				</li>
+				<li class="list-item" >
+					<div class="list-item__center">电子邮件2：</div>
+					<div class="list-item__right">
+						<input type="email" v-model="email2" name="email2" maxlength="40">
+					</div>
+				</li>
+				<li class="list-item" >
+					<div class="list-item__center">备注：</div>
+					<div class="list-item__right">
+						<input type="text" v-model="remark" name="remark" maxlength="50">
+					</div>
+				</li>
+			</ul>
+			
+			<div class="title">
+				接种情况
+			</div>
+			<ul class="list">
+				<li class="list-item" >
+					<div class="list-item__center" style="width: 40%;">卡介苗接种日期：</div>
+					<div class="list-item__right" style="width: 60%;">
+                     	<input type="text" v-model="b001Date" id="b001Dateid" name="b001Date" 
+							readonly="readonly" >
+						<ons-icon icon="ion-calendar" class="datepic" style=""></ons-icon>
+					</div>
+				</li>
+				<li class="list-item" >
+					<div class="list-item__center" style="width: 40%;">乙肝1接种日期：</div>
+					<div class="list-item__right" style="width: 60%;">
+						<input type="text" v-model="b063Date" id="b063Dateid" name="b063Date" 
+							readonly="readonly" >
+						<ons-icon icon="ion-calendar" class="datepic" style=""></ons-icon>
+					</div>
+				</li>
+			</ul>	
+		</div>
+		<div style="padding: 5px 6px;background-color: #EFEFF4;text-align: center;overflow-y: hidden;">
+			<button class="button--large--cta" v-on:click="saveChildBtn()" >提交</button>
+		</div>
+	</div>
+	<div id="sexPickerContainer" style="line-height: 1.5;"></div>	
+	<div id="bloodTypePickerContainer" style="line-height: 1.5;"></div>	
+	<div id="birthStatusPickerContainer" style="line-height: 1.5;"></div>	
+	<div id="residenceAreaPickerContainer" style="line-height: 1.5;"></div>
+	<div id="homeAreaPickerContainer" style="line-height: 1.5;"></div>
+	<div id="postAreaPickerContainer" style="line-height: 1.5;"></div>
+	<div id="birthdayContainer" style="line-height: 1.5;"></div>
+	<div id="b001DateContainer" style="line-height: 1.5;"></div>
+	<div id="b063DateContainer" style="line-height: 1.5;"></div>
+	<div id="stationNameContainer" style="line-height: 1.5;"></div>
+		<script>
+			var vmchi ;
+		    var datearr = getNowFormatDate3();
+			ons.getScriptPage().onInit = function() {
+			    vmchi = new Vue({
+					el: '.createChildcontent',
+					data: {
+						stationName: '',
+						stationCode: '',
+						childName: '',
+						birthday: '',
+						sex: '男',
+						sexValue: '1001',
+						oldWeight: '',
+						bloodType: '未检测',
+						bloodTypeValue: '1005',
+						idCard: '',
+						birthHospital: '',
+						birthDoctor: '',
+						birthCode: '',
+						birthStatus: '顺产',
+						birthStatusValue: '1001', 
+						//birthStatusValue: '0',
+						parentName: '',
+						parentCompany: '',
+						parentIdCard: '',
+						montherName: '',
+						montherCompany: '',
+						montherIdCard: '',
+						oldMobileNumber: '',
+						oldPhoneNumber: '',
+						residenceArea: '',
+						residenceSubAddress: '',
+						homeArea: '',
+						homeSubAddress: '',
+						postArea: '',
+						postSubAddress: '',
+						email1: '',
+						email2: '',
+						remark: '',
+						b001Date: '',
+						b063Date: '',
+						areaList: [],
+						stationList: []
+					},
+					created:function(){
+						var that=this;
+						axiosGet({page_index: 0}, "/Encryption/Station/GetAllStation", function(data) {
+							if(data.code == '0') {
+								var stationData = data.data;
+								that.stationData=JSON.stringify(stationData);
+								new MultiPicker({
+							        input: 'stationNameid',
+							        container: 'stationNameContainer',
+							        jsonData:eval(that.stationData),
+							        success: function (items) {
+							            that.stationName = items[1].value;
+										that.stationCode = items[1].code;
+							        }
+							    });
+								var stationLen = stationData.length;
+								if(stationData && stationLen > 0) {
+									var station = null;
+									var station2 = {};
+									for(var i = 0; i < stationLen; i++) {
+										station = stationData[i];
+										station2 = {};
+										station2.value = station.station_code;
+										station2.text = station.station_name;
+										that.stationList.push(station2);
+									}
+								}
+							}
+						});	
+			
+					},
+				    computed:{
+				        weight: {
+				            get: function() {
+				                return this.oldWeight;
+				            
+				            },
+				            set: function(newValue) {
+				                this.oldWeight = newValue.replace(/[^\d]/g,'');
+				                this.$forceUpdate();
+				            }
+				        },
+				        mobileNumber: {
+				            get: function() {
+				                return this.oldMobileNumber;
+				            
+				            },
+				            set: function(newValue) {
+				                this.oldMobileNumber = newValue.replace(/[^\d]/g,'');
+				                this.$forceUpdate();
+				            }
+				        },
+				        phoneNumber: {
+				            get: function() {
+				            	if(this.oldPhoneNumber == '') {
+				            		this.oldPhoneNumber = ' ';
+				            	}
+				                return this.oldPhoneNumber;
+				            
+				            },
+				            set: function(newValue) {
+				                this.oldPhoneNumber = newValue.replace(/([^\d\-])/g,'');
+				                this.$forceUpdate();
+				            }
+				        }
+				    },
+				methods:{
+					zzjdInstruction:function(){
+							top.document.querySelector('ons-navigator').pushPage("index/zzjdInstruction.html");
+					},
+					saveChildBtn:function(){
+						if(!vmchi.stationCode) {
+							ons.notification.toast('请选择接种点！', toastOptions);
+							return false;
+						}
+						
+						if(!vmchi.birthday) {
+							ons.notification.toast('请选择出生日期！', toastOptions);
+							return false;
+						}
+						
+						var weight = vmchi.weight;
+						if(weight && !isNumber(weight)) {
+							ons.notification.toast('请输入正确的出生体重！', toastOptions);
+							return false;
+						}
+						
+						if(weight && (weight < 300 || weight > 32766)) {
+							ons.notification.toast('出生体重范围为300~32766！', toastOptions);
+							return false;
+						}
+						
+						var idCard = vmchi.idCard;
+						if(idCard && !isCardNo(idCard)) {
+							ons.notification.toast('请输入正确的身份证号！', toastOptions);
+							return false;
+						}
+						
+						var parentIdCard = vmchi.parentIdCard;
+						if(parentIdCard && !isCardNo(parentIdCard)) {
+							ons.notification.toast('请输入正确的父亲身份证号！', toastOptions);
+							return false;
+						}
+						
+						var montherIdCard = vmchi.montherIdCard;
+						if(montherIdCard && !isCardNo(montherIdCard)) {
+							ons.notification.toast('请输入正确的母亲身份证号！', toastOptions);
+							return false;
+						}
+						
+						var mobileNumber = vmchi.mobileNumber;
+						if(!vmchi.mobileNumber) {
+							ons.notification.toast('请输入移动电话！', toastOptions);
+							return false;
+						}
+						if(!isMobileNumber(mobileNumber)) {
+							ons.notification.toast('请输入正确的移动电话！', toastOptions);
+							return false;
+						}
+						
+						var phoneNumber = vmchi.phoneNumber;
+						if(phoneNumber && phoneNumber.trim() && !isTel(phoneNumber)) {
+							ons.notification.toast('请输入正确的固定电话！', toastOptions);
+							return false;
+						}
+						
+						var email1 = vmchi.email1;
+						if(email1 && !isEmail(email1)) {
+							ons.notification.toast('请输入正确的电子邮件1！', toastOptions);
+							return false;
+						}
+						
+						var email2 = vmchi.email2;
+						if(email2 && !isEmail(email2)) {
+							ons.notification.toast('请输入正确的电子邮件2！', toastOptions);
+							return false;
+						}
+						
+						if(!vmchi.homeArea || !vmchi.homeSubAddress) {
+							ons.notification.toast('请输入家庭地址！', toastOptions);
+							return false;
+						}
+						
+						if(vmchi.b001Date.trim()&&vmchi.b001Date.trim()<vmchi.birthday.trim()) {
+							ons.notification.toast('卡介苗接种日期需要大于等于出生日期', toastOptions);
+							return false;
+						}
+						if(vmchi.b063Date.trim()&&vmchi.b063Date.trim()<vmchi.birthday.trim()) {
+							ons.notification.toast('乙肝1接种日期需要大于等于出生日期', toastOptions);
+							return false;
+						}
+						
+						var params = genSaveChildParams();
+						
+						axiosGet(params, "/Encryption/Child/SaveUserChildDetails", function(data) {
+							if(data.code == '1') {//建档失败
+								ons.notification.toast(data.message, toastOptions);	
+							} else if(data.code == '0') {
+								ons.notification.toast('儿童建档成功！', toastOptions);	
+								setTimeout(function() {
+									sessionStorage.setItem("refreshChildInfoList","1");
+									top.backfunction();
+								}, 2000);
+							}
+						});
+						
+					}
+					
+				}
+			});
+			
+			setmuidatafocus();
+			    new DateSelector({
+				    input: 'birthdayid',
+				    container: 'birthdayContainer',
+				    type: 0,
+				    param: [1, 1, 1, 0, 0],
+				    beginTime: [1970,1,1],
+				    endTime: datearr,
+				    recentTime: [],
+				    success: function (arr, arr2) {
+				      	vmchi.birthday = arr2.join("-");
+				    }
+				});
+				new DateSelector({
+				    input: 'b001Dateid',
+				    container: 'b001DateContainer',
+				    type: 0,
+				    param: [1, 1, 1, 0, 0],
+				    beginTime: [1970,1,1],
+				    endTime: datearr,
+				    recentTime: [],
+				    success: function (arr, arr2) {
+				      	vmchi.b001Date = arr2.join("-");
+				    }
+				});
+				new DateSelector({
+				    input: 'b063Dateid',
+				    container: 'b063DateContainer',
+				    type: 0,
+				    param: [1, 1, 1, 0, 0],
+				    beginTime: [1970,1,1],
+				    endTime: datearr,
+				    recentTime: [],
+				    success: function (arr, arr2) {
+				      	vmchi.b063Date = arr2.join("-");
+				    }
+				});
+		};
+		ons.ready(function() {
+				new MultiPicker({
+				        input: 'sexid',
+				        container: 'sexPickerContainer',
+				        jsonData:[{
+								code: '1001',
+								value: '男'
+							}, {
+								code: '1002',
+								value: '女'
+							}, {
+								code: '1003',
+								value: '未知'
+							}],
+				        success: function (items) {
+								vmchi.sex = items[0].value;
+								vmchi.sexValue = items[0].code;
+						}
+			    });
+			    new MultiPicker({
+				        input: 'bloodTypeid',
+				        container: 'bloodTypePickerContainer',
+				        jsonData:[{
+								code: '1005',
+								value: '未检测'
+							}, {
+								code: '1001',
+								value: 'A型'
+							}, {
+								code: '1002',
+								value: 'B型'
+							}, {
+								code: '1003',
+								value: 'O型'
+							}, {
+								code: '1004',
+								value: 'AB型'
+							}],
+				        success: function (items) {
+								vmchi.bloodType = items[0].value;
+								vmchi.bloodTypeValue = items[0].code; 
+						}
+			    });
+			    new MultiPicker({
+				        input: 'birthStatusid',
+				        container: 'birthStatusPickerContainer',
+				        jsonData:[{
+							code: '1001',
+							value: '顺产'
+						}, {
+							code: '1003',
+							value: '剖腹产'
+						}, {
+							code: '1002',
+							value: '难产'
+						}, {
+							code: '1004',
+							value: '其他'
+						}],
+				        success: function (items) {
+								vmchi.birthStatus = items[0].value;
+								vmchi.birthStatusValue = items[0].code;
+						}
+			    });
+			    new MultiPicker({
+				        input: 'residenceAreaPickerid',
+				        container: 'residenceAreaPickerContainer',
+				        jsonData:cityData3,
+				        success: function (items) {
+							vmchi.residenceArea = _getParam1(items[0], 'value') + "." + _getParam1(items[1], 'value') + "." + _getParam1(items[2], 'value') + "."; 
+						}
+			    });
+			    new MultiPicker({
+				        input: 'homeAreaPickerid',
+				        container: 'homeAreaPickerContainer',
+				        jsonData:cityData3,
+				        success: function (items) {
+				        	vmchi.homeArea = _getParam1(items[0], 'value') + "." + _getParam1(items[1], 'value') + "." + _getParam1(items[2], 'value') + "."; 
+						}
+			    });
+			    new MultiPicker({
+				        input: 'postAreaPickerid',
+				        container: 'postAreaPickerContainer',
+				        jsonData:cityData3,
+				        success: function (items) {
+				        	vmchi.postArea = _getParam1(items[0], 'value') + "." + _getParam1(items[1], 'value') + "." + _getParam1(items[2], 'value') + "."; 
+						}
+			    });
+				   
+				var _getParam1 = function(obj, param) {
+					return obj[param] || '';
+				};
+			
+		});
+			
+			
+			function genSaveChildParams() {
+				var params = {};
+				params.child_code = "";
+				params.station_code = vmchi.stationCode;
+				params.child_name = vmchi.childName;
+				params.child_birth_date = vmchi.birthday;
+				params.child_sex = vmchi.sexValue;
+				params.child_birth_weight = vmchi.weight;
+				params.child_blood_type = vmchi.bloodTypeValue;
+				
+				params.child_id_card = vmchi.idCard;
+				params.child_birth_hospital = vmchi.birthHospital;
+				params.child_birth_doctor = vmchi.birthDoctor;
+				params.child_birth_code = vmchi.birthCode;
+				params.child_birth_status = vmchi.birthStatusValue;
+				params.child_parent_name = vmchi.parentName;
+				params.child_parent_company = vmchi.parentCompany;
+				params.child_parent_id_card = vmchi.parentIdCard;
+				params.child_monther_name = vmchi.montherName;
+				params.child_monther_company = vmchi.montherCompany;
+				params.child_monther_id_card = vmchi.montherIdCard;
+				params.child_mobile_number = vmchi.mobileNumber;
+				params.child_phone_number = vmchi.phoneNumber;
+				params.child_residence_address = vmchi.residenceArea + "." + vmchi.residenceSubAddress;
+				params.child_address = vmchi.homeArea + "." + vmchi.homeSubAddress;
+				params.child_post_address = vmchi.postArea + "." + vmchi.postSubAddress;
+				params.child_email_1 = vmchi.email1;
+				params.child_email_2 = vmchi.email2;
+				params.child_remark = vmchi.remark;
+				params.b001_date = vmchi.b001Date;
+				params.b063_date = vmchi.b063Date;
+				
+				return params;
+			}
+			
+		</script>
+	
+	
+</ons-page>
+

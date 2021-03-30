@@ -1,0 +1,48 @@
+<ons-page>
+	<style>
+        	[v-cloak] {
+              display: none;
+            }
+            #tips_content{
+            	height: calc(100vh - 44px);
+	        	background-color: #EFEFF4;
+	        	overflow-y:auto;
+            }
+            #tips_content p{
+            	color: #000;
+            }
+    </style>
+	<ons-toolbar class="toolbar">
+	    <div class="left toolbar__left" onclick="backfunction()">
+			<ons-icon icon="ion-ios-arrow-back" style="color: white" size="24px"></ons-icon>
+		</div>
+	    <div class="center toolbar__center">
+	    	温馨提示
+	    </div>
+	    <div class="right toolbar__right">
+	  		<img src="images/ic_home.png" style="width: 24px;height: 24px;vertical-align: middle;" onclick="backIndex();">
+	    </div>
+	</ons-toolbar>
+	<div id="tips_content" class="content" v-html="remind" style="padding: 25px 10px 0 10px;">
+    </div>
+    <script>
+	 	var vm = new Vue({
+            el: '#tips_content',
+            data: {
+                remind:''
+            },
+            created: function() {
+                var that=this;
+                var senddata={"station_code":sessionStorage.getItem("reservation_station_code")};
+            	axiosGet(senddata,"/Encryption/Vaccine/GetVaccineRemind",function(data){
+                    if(data.code=='0'){
+                        that.remind=data.data.vaccine_desc;
+                    }
+                });
+            }
+        });
+    </script>
+</ons-page>
+
+
+

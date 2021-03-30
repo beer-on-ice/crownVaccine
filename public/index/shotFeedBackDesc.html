@@ -1,0 +1,42 @@
+<ons-page>
+	<style>
+			p{
+				color: black !important;
+				font-size: 16px !important;
+			}
+	</style>
+	
+	<ons-toolbar class="toolbar">
+	    <div class="left toolbar__left" onclick="backfunction()">
+	      	<ons-icon icon="ion-ios-arrow-back" style="color: white" size="24px"></ons-icon>
+	    </div>
+	    <div class="center toolbar__center">
+	    	接种反应说明
+	    </div>
+  </ons-toolbar>
+	
+		<div id="shotFeedBackDesc" class="mui-content">
+			<div v-html="descContent" style="padding: 10px;"></div>
+		</div>	
+		<script>
+			sessionStorage.setItem("pageActive",true);//后退时显示"接种异常反馈"页签，而不是"接种评价"
+			ons.getScriptPage().onInit = function(){
+				var vm = new Vue({
+					el: "#shotFeedBackDesc",
+					data: {
+						descContent: ""	
+					},
+					created: function() {
+						var that = this;
+						var sessionBaby = JSON.parse(sessionStorage.getItem("baby"));
+						axiosGet({"station_code": sessionBaby.station_code}, "/Encryption/Feedback/GetJzReactionDesc", function(data) {
+							if(data.code == "0") {
+								that.descContent = data.data.vaccine_desc;
+							}
+						});
+					}
+				});
+			}
+			
+		</script>
+</ons-page>

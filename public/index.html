@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      http-equiv="Cache-Control"
+      content="no-cache, no-store, must-revalidate"
+    />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    <meta name="viewport" content="width=device-width, user-scalable=no" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="renderer" content="webkit" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>金苗宝</title>
+    <!-- 使用CDN的CSS文件 -->
+    <% for (var i in htmlWebpackPlugin.options.cdn &&
+    htmlWebpackPlugin.options.cdn.css) { %>
+    <link rel="stylesheet" href="<%= htmlWebpackPlugin.options.cdn.css[i] %>" />
+    <% } %>
+  </head>
+  <body>
+    <noscript>
+      <strong
+        >We're sorry but pds doesn't work properly without JavaScript enabled.
+        Please enable it to continue.</strong
+      >
+    </noscript>
+    <div id="app"></div>
+    <% for (var i in htmlWebpackPlugin.options.cdn &&
+    htmlWebpackPlugin.options.cdn.js) { %>
+    <script
+      type="text/javascript"
+      src="<%= htmlWebpackPlugin.options.cdn.js[i] %>"
+    ></script>
+    <% } %>
+    <!-- <script src="./js/baidumap.js?version=v1.0.0"></script> -->
+    <script
+      type="text/javascript"
+      src="http://api.map.baidu.com/api?v=2.0&ak=39deb0045d1e1d3cce03a309b4c123a6"
+    ></script>
+    <script>
+      //2011-7-25
+      ;(function() {
+        //闭包
+        function load_script(xyUrl, callback) {
+          var head = document.getElementsByTagName('head')[0]
+          var script = document.createElement('script')
+          script.type = 'text/javascript'
+          script.src = xyUrl
+          //借鉴了jQuery的script跨域方法
+          script.onload = script.onreadystatechange = function() {
+            if (
+              !this.readyState ||
+              this.readyState === 'loaded' ||
+              this.readyState === 'complete'
+            ) {
+              callback && callback()
+              // Handle memory leak in IE
+              script.onload = script.onreadystatechange = null
+              if (head && script.parentNode) {
+                head.removeChild(script)
+              }
+            }
+          }
+          // Use insertBefore instead of appendChild  to circumvent an IE6 bug.
+          head.insertBefore(script, head.firstChild)
+        }
+        function translate(point, type, callback) {
+          var callbackName = 'cbk_' + Math.round(Math.random() * 10000) //随机函数名
+          var xyUrl =
+            'https://api.map.baidu.com/ag/coord/convert?from=' +
+            type +
+            '&to=4&x=' +
+            point.lng +
+            '&y=' +
+            point.lat +
+            '&callback=BMap.Convertor.' +
+            callbackName
+          //动态创建script标签
+          load_script(xyUrl)
+          BMap.Convertor[callbackName] = function(xyResult) {
+            delete BMap.Convertor[callbackName] //调用完需要删除改函数
+            var point = new BMap.Point(xyResult.x, xyResult.y)
+            callback && callback(point)
+          }
+        }
+
+        window.BMap = window.BMap || {}
+        BMap.Convertor = {}
+        BMap.Convertor.translate = translate
+      })()
+    </script>
+  </body>
+</html>

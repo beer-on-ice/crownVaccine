@@ -1,0 +1,400 @@
+<ons-page>
+<style>
+    [v-cloak] {
+      display: none;
+    }
+    p {
+    	color:black;
+    }
+    .nogt:after{
+    	content: "";
+    }
+    .mui-badge{
+        position: absolute;
+        right: 2px;
+       font-size:12px;
+       line-height:12px;
+       display:inline-block;
+       padding:3px 6px;
+       border-radius:100px;
+       color:#fff;
+       background-color:#dd524d;
+        top: 2px;
+        z-index: 999;
+    }
+    .toolbar-mes{
+    	overflow-y: hidden;
+    }
+    .segment_active_button{
+    	background-color:#fff;
+    	color:#0076ff;
+    	}
+    .msgclass_h{
+    	height:calc(100vh - 44px);
+    	overflow-y: hidden;
+    }
+    .msgclass_y{
+    	height:calc(100vh - 44px);
+    	overflow-y: auto;
+    }
+    
+</style>
+
+		
+	<ons-toolbar class="toolbar toolbar-mes">
+	     <div class="left toolbar__left" onclick="backIndex()" style="width:20%;">
+	      	<ons-icon icon="ion-ios-arrow-back" style="color: white" size="24px"></ons-icon>
+	    </div>
+	    <div class="center toolbar__center" style="position:relative !important">
+	    	<div v-show="msg_show_flag||direct_show_flag" class="segment" style="width:160px;">
+			      <div class="segment__item" v-on:click="showmsg($event)">
+			        <div class="segment__button segment_active_button" >消息<span class="mui-badge" v-if="msg_num>0">{{msg_num}}</span></div>
+			      </div>
+			
+			      <div class="segment__item" v-on:click="showdirect($event)">
+			        <div class="segment__button">指引<span class="mui-badge" v-if="direct_num>0">{{direct_num}}</span></div>
+			      </div>
+		    </div>
+	    </div>
+	    <div class="right toolbar__right"  style="width:20%;">
+	       <div  v-on:click="delmsg()" v-show="msg_show_flag||direct_show_flag" style="width:100%;">
+	    	  <img src="images/delete_btn.png" style="width: 24px;height: 24px;vertical-align: middle;">
+	    	</div>
+	    </div>
+ 	</ons-toolbar>
+		
+		
+		
+		
+
+        <div class="mui-content-msg msgclass_y" id="msgclassId" v-cloak >
+            <div id="msg"   v-if="msg_show_flag" >
+                <ul class="list" v-if="message.length>0">
+					<li class="list-item list-item--chevron" v-for="(msg,index) in message" v-on:click="showinfo(msg.message_code,msg.message_content,1,index)">
+					    	<div class="list-item__center" v-bind:for="'check'+index">
+					    	    <div style="padding-right:18px;">
+						    	    <img src="images/red_point.png" style="width: 10px;height: 10px;position: absolute;top: 50%;display: inline-block;" v-if="msg.is_read=='0'&&!msg_flag"/>
+		                            <div class="" v-if="msg_flag">
+		                                <!--<input name="radio1" type="checkbox" v-bind:id="'check'+index" style="left: -30px;" v-bind:value="msg.message_code" v-model="picked">-->
+		                                <label class="checkbox">
+									        <input type="checkbox" class="checkbox__input" name="c" v-bind:id="'check'+index"  v-bind:value="msg.message_code" v-model="picked">
+									        <div class="checkbox__checkmark"></div>
+									    </label>
+		                            </div>
+					    	    </div>
+					    	    <div style="text-align: left;">
+						    	    <div style="color: #666;font-size: 15px;">{{msg.message_time}}</div>
+		                            <div style="width: calc(100vw - 70px);overflow: hidden;text-overflow:ellipsis;white-space: nowrap;">
+		                            	<a class="mui-navigate-right" style="color: #000000;" v-bind:class="msg_flag?'nogt':''">{{msg.message_title}}</a>
+		                            </div>
+					    	    </div>
+	                            
+					    	</div>
+					</li>
+				</ul>
+                <div v-else style="width:100vw;height:calc(100vh - 120px);display: flex;justify-content: center;align-items: center;">
+                    <span class="mui-icon mui-icon-info"></span>暂无消息
+                </div>
+            </div>
+            <div id="direct"  v-if="direct_show_flag">
+            	<div style="background-color: #fef7bb;color:#f99638;padding: 10px 10px;" v-if="watch_time>0">留观倒计时：{{watch_time}}分钟</div>
+                <ul class="list" v-if="direct.length>0">
+					<li class="list-item list-item--chevron" v-for="(msg,index) in direct" v-on:click="showinfo(msg.message_code,msg.message_content,2,index)">
+					    	<div class="list-item__center" v-bind:for="'check'+index">
+					    	    <div style="padding-right:18px;">
+						    	    <img src="images/red_point.png" style="width: 10px;height: 10px;position: absolute;top: 50%;display: inline-block;" v-if="msg.is_read=='0'&&!direct_flag"/>
+		                            <div class="" v-if="direct_flag">
+		                                <label class="checkbox">
+									        <input type="checkbox" class="checkbox__input"  v-bind:id="'check'+index" v-bind:value="msg.message_code" v-model="direct_picked">
+									        <div class="checkbox__checkmark"></div>
+									    </label>
+		                            </div>
+					    	    </div>
+					    	    <div style="text-align: left;">
+						    	    <div style="color: #666;font-size: 15px;">{{msg.message_time}}</div>
+		                            <div style="width: calc(100vw - 70px);overflow: hidden;text-overflow:ellipsis;white-space: nowrap;">
+		                            	<a class="mui-navigate-right" style="color: #000000;" v-bind:class="msg_flag?'nogt':''">{{msg.message_title}}</a>
+		                            </div>
+					    	    </div>
+					    	</div>
+					</li>
+				</ul>
+                
+                <div v-else style="width:100vw;height:calc(100vh - 44px);display: flex;justify-content: center;align-items: center;">
+                    <span class="mui-icon mui-icon-info"></span>暂无指引消息
+                </div>
+            </div>
+        </div>
+        
+         
+         
+        <script>
+    	var baby = JSON.parse(sessionStorage.getItem("baby"));
+    	var child_code="";
+    	if(baby!=undefined&&baby.child_code!=undefined){
+    		child_code=baby.child_code;
+    	}
+    	var showflag;
+        var vm = new Vue({
+                el: '.mui-content-msg',
+                data: {
+                    message:[],
+                    direct:[],
+                    msg_flag:false,
+                    direct_flag:false,
+                    msg_show_flag:false,
+                    direct_show_flag:false,
+                    picked:[],
+                    direct_picked:[],
+                    watch_time:0,
+                },
+                created: function() {
+                    var that=this;
+                    getMessage("1001",function(data){
+                        that.message=data;
+                        that.msg_show_flag = true;
+                        vm2.msg_show_flag = true;
+                    });
+                },
+                methods: {
+                    showinfo:function(id,content,type,index){
+                        if(showflag||this.msg_flag||this.direct_flag){
+                            return;
+                        }
+                        var that=this;
+                        var senddate={"message_code":id};
+                        axiosGet(senddate,"/Encryption/Message/ReadMessage",function(data){
+                            if(data.code=='0'){
+                                if(type==1&&that.message[index].is_read!="1"){
+                                    that.message[index].is_read='1';
+                                    vm2.msg_num--;
+                                }else if(type==2&&that.direct[index].is_read!="1"){
+                                    that.direct[index].is_read='1';
+                                    vm2.direct_num--;
+                                }
+                            }
+                        });
+                        var height=document.documentElement.clientHeight*0.6;
+                        content = content.replace(/\n/g,"").replace(/\r/g,"").replace(/&gt;/g,">").replace(/&lt;/g,"<");
+                        var alertHtml = "<div  style='height:300px;overflow-y:auto;text-align: left;'>"
+                                        +"<div style='text-align: left;line-height:normal;'>"
+                                        +content
+                                        +"</div>"
+                                        +"</div>";
+                        var name="消息";
+                        if(2==type){
+                            name="指引";
+                        }
+                        ons.notification.alert("",{title:name,messageHTML:alertHtml,buttonLabels:"关闭",callback:function(){
+                        	 isScroll("msgclassId",true);
+                        	 showflag = false;
+                        }});
+                        
+                        isScroll("msgclassId",false);
+                        showflag = true;
+                        
+                    }
+                }
+            });
+            
+            
+            function isScroll(idname,flag){
+            	if(flag){
+            		document.getElementById(idname).classList.remove("msgclass_h");
+                    document.getElementById(idname).classList.add("msgclass_y");
+            	}else{
+            		document.getElementById(idname).classList.remove("msgclass_y");
+                    document.getElementById(idname).classList.add("msgclass_h");
+            	}
+            }
+            
+            function getMessage(type,fun){
+                var senddate={"child_code":child_code,"message_type_code":type,"page_index":"0"};
+                axiosGet(senddate,"/Encryption/Message/GetMessageList",function(data){
+                        if(data.code=='0'){
+                            fun(data.data);
+                        }
+                    });
+            }
+        var vm2= new Vue({
+                el: '.toolbar-mes',
+                data: {
+                    flag:false,
+                    msg_num:0,
+                    direct_num:0,
+                    msg:true,
+                    deleteflag:false,
+                    msg_show_flag:false,
+                    direct_show_flag:false,
+                },
+                created: function() {
+                    var that=this;
+                    var senddate={"child_code":child_code,"message_type_code":"1001"};
+                    axiosGet(senddate,"/Encryption/Message/GetMessageCount",function(data){
+                        if(data.code=='0'){
+                            that.msg_num=parseInt(data.data.no_read_count);
+                        }
+                    });
+                    var senddate={"child_code":child_code,"message_type_code":"1002"};
+                    axiosGet(senddate,"/Encryption/Message/GetMessageCount",function(data){
+                        if(data.code=='0'){
+                            that.direct_num=parseInt(data.data.no_read_count);
+                        }
+                    });
+                },
+                methods: {
+                    showdirect:function(evt){
+                    	
+                    	if(this.deleteflag){
+                    		if(window.event) {
+							   // Chrome,IE6,Opera
+							   window.event.cancelBubble = true;
+							}else{
+							   // FireFox 3
+							   evt.stopPropagation();
+							}
+                        	return;
+                    	}else{
+                    		
+                    		var dom=evt.target;
+	                    	if(dom.parentNode.classList.contains("segment__button")){
+	                    		dom=evt.target.parentNode;
+	                    	}
+	                    	dom.classList.add("segment_active_button");
+	                    	var mes=dom.parentNode.parentNode.firstChild.firstChild;
+	                    	mes.classList.remove("segment_active_button");
+                    	}
+                        var that=this;
+                        that.msg=false;
+                        getMessage("1002",function(data){
+                            vm.direct=data;
+                            /*that.flag=true;*/
+                        });
+                        var senddate={"child_code":child_code};
+                        axiosGet(senddate,"/Encryption/Message/GetStayTime",function(data){
+	                        if(data.code=='0'){
+	                            vm.watch_time=parseInt(data.data.stay_time);
+	                        }
+	                    });
+	                    
+	                    var senddate1={"child_code":child_code,"message_type_code":"1002"};
+	                    axiosGet(senddate1,"/Encryption/Message/GetMessageCount",function(data){
+	                        if(data.code=='0'){
+	                            that.direct_num=parseInt(data.data.no_read_count);
+	                        }
+	                    });
+		                    
+	                    vm.msg_show_flag = false;
+	                    vm.direct_show_flag = true;
+	                    vm2.msg_show_flag = false;
+	                    vm2.direct_show_flag = true;
+                    },
+                    showmsg:function(evt){
+                    	if(!this.deleteflag){
+                    		
+                    		var dom=evt.target;
+	                    	if(dom.parentNode.classList.contains("segment__button")){
+	                    		dom=evt.target.parentNode;
+	                    	}
+	                    	dom.classList.add("segment_active_button");
+	                    	var direct=dom.parentNode.parentNode.children[1].firstChild;
+	                    	direct.classList.remove("segment_active_button");
+                    		
+                        	this.msg=true;
+		                    vm.msg_show_flag = true;
+		                    vm.direct_show_flag = false;
+		                    vm2.msg_show_flag = true;
+		                    vm2.direct_show_flag = false;
+                    	}else{
+                    		if(window.event) {
+							   // Chrome,IE6,Opera
+							   window.event.cancelBubble = true;
+							}else{
+							   // FireFox 3
+							   evt.stopPropagation();
+							}
+                    	}
+                    },
+                    delmsg:function(){
+                        if(this.msg){
+                            if(vm.picked.length>0){
+                                var btnArray = ['否', '是'];
+                                ons.notification.confirm('是否删除消息？', {
+                                  	buttonLabels:btnArray,
+                                  	title:"提示",
+                                  	callback: function(idx) {
+								      	if(idx==1){
+	                                        var senddate={"message_code":vm.picked.join(",")};
+	                                        axiosGet(senddate,"/Encryption/Message/DeleteMessage",function(data){
+	                                            if(data.code=='0'){
+	                                                 getMessage("1001",function(data){
+	                                                    vm.message=data;
+	                                                });
+	                                                ons.notification.toast(data.message, toastOptions);
+	                                            }
+	                                        });
+	                                    }
+								      	for(var i in vm.message){
+	                                    	if(vm.picked.indexOf(vm.message[i].message_code)>-1&&vm.message[i].is_read!="1"){
+	                                    		vm2.msg_num--;
+	                                    	}
+	                                    }
+	                                    vm.msg_flag=!vm.msg_flag;
+	                                    vm.picked=[];
+	                                	vm2.deleteflag = vm.msg_flag;
+								      }
+                                  });
+                            }else{
+                            	if(vm.msg_show_flag&&vm.message.length==0){
+                            		ons.notification.toast("当前没有消息", toastOptions);
+                            		return;
+                            	}
+                                vm.msg_flag=!vm.msg_flag;
+                                vm2.deleteflag = vm.msg_flag;
+                            }
+                        }else{
+                            if(vm.direct_picked.length>0){
+                                var btnArray = ['否', '是'];
+                                
+                                 ons.notification.confirm('是否删除指引？', {
+                                  	buttonLabels:btnArray,
+                                  	title:"提示",
+                                  	callback: function(idx) {
+	                                    if (idx == 1) {
+	                                        var senddate={"message_code":vm.direct_picked.join(",")};
+	                                        axiosGet(senddate,"/Encryption/Message/DeleteMessage",function(data){
+	                                            if(data.code=='0'){
+	                                                 getMessage("1002",function(data){
+	                                                    vm.direct=data;
+	                                                });
+	                                                ons.notification.toast(data.message, toastOptions);
+	                                            }
+	                                        });
+	                                    }
+		                                for(var i in vm.direct){
+		                                	if(vm.direct_picked.indexOf(vm.direct[i].message_code)>-1&&vm.direct[i].is_read!="1"){
+		                                		vm2.direct_num--;
+		                                	}
+		                                }
+	                                    vm.direct_flag=!vm.direct_flag;
+	                                    vm.direct_picked=[];
+	                                	vm2.deleteflag = vm.direct_flag;
+	                                }
+                                  });
+                            }else{
+                            	if(vm.direct_show_flag&&vm.direct.length==0){
+                            		ons.notification.toast("当前没有指引", toastOptions);
+                            		return;
+                            	}
+                                vm.direct_flag=!vm.direct_flag;
+                                vm2.deleteflag = vm.direct_flag;
+                            }
+                        }
+                    }
+                }
+            });    
+        </script>
+
+</ons-page>
+
+

@@ -1,0 +1,289 @@
+<ons-page>
+	<style>
+		.each-row {
+			padding-top: 10px;
+			position: relative;
+			text-align: center;
+		}
+		
+		.button--large--cta {
+			background-color: #6798FF;
+			font-size: 18px;
+			height: 40px;
+			color: #fff;
+		}
+	</style>
+	<ons-toolbar class="toolbar">
+		<div class="left toolbar__left" onclick="backfunction()">
+			<ons-icon icon="ion-ios-arrow-back" style="color: white" size="24px"></ons-icon>
+		</div>
+		<div class="center toolbar__center">
+			绑定儿童
+		</div>
+	</ons-toolbar>
+	<div class="content" id="bindChild">
+		<div v-show="!showChildren">
+			<!--<p style="margin: 15px 15px;">扫描接种本条码绑定</p>
+					<ul style="background-color: white;">
+						<li style="text-align: center; ">
+							<img id="qrcodeImg" v-on:click="bindclick" src="images/ic_qrcode.png" style="width: 100px; height: 100px;">
+						</li>
+					</ul>	-->
+			<input id="qrBirthday" type="hidden" />
+
+			<p style="margin: 15px 15px;">儿童信息绑定</p>
+			<div id="queryDiv" style="padding-left: 5px; padding-right: 5px;padding-bottom: 15px;background-color: white;">
+				<div class="each-row">
+					<input type="text" v-model="childName" name="childName" placeholder="儿童姓名或儿童编码" maxlength="18">
+				</div>
+				<div class="each-row">
+
+					<input type="text" v-model="birthday" id="birthday" name="birthday" readonly="readonly" placeholder="出生日期" autocomplete="off">
+					<ons-icon id="birthday-icon" icon="ion-calendar" style="position:absolute;right:5px;top: 22px;opacity: 0.7;"></ons-icon>
+				</div>
+				<div class="each-row">
+					<input type="text" onclick="this.type='password';" ontouchstart="this.type='password';" autocomplete="off" v-model="imuno" v-bind:disabled="isDisabled" name="imuno" placeholder="接种本条码或儿童编码后四位" maxlength="4">
+				</div>
+				<div class="each-row">
+					<div id="bindChildBtn" class="button--large--cta" v-on:click="bindbtn">
+						提交
+					</div>
+				</div>
+			</div>
+
+			<div style="display: flex; justify-content:space-between; flex-direction: column;padding-top: 70px;padding-bottom: 120px;">
+				<!--<div id="ksjdDiv" style="display: flex;flex-direction: row;justify-content:center; margin-bottom: 20px;">
+					<div style="display: flex;flex-direction: column;justify-content:center;font-size: 14px;color: #8f8f94;">没有宝贝登记？请点击</div>
+					<button v-on:click="ksjdBtn();" class="button button--outline">开始建档</button>
+				</div>-->
+				<div style="display: flex;flex-direction: row;justify-content:center;">
+					<p>如有疑问，请联系门诊医生。</p>
+				</div>
+			</div>
+		</div>
+		<div v-show="showChildren" style="margin-top: 15px;">
+			<template v-for="child in children">
+				<div class="children" v-on:click="getChild($event)" style="margin-bottom: 5px;padding: 10px;background-color: white;" v-bind:code="child.child_code">
+					<div style="color:#5FC5EA">{{child.child_name}}</div>
+					<div>出生日期：{{child.child_birth_date}}</div>
+					<div>儿童编码：{{child.child_code}}</div>
+				</div>
+			</template>
+		</div>
+		<div id="targetContainer"></div>
+		<div id="targetContainerQrcode">
+			<div id="qrcodetext"></div>
+		</div>
+	</div>
+	<script>
+		var vm, old_function, datepicker1, datepicker2;
+		ons.getScriptPage().onInit = function() {
+			vm = new Vue({
+				el: '#bindChild',
+				data: {
+					qrCode: '',
+					qrCodeText: '',
+					qrBirthday: '',
+
+					childName: '',
+					birthday: '',
+					imuno: '',
+					isDisabled: false,
+
+					showChildren: false,
+					children: []
+				},
+				watch: {
+					childName: function(newName, oldName) {
+						if(isChildNo(newName)) {
+							this.isDisabled = true;
+						} else {
+							this.isDisabled = false;
+						}
+					}
+				},
+				methods: {
+					bindclick: function() {
+						setBlur();
+					},
+					bindbtn: function() {
+						var childName = this.childName.trim();
+						var birthday = this.birthday.trim();
+						var imuno = this.isDisabled ? "" : this.imuno.trim();
+						if(!childName) {
+							ons.notification.toast('请输入绑定条件！', toastOptions);
+							return false;
+						}
+						if(!birthday) {
+							ons.notification.toast('请输入出生日期！', toastOptions);
+							return false;
+						}
+						if(!imuno && !isChildNo(childName)) {
+							ons.notification.toast('请输入接种本条码或儿童编码后四位！', toastOptions);
+							return false;
+						}
+						var params = {};
+						params.child_short_code = "";
+						params.child_birth_date = birthday;
+						params.child_password = imuno;
+						if(isChildNo(childName)) {
+							params.child_code = childName;
+							params.child_name = "";
+							params.operation_type = "1002";
+						} else {
+							params.child_code = "";
+							params.child_name = childName;
+							params.operation_type = "1003";
+						}
+						var that = this;
+						axiosGet(params, "/Encryption/Child/SearchChildList", function(data) {
+							if(data.code == '1') {
+								ons.notification.toast(data.message, toastOptions);
+							} else if(data.code == '0') {
+								var children = data.data;
+								if(children && children.length > 1) {
+									that.children = children;
+									that.showChildren = true;
+									old_function = backfunction;
+									backfunction = function() {
+										document.getElementsByClassName("toolbar__center")[0].innerText = "绑定儿童";
+										vm.showChildren = false;
+										backfunction = old_function;
+									}
+									document.getElementsByClassName("toolbar__center")[0].innerText = "选择儿童";
+								} else if(children && children.length > 0) {
+									var child = children[0];
+									axiosGet({
+										child_code: child.child_code
+									}, "/Encryption/Child/BindUserChild", function(data2) {
+										ons.notification.toast(data2.message, toastOptions);
+										if(data2.code == '0') {
+											setTimeout(function() {
+												sessionStorage.setItem("refreshChildInfoList", "1");
+												backfunction();
+											}, 350);
+										}
+									});
+								}
+							}
+
+						});
+					},
+					ksjdBtn: function() {
+						setTimeout(function() {
+							top.document.querySelector('ons-navigator').pushPage("index/createChild.html", {
+								callback: function() {
+									backfunction = function() {
+										setBlur();
+										backToPrevPage("index/bindChild.html");
+									};
+									pageBackFuncs["index/createChild.html"] = backfunction;
+								}
+							});
+						}, 1000)
+					}
+
+				}
+			});
+			setmuidatafocus();
+			var datearr = getNowFormatDate3();
+			datepicker1 = new DateSelector({
+				input: 'birthday', //点击触发插件的input框的id
+				container: 'targetContainer', //插件插入的容器id
+				type: 0,
+				//0：不需要tab切换，自定义滑动内容，建议小于三个；
+				//1：需要tab切换，【年月日】【时分】完全展示，固定死，可设置开始年份和结束年份
+				param: [1, 1, 1, 0, 0],
+				//设置['year','month','day','hour','minute'],1为需要，0为不需要,需要连续的1
+				beginTime: [], //如空数组默认设置成1970年1月1日0时0分开始，如需要设置开始时间点，数组的值对应param参数的对应值。
+				endTime: datearr, //如空数组默认设置成次年12月31日23时59分结束，如需要设置结束时间点，数组的值对应param参数的对应值。
+				recentTime: [], //如不需要设置当前时间，被为空数组，如需要设置的开始的时间点，数组的值对应param参数的对应值。
+				success: function(arr, arr2) {
+					vm.birthday = arr2.join("-");
+				} //回调
+			});
+			datepicker2 = new DateSelector({
+				input: 'qrBirthday', //点击触发插件的input框的id
+				container: 'targetContainerQrcode', //插件插入的容器id
+				type: 0,
+				//0：不需要tab切换，自定义滑动内容，建议小于三个；
+				//1：需要tab切换，【年月日】【时分】完全展示，固定死，可设置开始年份和结束年份
+				param: [1, 1, 1, 0, 0],
+				//设置['year','month','day','hour','minute'],1为需要，0为不需要,需要连续的1
+				beginTime: [], //如空数组默认设置成1970年1月1日0时0分开始，如需要设置开始时间点，数组的值对应param参数的对应值。
+				endTime: datearr, //如空数组默认设置成次年12月31日23时59分结束，如需要设置结束时间点，数组的值对应param参数的对应值。
+				recentTime: [], //如不需要设置当前时间，被为空数组，如需要设置的开始的时间点，数组的值对应param参数的对应值。
+				success: function(arr, arr2) {
+					var code = vm.qrCode;
+					bindChildByQrCode(code, arr2.join("-"));
+				} //回调
+			});
+		}
+
+		function bindChildByQrCode(qrCode, birthDate) {
+			var params = {};
+			params.child_short_code = qrCode;
+			params.operation_type = "1001";
+			params.child_birth_date = birthDate;
+			axiosGet(params, "/Encryption/Child/SearchChildList", function(data) {
+				if(data.code == '1') {
+					ons.notification.toast(data.message, toastOptions);
+				} else if(data.code == '0') {
+					var children = data.data;
+					if(children && children.length > 1) {
+						vm.children = children;
+						vm.showChildren = true;
+						old_function = backfunction;
+						backfunction = function() {
+							vm.showChildren = false;
+							backfunction = old_function;
+						}
+					} else if(children && children.length > 0) {
+						var child = children[0];
+						axiosGet({
+							child_code: child.child_code
+						}, "/Encryption/Child/BindUserChild", function(data2) {
+							ons.notification.toast(data2.message, toastOptions);
+							if(data2.code == '0') {
+								sessionStorage.setItem("babyrefresh", true);
+								sessionStorage.setItem("refreshChildInfoList", "1");
+								backfunction();
+							}
+						});
+					}
+				}
+
+			});
+		}
+
+		function getChild(evt) {
+			var code = event.currentTarget.getAttribute("code");
+			axiosGet({
+				child_code: code
+			}, "/Encryption/Child/BindUserChild", function(data2) {
+				vm.showChildren = false;
+				backfunction = old_function;
+				ons.notification.toast(data2.message, toastOptions);
+				if(data2.code == '0') {
+					setTimeout(function() {
+						sessionStorage.setItem("refreshChildInfoList", "1");
+						old_function();
+					}, 350);
+				}
+			});
+		}
+	</script>
+</ons-page>
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,196 @@
+<!--预约记录-->
+<ons-page>
+	 <style>
+            [v-cloak] {
+              display: none;
+            }
+            .yytitle{
+            	display: flex;
+            	justify-content: space-between;
+            	flex-direction: row;
+            	padding: 10px 10px;
+            	background-color: #f7f7f7;
+            }
+            .chidinfoBillList{
+            	margin-top: 10px;
+            	margin-left: 10px;
+            	display: flex;
+            	justify-content: flex-start;
+            	flex-direction: row;
+            }
+            .chidinfoBillList .label{
+            	color:#666;
+            	word-break:keep-all;
+            	white-space:nowrap;
+            }
+            #billtext{
+        		overflow-y:auto;
+        		height: calc(100vh - 44px);
+        		padding-bottom: 25px;
+        	} 
+        	[data-style=android]#billtext{
+        		overflow-y:auto;
+        		height: calc(100vh - 56px);
+        		padding-bottom: 25px;
+        	} 
+        </style>
+        
+        <ons-toolbar class="toolbar">
+	  	    <div class="left toolbar__left" onclick="backfunction()">
+				<ons-icon icon="ion-ios-arrow-back" style="color: white" size="24px"></ons-icon>
+			</div>
+		    <div class="center toolbar__center">
+		    	我的账单
+		    </div>
+	 	</ons-toolbar>
+        
+        <div id="billtext" class="mui-content" v-cloak>
+        	<div v-if="bespeaklist.length>0" id="billtextInner">
+        	<div v-for="bespeak in bespeaklist" v-on:click="gotoDetail(bespeak.reservation_code,bespeak.vaccine_name)">
+        		<template>
+        		<div class="yytitle">
+	        		<div><div style="display: inline-block;vertical-align: top;">订单号：</div><div style="display: inline;word-break: break-all;word-wrap: break-word;">{{bespeak.pay_no}}</div></div>
+	        		<div v-bind:style="bespeak.fontcolor" style="width:120px;text-align: right;">{{bespeak.reservation_status_desc}}</div>
+        		</div>
+        		<div>
+        			<div class="chidinfoBillList">
+		        		<div class="label">儿童姓名：</div>
+		        		<div>{{bespeak.child_name}}</div>
+	        		</div>
+		        	<div class="chidinfoBillList">
+		        		<div class="label">儿童编码：</div><div>{{bespeak.child_code}}</div>
+		        	</div>
+		        	<div class="chidinfoBillList">
+		        		<div class="label">预约门诊：</div>
+		        		<div>{{bespeak.station_name}}</div>
+		        	</div>
+		        	<div class="chidinfoBillList">
+		        		<div class="label">接种疫苗：</div>
+		        		<div><div v-for="vaccine in bespeak.vaccinelist">{{vaccine}}</div></div>
+		        	</div>
+		        	<div class="chidinfoBillList">
+		        		<div class="label">预约时间：</div>
+		        		<div>{{bespeak.reservation_date}}<span v-if="bespeak.reservation_begin_time&&bespeak.reservation_end_time">&nbsp;{{bespeak.reservation_begin_time}}-{{bespeak.reservation_end_time}}</span></div>
+		        	</div>
+		        	<div class="chidinfoBillList">
+		        		<div class="label">价格：</div>
+		        		<div>￥{{bespeak.price}}</div>
+		        	</div>
+		        	<div class="chidinfoBillList" style="margin-bottom: 10px;">
+		        		<div class="label">支付状态：</div>
+		        		<div>{{bespeak.pay_status_desc}}</div>
+		        	</div>
+	        	</div>
+        		</template>
+	        </div>
+	        </div>
+	        <div style="margin: 0 auto;position: fixed;top:50%;width: 100%;text-align: center;"  v-else>该儿童无历史账单！</div>
+        </div>
+        <script>
+        	var baby = JSON.parse(sessionStorage.getItem("baby"));
+        	ons.getScriptPage().onInit = function(){
+				var vm = new Vue({
+			        el: '#billtext',
+			        data: {
+			            bespeaklist:[],
+                    	sessionBaby:baby
+			        },
+			        mounted: function() {
+			            var that=this;
+			            if(baby.ispay=='1'){
+			            	that.ispay=true;
+			            }
+						var page=0;
+			            var sw=true;
+			            var senddata={"child_code":baby.child_code,"page":page++};
+			        	axiosGet(senddata,"/Encryption/Reservation/MyAccountList",function(data){
+			                if(data.code=='0'){
+			                    for(var i=0;i<data.data.length;i++){
+			                    	var bespeak=data.data[i];
+			                    	bespeak.vaccinelist=bespeak.vaccine_name.split(",");
+			                    	bespeak.child_code=baby.child_code;
+			                    	if(bespeak.reservation_status=='1003'){
+			                    		bespeak.fontcolor="color:orange";
+			                    	}else if(bespeak.reservation_status=='1002'){
+			                    		bespeak.fontcolor="color:green";
+			                    	}else if(bespeak.reservation_status=='1001'){
+			                    		bespeak.fontcolor="color:gray";
+			                    	}else if(bespeak.reservation_status=='1004'){
+			                    		bespeak.fontcolor="color:red";
+			                    	}
+			                    }
+			                    that.bespeaklist=data.data;
+			                    that.loadingflag = true;
+			                    if(that.bespeaklist.length<20){
+			                    	sw=false;
+			                    }
+			                }
+			            });
+			            var scrollflag;
+			             // 注册scroll事件并监听  
+			            document.getElementById("billtext").addEventListener('scroll',function(evt){  
+			                var scrollTop = document.getElementById("billtext").scrollTop|| document.documentElement.scrollTop || document.getElementById("billtext").scrollTop;
+			                // 判断是否滚动到底部
+			                var style = document.defaultView.getComputedStyle(document.getElementById("billtext"),null);
+			                var styleinner = document.defaultView.getComputedStyle(document.getElementById("billtextInner"),null);
+			                //console.log(scrollTop,parseInt(style.height),parseInt(styleinner.height))
+			                if(scrollTop+ parseInt(style.height) >= parseInt(styleinner.height)) {
+			                	if(scrollflag){
+			                		return;
+			                	}
+			                    //console.log(sw);  
+			                    // 如果开关打开则加载数据  
+			                    if(sw==true){  
+			                        // 将开关关闭  
+			                        sw = false; 
+			                        that.bespeaklist.push({});
+				                    var senddata={"child_code":baby.child_code,"page":page++};
+				                	axiosGet(senddata,"/Encryption/Reservation/GetReservationList",function(data){
+				                        if(data.code=='0'){
+				                            
+				                            for(var i=0;i<data.data.length;i++){
+				                            	var bespeak=data.data[i];
+				                            	bespeak.vaccinelist=bespeak.vaccine_name.split(",");
+				                            	bespeak.child_code=baby.child_code;
+				                            	if(bespeak.reservation_status=='1003'){
+				                            		bespeak.fontcolor="color:orange";
+				                            	}else if(bespeak.reservation_status=='1002'){
+				                            		bespeak.fontcolor="color:green";
+				                            	}else if(bespeak.reservation_status=='1001'){
+				                            		bespeak.fontcolor="color:gray";
+				                            	}else if(bespeak.reservation_status=='1004'){
+				                            		bespeak.fontcolor="color:red";
+				                            	}
+				                            }
+				                            that.bespeaklist.pop();
+				                            that.bespeaklist=that.bespeaklist.concat(data.data);
+				                            if(that.bespeaklist.length<20){
+				                            	sw=false;
+				                            }else{
+				                            	sw=true;
+				                            }
+				                            if(data.data.length==0){
+				                            	ons.notification.toast("已经没有数据了!", toastOptions);
+				                            	scrollflag = true;
+				                            }
+				                        }
+				                    });
+			                    }  
+			                }  
+			            });  
+			            
+			        },
+			        methods:{
+			        	gotoDetail:function(code,name){
+			        		sessionStorage.setItem("list_reservation_code",code);
+			        		sessionStorage.setItem("list_vaccine_name",name);
+			                top.document.querySelector('ons-navigator').pushPage("mine/billsListPayDetail.html");
+			        	}
+			        }
+			    });
+        		
+        	}
+
+        </script>
+	
+</ons-page>

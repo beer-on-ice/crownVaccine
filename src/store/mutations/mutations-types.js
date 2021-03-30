@@ -1,0 +1,17 @@
+export const SET_LOADING_PAGE = 'setLoadingPage'
+export const SET_LOADING_AXIOS = 'setLoadingAxios'
+export const SET_TIMESTAMP = 'setTimestamp'
+
+// ///////////////// /// //
+export const SET_PRICEID = 'setpriceId'
+export const SET_BACTID = 'setbactId'
+export const SET_CHILDCODE = 'setchildCode'
+export const SET_VACCINECODE = 'setvaccineCode'
+export const SET_STATIONCODE = 'setstationCode'
+export const SET_PRODUCTNO = 'setproductNo'
+export const SET_FACTORYNO = 'setfactoryNo'
+export const SET_SIGNED = 'setsigned'
+export const SET_REVDATE = 'setreservation_date'
+export const SET_REVSTART = 'setreservation_begin_time'
+export const SET_REVEND = 'setreservation_end_time'
+export const SET_FROM = 'setFrom'

@@ -1,0 +1,162 @@
+
+<ons-page>
+	
+    <style>
+		[v-cloak] {
+		  display: none;
+		}
+		
+		.rowDiv {
+			display: flex;
+			flex-direction: row;
+			justify-content: left;
+			margin-bottom: 10px;	
+		}
+		#feedbackHistoryListContent{
+			    font-size: 14px
+		}
+		.list-item--nodivider__left{
+			vertical-align: top;
+			width:30%;
+			word-break: keep-all;
+		}
+	</style>
+	
+	
+	<ons-toolbar class="toolbar">
+	    <div class="left toolbar__left" onclick="backfunction()">
+	      	<ons-icon icon="ion-ios-arrow-back" style="color: white" size="24px"></ons-icon>
+	    </div>
+	    <div class="center toolbar__center">
+	    	历史接种反馈
+	    </div>
+    </ons-toolbar>
+		
+	<div class="content">
+	
+		<div id="feedbackHistoryListContent" style="height:calc(100vh - 60px);overflow-y:auto;">
+			<div v-show="!showContentDiv" v-cloak style="text-align: center;height: calc(100vh - 100px);display: flex;flex-direction: column;justify-content: center;font-size: 16px;" v-cloak>{{noContent}}</div>
+			<div v-show="showContentDiv">
+	    		
+	    		<div  style="margin: 10px 0px;">
+					<ul class="card--material list">
+						<li class="list-item" >
+						    <div class="list-item__left">
+						      <img class="list-item__thumbnail" src="images/img_user_avatar.png" style="width:60px;height: 60px;" alt="admin user">
+						    </div>
+						    <div class="list-item__center" style="text-align: left;">
+						      <div v-cloak v-if="childName" class="list-item__title">{{childName}}</div>
+						      <div v-cloak v-if="!childName" class="list-item__title">{{child_code}}</div>
+						      <div class="list-item__subtitle" v-cloak>{{age}}</div>
+						    </div>
+						</li>
+					</ul>
+				</div>	
+				
+				<div v-for="feedBack in feedBacks" > 
+						<div style="margin: 10px 0px;" v-bind:data-abnormalid="feedBack.abnormal_id" v-on:click="dealFeedBack($event);">
+						    <ul class="card--material list" >
+								<li class="list-item list-item--nodivider">
+								    <div class="list-item__left list-item--nodivider__left">
+								             接种疫苗：
+								    </div>
+								    <div class="list-item__center list-item--nodivider__center" style="text-align: left;width:200px;">
+								      {{feedBack.vaccine_name}}
+								    </div>
+								</li>
+								<li class="list-item list-item--nodivider">
+								    <div class="list-item__left list-item--nodivider__left">
+								             接种日期：
+								    </div>
+								    <div class="list-item__center list-item--nodivider__center" style="text-align: left;">
+								      {{feedBack.jz_date}}
+								    </div>
+								</li>
+								<li class="list-item list-item--nodivider">
+								    <div class="list-item__left list-item--nodivider__left">
+								             发现日期：
+								    </div>
+								    <div class="list-item__center list-item--nodivider__center" style="text-align: left;">
+								      {{feedBack.find_date}}
+								    </div>
+								</li>
+								<li class="list-item list-item--nodivider">
+								    <div class="list-item__left list-item--nodivider__left">
+								             症&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;状：
+								    </div>
+								    <div class="list-item__center list-item--nodivider__center" style="text-align: left;">
+								     	<div style="width:200px;word-break: break-all;">
+											<label v-if="feedBack.jz_site">接种部位&nbsp;{{feedBack.jz_site}}</label> 
+											<label v-if="feedBack.jz_site && feedBack.jz_reaction"><br></label> 
+											<label v-if="feedBack.jz_reaction">综合反应&nbsp;{{feedBack.jz_reaction}}</label> 
+											<label v-if="(feedBack.jz_site || feedBack.jz_reaction)&&feedBack.other_reaction"><br></label> 
+											<label v-if="feedBack.other_reaction">其他症状&nbsp;{{feedBack.other_reaction}}</label>
+										</div>
+								    </div>
+								</li>
+							</ul>
+					</div>
+			    </div>
+		    </div>
+		</div>
+	</div>	
+		<script>
+			sessionStorage.setItem("pageActive",true);//后退时显示"接种异常反馈"页签，而不是"接种评价"
+			ons.getScriptPage().onInit = function(){
+					var vm = new Vue({
+						el: "#feedbackHistoryListContent",
+						data: {
+							showContentDiv: false,
+							child_code: "",
+							childName: "",
+							age: "",
+							feedBacks: [],
+							noContent: ""
+						},
+						created: function() {
+							sessionStorage.setItem("shotExceptionFeedBackActive", true);//后退时显示"接种异常反馈"页签，而不是"接种评价"
+							var that = this;
+							var sessionBaby = JSON.parse(sessionStorage.getItem("baby"));
+							that.childName = sessionBaby.child_name;
+							that.child_code = sessionBaby.child_code;
+							that.age = sessionBaby.age;
+							
+							axiosGet({child_code: sessionBaby.child_code}, "/Encryption/Feedback/GetAbnormalList", function(data) {
+								//console.log(data);
+								that.noContent = "ⓘ暂无数据";
+								if(data.code == '1') {
+									that.showContentDiv = false;	
+									
+								} else if(data.code == '0') {
+									var curData = data.data;
+									if(curData == null || curData.length == 0) {
+										that.showContentDiv = false;		
+									} else {
+										//console.log(curData);
+										that.feedBacks = curData;
+										that.noContent = "";
+										that.showContentDiv = true;
+									}
+									
+								}
+							});
+							
+						},
+						methods:{
+							dealFeedBack:function(e){
+								var dom=e.target.parentNode;
+								var that=dom;
+								
+								while(!that.classList.contains("card--material")){
+									that=that.parentNode
+								}
+								var abnormalId = that.parentNode.getAttribute("data-abnormalid");	
+								sessionStorage.setItem("curBnormalId", abnormalId);
+								top.document.querySelector('ons-navigator').pushPage("index/dealFeedBack.html");
+							}
+						}
+					});
+			}
+		
+		</script>
+</ons-page>

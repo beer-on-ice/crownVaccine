@@ -1,0 +1,564 @@
+<ons-page>
+	<style>
+		.shotinfocontent {
+			overflow-y: hidden;
+		}
+		
+		#menus_change {
+			background-color: #6E89FF;
+			width: 100%;
+			margin-top: 0px;
+			padding-top: 5px;
+			padding-bottom: 5px;
+		}
+		
+		.list-label {
+			width: 100px;
+			text-align: left;
+		}
+		
+		#sliderSegmentedcarousel .leftDiv .centerDiv .rightDiv {
+			display: flex;
+			flex-direction: column;
+			justify-content: center;
+			text-align: center;
+			font-size: 14px;
+		}
+		
+		#sliderSegmentedcarousel .title {
+			color: #61BDE6;
+			padding: 10px 15px;
+			background-color: #EFEFF4;
+		}
+		
+		.leftDiv {
+			text-align: left;
+			width: 33%;
+		}
+		
+		.centerDiv {
+			width: 33%;
+		}
+		
+		.rightDiv {
+			width: 33%;
+		}
+		
+		.segment__button {
+			background-color: transparent;
+		}
+		
+		.segment__item:first-child>.segment__button {
+			border-left-width: 1px;
+			border-top-width: 1px;
+			border-bottom-width: 1px;
+			border-radius: 4px 0 0 4px;
+		}
+		
+		.segment__item:last-child>.segment__button {
+			border-right-width: 1px;
+			border-top-width: 1px;
+			border-bottom-width: 1px;
+			border-radius: 0 4px 4px 0;
+		}
+	</style>
+	<ons-toolbar class="toolbar">
+		<div class="left toolbar__left" onclick="backfunction()">
+			<ons-icon icon="ion-ios-arrow-back" style="color: white" size="24px"></ons-icon>
+		</div>
+		<div class="center toolbar__center">
+			接种信息
+		</div>
+	</ons-toolbar>
+	<div class="content shotinfocontent" style="background-color: #6E89FF;">
+		<ons-segment id="menus_change">
+			<button v-on:click="blue($event)" class="fontStyle" :active="btnIndex==0">儿童信息</button>
+			<button v-on:click="dark($event)" class="fontStyle" :active="btnIndex==1">接种记录</button>
+			<button v-on:click="orange($event)" class="fontStyle" :active="btnIndex==2">下次接种</button>
+		</ons-segment>
+		<div id="remindContent" v-on:click="gotoPage" v-if="remindContent != ''" class="mui-bar mui-bar-nav" style="top: 110px; padding: 0px 5px;height: 28px;background-color: #F9F5D8;font-size: medium;">
+			<div id="remindContentInner" style="display: flex;flex-direction: row;justify-content:flex-start;padding: 4px 0;">
+				<div class="mui-col-xs-8" id="remindContentDetail" style="display: flex;flex-direction: row;justify-content:flex-start;color:#FBB04E;font-size: small;width: calc(100vw - 50px);">
+					<marquee scrollamount="3" style="width: 100%;">{{remindContent}}</marquee>
+				</div>
+			</div>
+		</div>
+
+		<ons-carousel id="carousel" fullscreen>
+			<!--auto-scroll overscrollable -->
+			<ons-carousel-item style="background-color: #FFFFFF;">
+				<div id="childInfo" style="height:calc(100vh - 109px);overflow-y:auto;">
+					<ul class="list" style="margin-top: 15px;margin-bottom: 6px;">
+						<li class="list-item">
+							<div class="list-item__center">
+								<div class="list-label">儿童姓名：</div>
+								{{baby.child_name}}
+							</div>
+						</li>
+						<li class="list-item">
+							<div class="list-item__center">
+								<div class="list-label">儿童编码：</div>
+								{{baby.child_code}}
+							</div>
+						</li>
+						<li class="list-item">
+							<div class="list-item__center">
+								<div class="list-label">出生日期：</div>
+								{{baby.child_birth_date}}
+							</div>
+						</li>
+						<li class="list-item">
+							<div class="list-item__center">
+								<div class="list-label">性别：</div>
+								{{baby.child_sex_name}}
+							</div>
+						</li>
+						<li class="list-item">
+							<div class="list-item__center">
+								<div class="list-label">父亲姓名：</div>
+								{{baby.child_parent_name}}
+							</div>
+						</li>
+						<li class="list-item">
+							<div class="list-item__center">
+								<div class="list-label">母亲姓名：</div>
+								{{baby.child_monther_name}}
+							</div>
+						</li>
+						<li class="list-item">
+							<div class="list-item__center">
+								<div class="list-label">固定电话：</div>
+								{{baby.child_phone_number}}
+							</div>
+						</li>
+						<li class="list-item">
+							<div class="list-item__center">
+								<div class="list-label">移动电话：</div>
+								{{baby.child_mobile_number}}
+							</div>
+						</li>
+						<li class="list-item">
+							<div class="list-label">家庭住址：</div>
+							<div class="list-item__center ">{{homeArea}}</div>
+						</li>
+						<li class="list-item">
+							<div class="list-item__center">
+								<div class="list-label"></div>
+								{{homeSubAddress}}
+							</div>
+						</li>
+						<li class="list-item">
+							<div class="list-item__center">
+								<div class="list-label">所属接种点：</div>
+								{{baby.station_name}}
+							</div>
+						</li>
+					</ul>
+				</div>
+			</ons-carousel-item>
+			<ons-carousel-item style="">
+				<div id="jzjl" style="">
+					<div id="jzjlSlider">
+						<div id="secondeMenu" style="background-color: #EFEFF4;">
+							<div style="color:#fe9d66;text-align: center;padding-top: 5px;padding-bottom: 5px;font-size: small;">提示：点击疫苗名称，可以查看疫苗详情</div>
+							<div id="sliderSegmentedControl" class="">
+								<div class="tabbar tabbar--top tabbar--top-border" style="background-color: #EFEFF4;">
+									<label class="tabbar__item tabbar--top-border__item" v-on:click="firstYimiao($event)">
+						    <input type="radio" name="top-tabbar-b" checked="checked" href="#firstYm">
+						    <button class="tabbar__button tabbar--top-border__button">
+						             第一类疫苗
+						    </button>
+						  </label>
+									<label class="tabbar__item tabbar--top-border__item" v-on:click="secondYimiao($event)">
+						    <input type="radio" name="top-tabbar-b" href="#secondYm">
+						    <button class="tabbar__button tabbar--top-border__button">
+						            第二类疫苗
+						    </button>
+						  </label>
+								</div>
+							</div>
+						</div>
+
+						<ons-carousel id="sliderSegmentedcarousel" fullscreen>
+							<!--auto-scroll overscrollable swipeable-->
+							<ons-carousel-item style="background-color: #EFEFF4;">
+								<div id="firstYm" class="" style="height:calc(100vh - 200px);overflow-y:auto;">
+									<div v-if="!jzjlYLDLs||jzjlYLDLs.length==0" style="width:100%;height: calc(100vh - 200px);display: flex;align-items: center;justify-content: center;font-size: 20px;">ⓘ未查到接种记录信息</div>
+									<div v-if="jzjlYLDLs&&jzjlYLDLs.length>0" class="">
+										<div class="mui-scroll">
+											<template v-for="jzjlDL in jzjlYLDLs">
+												<div class="title" v-bind:data-vaccineCode="jzjlDL.child_vaccine_code" onclick="viewYMDL(this)">
+													{{jzjlDL.vaccine_name}}
+												</div>
+												<ul class="list list--noborder">
+													<li class="list-item" v-for="jzjl in jzjlDL.child_vaccine_list" style="display: flex;flex-direction: row;justify-content:flex-start;">
+														<div class="list-item__center">
+															<div class="centerDiv">{{jzjl.vaccine_count ? '第' + jzjl.vaccine_count + '剂次': ''}}</div>
+															<div class="rightDiv" v-bind:style="{color: jzjl.vaccine_time_color}" style="text-align: right;">{{jzjl.vaccine_time_type_name}}</div>
+														</div>
+													</li>
+												</ul>
+											</template>
+										</div>
+									</div>
+								</div>
+							</ons-carousel-item>
+							<ons-carousel-item style="background-color: #EFEFF4;">
+								<div id="secondYm" class="" style="height:calc(100vh - 200px);overflow-y:auto;">
+									<div v-if="!jzjlELDLs||jzjlELDLs.length==0" style="width:100%;height: calc(100vh - 200px);display: flex;align-items: center;justify-content: center;font-size: 20px;">ⓘ未查到接种记录信息</div>
+									<div v-if="jzjlELDLs&&jzjlELDLs.length>0" class="">
+										<div class="mui-scroll">
+											<template v-for="jzjlDL in jzjlELDLs">
+												<div class="title" v-bind:data-vaccineCode="jzjlDL.child_vaccine_code" onclick="viewYMDL(this)">
+													{{jzjlDL.vaccine_name}}
+												</div>
+												<ul class="list list--noborder">
+													<li v-for="jzjl in jzjlDL.child_vaccine_list" class="list-item" style="display: flex;flex-direction: row;justify-content:flex-start;">
+														<div class="list-item__center">
+															<div class="centerDiv">{{jzjl.vaccine_count ? '第' + jzjl.vaccine_count + '剂次': ''}}</div>
+															<div class="rightDiv" v-bind:style="{color: jzjl.vaccine_time_color}" style="text-align: right;">{{jzjl.vaccine_time_type_name}}</div>
+														</div>
+													</li>
+												</ul>
+											</template>
+										</div>
+									</div>
+								</div>
+							</ons-carousel-item>
+						</ons-carousel>
+					</div>
+				</div>
+			</ons-carousel-item>
+			<!--<ons-carousel-item style="background-color: #FFFFFF;">
+	      <div style="text-align: center;">
+	        <iframe id="nextShotIframe" src="bespeak/bespeak.html" style="width: 100%;border: 0px;height:calc(100vh - 80px);"></iframe>
+	      </div>
+	    </ons-carousel-item>-->
+			<ons-carousel-item style="background-color: #FFFFFF;">
+				<ons-tabbar>
+					<ons-tab page="bespeak/bespeak.html" active></ons-tab>
+				</ons-tabbar>
+			</ons-carousel-item>
+		</ons-carousel>
+	</div>
+	<script>
+		var vmremind, vm2, vm, vmee;
+		ons.getScriptPage().onInit = function() {
+			vmee = new Vue({
+				el: '#menus_change',
+				data: {
+					btnIndex: 0,
+				},
+				created: function() {
+					var backShotInfo2 = sessionStorage.getItem("backShotInfo2");
+					if(backShotInfo2 == "2") {
+						setTimeout(doInit, 0);
+					}
+					sessionStorage.removeItem("backShotInfo2");
+				},
+				methods: {
+					blue: function(event) {
+						this.btnIndex = 0;
+					},
+					dark: function(event) {
+						this.btnIndex = 1;
+					},
+					orange: function(event) {
+						this.btnIndex = 2;
+					}
+				},
+				watch: {
+					btnIndex: function(val) {
+						var menus_change = document.getElementById('menus_change');
+						if(menus_change && menus_change.setActiveButton) {
+							menus_change.setActiveButton(val);
+						}
+						var carousel = document.getElementById('carousel');
+						if(carousel && carousel.setActiveIndex) {
+							carousel.setActiveIndex(val);
+						}
+					}
+				}
+			});
+			vm = new Vue({
+				el: '#childInfo',
+				data: {
+					baby: {},
+					homeArea: "",
+					homeSubAddress: ""
+				},
+				created: function() {
+					var that = this;
+					var sessionBaby = null;
+					try {
+						sessionBaby = JSON.parse(sessionStorage.getItem("baby"));
+					} catch(e) {
+						return false;
+					}
+					if(sessionBaby == null || !sessionBaby.child_code) {
+						return false;
+					}
+					axiosGet({
+						child_code: sessionBaby.child_code
+					}, "/Encryption/Child/GetUserSelfChildDetails", function(data) {
+						if(data.code == '1') {
+							mui.toast(data.message);
+						} else if(data.code == '0') {
+							var curData = data.data;
+							that.baby = curData;
+							that.homeArea = parseAddress(curData.child_address)[0];
+							that.homeSubAddress = parseAddress(curData.child_address)[1];
+
+						}
+					});
+				}
+			});
+
+			vmremind = new Vue({
+				el: "#remindContent",
+				data: {
+					remindContent: "",
+					reservation_code: "",
+					vaccine_message_type: ""
+				},
+				created: function() {
+					var that = this;
+					var sessionBaby = null;
+					try {
+						sessionBaby = JSON.parse(sessionStorage.getItem("baby"));
+					} catch(e) {
+						console.log(e);
+						return false;
+					}
+					if(sessionBaby == null || !sessionBaby.child_code) {
+						return false;
+					}
+					axiosGet({
+						child_code: sessionBaby.child_code,
+						type: "1"
+					}, "/Encryption/Vaccine/GetChildVaccineMessage", function(data) {
+						if(data.code == "0") {
+							var curData = data.data;
+							if(curData != null) {
+								that.remindContent = curData.vaccine_message;
+								that.reservation_code = curData.reservation_code;
+								that.vaccine_message_type = curData.vaccine_message_type;
+								//document.getElementById("carousel").style.paddingTop = "132px";
+								//var height = parent.document.documentElement.clientHeight - 132;
+								//document.getElementById("nextShotIframe").style.height = height + "px";
+								//document.getElementById("secondeMenu").style.top = 130;
+							}
+						}
+					});
+				},
+				methods: {
+					gotoPage: function() {
+						var vaccine_message_type = vmremind.vaccine_message_type;
+						if(vaccine_message_type == "1002") {
+
+						} else if(vaccine_message_type == "1003") {
+							top.document.querySelector('ons-navigator').pushPage("bespeak/bespeakOns.html");
+						} else if(vaccine_message_type == "1004") {
+							toYYView();
+						}
+
+					}
+				}
+			});
+
+			new Vue({
+				el: '#firstYm',
+				data: {
+					jzjlYLDLs: []
+				},
+				created: function() {
+					var that = this;
+					var sessionBaby = null;
+					try {
+						sessionBaby = JSON.parse(sessionStorage.getItem("baby"));
+					} catch(e) {
+						console.log(e);
+						return false;
+					}
+					if(sessionBaby == null || !sessionBaby.child_code) {
+						return false;
+					}
+					axiosGet({
+						child_code: sessionBaby.child_code,
+						vaccine_class: "1001"
+					}, "/Encryption/Vaccine/GetChildVaccineHistoryList", function(data) {
+						if(data.code == '1') {
+							ons.notification.toast(data.message, toastOptions);
+						} else if(data.code == '0') {
+							var len = data.data.length;
+							if(len > 0) {
+								var jzjlDL = null;
+								var child_vaccine_list = [];
+								var childVaccineLen = -1;
+								var jzjl = null;
+								var vaccine_time_type = null;
+								for(var i = 0; i < len; i++) {
+									jzjlDL = data.data[i];
+									child_vaccine_list = jzjlDL.child_vaccine_list;
+									childVaccineLen = child_vaccine_list.length;
+									if(childVaccineLen > 0) {
+										for(var j = 0; j < childVaccineLen; j++) {
+											jzjl = child_vaccine_list[j];
+											if(j == 0) {
+												jzjlDL.child_vaccine_code = jzjl.child_vaccine_code;
+											}
+											vaccine_time_type = jzjl.vaccine_time_type;
+											jzjl.vaccine_time_type_name = jzjl.vaccine_time;
+										}
+									}
+									that.jzjlYLDLs.push(jzjlDL);
+								}
+							}
+						}
+
+					});
+				}
+			});
+
+			vm2 = new Vue({
+				el: '#secondYm',
+				data: {
+					jzjlELDLs: []
+				},
+				created: function() {
+					var that = this;
+					var sessionBaby = null;
+					try {
+						sessionBaby = JSON.parse(sessionStorage.getItem("baby"));
+					} catch(e) {
+						console.log(e);
+						return false;
+					}
+					if(sessionBaby == null || !sessionBaby.child_code) {
+						return false;
+					}
+					axiosGet({
+						child_code: sessionBaby.child_code,
+						vaccine_class: "1002"
+					}, "/Encryption/Vaccine/GetChildVaccineHistoryList", function(data) {
+						if(data.code == '1') {
+							ons.notification.toast(data.message, toastOptions);
+						} else if(data.code == '0') {
+							var len = data.data.length;
+							if(len > 0) {
+								var jzjlDL = null;
+								var child_vaccine_list = [];
+								var childVaccineLen = -1;
+								var jzjl = null;
+								var vaccine_time_type = null;
+								for(var i = 0; i < len; i++) {
+									jzjlDL = data.data[i];
+									child_vaccine_list = jzjlDL.child_vaccine_list;
+									childVaccineLen = child_vaccine_list.length;
+									if(childVaccineLen > 0) {
+										for(var j = 0; j < childVaccineLen; j++) {
+											jzjl = child_vaccine_list[j];
+											if(j == 0) {
+												jzjlDL.child_vaccine_code = jzjl.child_vaccine_code;
+											}
+											vaccine_time_type = jzjl.vaccine_time_type;
+										}
+									}
+									that.jzjlELDLs.push(jzjlDL);
+								}
+							}
+						}
+
+					});
+				}
+			});
+
+			new Vue({
+				el: '#secondeMenu',
+				methods: {
+					firstYimiao: function(event) {
+						var carousel = document.getElementById('sliderSegmentedcarousel');
+						carousel.setActiveIndex(0);
+					},
+					secondYimiao: function(event) {
+						var carousel = document.getElementById('sliderSegmentedcarousel');
+						carousel.setActiveIndex(1);
+					}
+				}
+			});
+
+		}
+
+		function toYYView() {
+			if(vm.baby.child_code == undefined || vm.baby.child_code == '') {
+				ons.notification.toast('请先绑定儿童', toastOptions);
+				return;
+			}
+			if(vm.baby.isbespeak == 0) {
+				ons.notification.toast('所属接种点未开通服务', toastOptions);
+				return;
+			}
+			axiosGet({
+				child_code: vm.baby.child_code,
+				flag: '0'
+			}, "/Encryption/Vaccine/CheckChildHasVaccine?" + Math.random(), function(data) {
+				if(data.code = '0') {
+					if(data.data.is_has_vaccine == '0') {
+						top.document.querySelector('ons-navigator').pushPage("bespeak/bespeakOns.html");
+					} else {
+						sessionStorage.setItem("reservation_code", data.data.reservation_code);
+						if(vm.baby.ispay == '1') {
+							top.document.querySelector('ons-navigator').pushPage("bespeak/bespeakPayDetail.html");
+						} else {
+							top.document.querySelector('ons-navigator').pushPage("bespeak/bespeakdetail.html");
+						}
+					}
+				}
+
+			});
+		}
+
+		function viewYMDL(e) {
+			var vaccineCode = e.attributes['data-vaccineCode'].value;
+			axiosGet({
+				vaccine_code: vaccineCode,
+				update_time: "2015-01-01"
+			}, "/Encryption/Vaccine/GeVaccineDescInfo", function(data) {
+				if(data.code == '1') {
+					ons.notification.toast(data.message, toastOptions);
+				} else if(data.code == '0') {
+					var htmlContent = data.data.vaccine_desc;
+					if(!htmlContent) {
+						ons.notification.toast('查看疫苗详情失败', toastOptions);
+						return false;
+					}
+					var alertHtml = "<div id='alertScroll' style='height:300px;overflow-y:auto;text-align: left;'>" +
+						"<div style='padding: 0px 7px;'>" +
+						htmlContent +
+						"</div></div>";
+					ons.notification.alert("", {
+						title: e.innerText,
+						messageHTML: alertHtml,
+						buttonLabels: "确定"
+					});
+					document.getElementsByClassName("alert-dialog-mask")[0].addEventListener('touchmove', function(e) {
+						e.preventDefault(); //阻止默认的处理方式(阻止下拉滑动的效果)
+					}, {
+						passive: false
+					});
+				}
+			});
+		}
+
+		function doInit() {
+			if(document.getElementsByClassName("segment__input").length > 0 &&
+				vmee && document.getElementById('carousel')) {
+				vmee.orange();
+			} else {
+				setTimeout(doInit, 100);
+			}
+
+		}
+	</script>
+
+</ons-page>

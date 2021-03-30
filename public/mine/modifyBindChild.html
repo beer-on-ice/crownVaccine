@@ -1,0 +1,307 @@
+
+<ons-page>
+	<style>
+	  .list-label{
+         width:100px;  	
+         text-align: left;  	
+	  }
+	
+	#contentbindchild{
+		font-size: 14px;
+	}
+	.text-input{
+		border: 0px solid rgba(0,0,0,.2) !important;
+		font-size: 14px !important;
+	}
+	ul{
+		display:block;
+	}
+	
+	.tabbar__label:first-child{
+		color:#007aff;
+	}
+	</style>
+	<ons-toolbar class="toolbar" id="bindchildtoolbar">
+	    <div v-show="viewOrEdit == 'VIEW'" class="left toolbar__left" onclick="backfunction()"><ons-icon icon="ion-ios-arrow-back" style="color: white" size="24px"></ons-icon></div>
+		<div v-show="viewOrEdit == 'EDIT'"  class="left toolbar__left" v-on:click="cancelEditBindChild()">取消</div>
+	    <div class="center toolbar__center">
+	    	儿童信息
+	    </div>
+	    <div v-show="viewOrEdit == 'EDIT'" class="right toolbar__right"  v-on:click="saveEditBindChild()">完成</div>
+	</ons-toolbar>
+	
+	<div id="contentbindchild" class="content">
+	<div id="bindChildForm"  v-bind:style="viewOrEdit == 'EDIT'?'height:calc(100vh - 50px);overflow-y:auto;':'height:calc(100vh - 49px - 50px);overflow-y:auto;'">
+		<ul class="list" style="margin-top: 15px;margin-bottom: 6px;">
+		  <li class="list-item">
+		    <div class="list-item__center"><div class="list-label">儿童姓名：</div>{{childName}}</div>
+		  </li>
+		  <li class="list-item">
+		    <div class="list-item__center"><div class="list-label">儿童编码：</div>{{fchildno}}</div>
+		  </li>
+		  <li class="list-item">
+		    <div class="list-item__center"><div class="list-label">出生日期：</div>{{birthday}}</div>
+		  </li>
+		  <li class="list-item">
+		    <div class="list-item__center"><div class="list-label">性别：</div>{{sex}}</div>
+		  </li>
+		  <li class="list-item">
+		    <div class="list-item__center"><div class="list-label">父亲姓名：</div>{{parentName}}</div>
+		  </li>
+		  <li class="list-item">
+		    <div class="list-item__center"><div class="list-label">母亲姓名：</div>{{montherName}}</div>
+		  </li>
+		  <li class="list-item">
+		    <div class="list-item__center"><div class="list-label">固定电话：</div>{{phoneNumber}}</div>
+		  </li>
+		  <li class="list-item">
+		    <div class="list-item__center"><div class="list-label">移动电话：</div>
+		    <div v-if="viewOrEdit == 'VIEW'" v-cloak>{{mobileNumber2}}</div>
+			<div v-else="viewOrEdit == 'EDIT'">
+				<input type="text" v-model="mobileNumber" name="mobileNumber" placeholder="（必填项）" class="text-input" >
+			</div>
+		    </div>
+		  </li>
+		  <li class="list-item">
+		     <div class="list-label">家庭住址：</div>
+		     <div v-cloak v-if="viewOrEdit == 'VIEW'" class="list-item__center ">
+						{{homeArea2}}
+		     </div>
+			 <div v-else="viewOrEdit == 'EDIT'" class="list-item__center " >
+						<input id="homeAreaPicker" type="text" readonly="readonly" v-model="homeArea" name="homeArea" placeholder="选择地区（必填项）" class="text-input" >
+			            <ons-icon icon="ion-ios-arrow-forward" style="color: #bbb;"></ons-icon>
+			 </div>
+		  </li>
+		  <li class="list-item">
+		     <div class="list-item__center" v-cloak v-if="viewOrEdit == 'VIEW'"><div class="list-label"></div>
+		     	  {{homeSubAddress2}}
+		     </div>
+		     <div class="list-item__center" v-else="viewOrEdit == 'EDIT'"><div class="list-label"></div>
+		     	  <input type="text" v-model="homeSubAddress" name="homeSubAddress" placeholder="请输入详细地址" class="text-input" >
+		     </div>
+		     
+		  </li>
+		  <li class="list-item">
+		    <div class="list-item__center"><div class="list-label">所属接种点：</div>{{stationName}}</div>
+		  </li>
+		</ul>
+	</div>
+
+	<div class="tabbar" v-if="viewOrEdit == 'VIEW'" >
+		<label class="tabbar__item" v-on:click="cancelBindChild()" style="border-right: solid 1px #CCCCCC;">
+		    <button class="tabbar__button" >
+		      <div class="tabbar__label">取消绑定</div>
+		    </button>
+		 </label>
+		 <label class="tabbar__item" v-on:click="editBindChild()">
+		    <button class="tabbar__button" >
+		      <div class="tabbar__label">编辑</div>
+		    </button>
+		 </label>
+	</div>
+	</div>
+	<div id="targethomeArea" style="line-height: 1.5;"></div>
+	<script>
+		
+		    new MultiPicker({
+		        input: 'homeAreaPicker',
+		        container: 'targethomeArea',
+		        jsonData: cityData3,
+		        success: function (items) {
+		        	vm2.homeArea = _getParam(items[0], 'value') + "." + _getParam(items[1], 'value') + "." + _getParam(items[2], 'value') + "."; 
+		        }
+		    });
+		     /**
+				 * 获取对象属性的值
+				 * 主要用于过滤三级联动中，可能出现的最低级的数据不存在的情况，实际开发中需要注意这一点；
+				 * @param {Object} obj 对象
+				 * @param {String} param 属性名
+				 */
+			var _getParam = function(obj, param) {
+				return obj[param] || '';
+			};
+		    var vm;
+		
+			var vm4 = new Vue({
+				el: "#bindchildtoolbar",
+				data: {
+					viewOrEdit: "VIEW"
+				},
+				methods:{
+					cancelEditBindChild:function(){
+						changeViewOrEdit("VIEW"); 
+					},
+					saveEditBindChild:function(){
+						var mobileNumber = vm2.mobileNumber;
+						if(mobileNumber != vm2.mobileNumber2) {
+							if(!mobileNumber || !isMobileNumber(mobileNumber)) {
+								ons.notification.toast("请填写正确的移动电话", toastOptions);
+								return false;
+							}
+						}
+						
+						var homeArea = vm2.homeArea.trim();
+						var homeSubAddress = vm2.homeSubAddress.trim();
+						if(!homeArea || !homeSubAddress) {
+							ons.notification.toast("请输入家庭住址！", toastOptions);
+							return false;
+						}
+						
+						var params = {};
+						params.child_code = vm2.fchildno;
+					    params.child_mobile_number = mobileNumber;
+						params.child_address = homeArea + "." + homeSubAddress;
+						axiosGet(params, "/Encryption/Child/SubmitChildModify", function(data) {
+							if(data.code == '1') {
+								ons.notification.toast(data.message, toastOptions);
+							} else if(data.code == '0') {
+								ons.notification.toast("修改成功，请等医生确认", toastOptions);
+								setTimeout(function() { 
+								   backfunction();
+								}, 2000);
+							}
+						});
+				
+					}
+				}
+			});
+			
+			var vm2 = new Vue({
+				el: "#contentbindchild",
+				data: {
+					viewOrEdit: "VIEW",
+					is_allow_edit: '',
+					childName: "",
+					fchildno: "",
+					birthday: "",
+					sex: "",
+					parentName: "",
+					montherName: "",
+					phoneNumber: "",
+					mobileNumber2: "",
+					mobileNumber: '',
+					homeArea: '',
+					homeSubAddress: '',
+					homeArea2: '',
+					homeSubAddress2: '',
+					stationName: ""
+				},
+				created: function() {
+					var that = this;
+					var childCode = sessionStorage.getItem("mineBindChildCode");
+					axiosGet({child_code: childCode}, "/Encryption/Child/GetUserSelfChildDetails", function(data) {
+						if(data.code == '1') {
+							mui.toast(data.message);	
+						} else if(data.code == '0') {
+							var respData = data.data;
+							/*that.is_allow_edit = respData.is_allow_edit;*/
+							that.childName = respData.child_name;
+							that.fchildno = respData.child_code;
+							that.birthday = respData.child_birth_date;
+							that.sex = respData.child_sex_name;
+							that.parentName = respData.child_parent_name;
+							that.montherName = respData.child_monther_name;
+							that.phoneNumber = respData.child_phone_number;
+							that.mobileNumber = respData.child_mobile_number;
+							that.mobileNumber2 = respData.child_mobile_number; 
+							
+							var homeAddress = respData.child_address;
+							
+							that.homeArea = parseAddress(homeAddress)[0];
+							that.homeArea2 = that.homeArea;
+							
+							that.homeSubAddress = parseAddress(homeAddress)[1];
+							that.homeSubAddress2 = that.homeSubAddress;
+							
+							that.stationName = respData.station_name;
+						}
+					});
+				},
+				methods:{
+					cancelBindChild:function(){
+					    axiosGet({child_code: vm2.fchildno}, "/Encryption/Vaccine/CheckChildHasVaccine", function(data2) {
+							if(data2.code == '1') {
+								ons.notification.toast(data2.message, toastOptions);
+							} else {
+								var is_has_vaccine = data2.data.is_has_vaccine;
+								var msg = "是否确认取消绑定？";
+								if(is_has_vaccine == "1") {
+									msg = "该儿童有未完成的预约单，是否确认取消绑定？";	
+								}
+								ons.notification.confirm({
+							      message: msg,
+							      callback: function(idx) {
+							      	if(idx==1){
+							      		axiosGet({child_code: vm2.fchildno}, "/Encryption/Child/UnbindUserChild", function(data) {
+											if(data.code == '1') {
+												ons.notification.toast(data.message, toastOptions);
+											} else if(data.code == '0') {
+												ons.notification.toast('取消绑定成功！', toastOptions);
+												var sessionBaby = JSON.parse(sessionStorage.getItem("baby"));
+												if(sessionBaby&&sessionBaby.child_code == vm2.fchildno) {
+													sessionStorage.removeItem("baby");
+												}
+												sessionStorage.setItem("babyrefresh",true);
+												setTimeout(function() {
+													backfunction();
+												}, 350);
+											}
+										});
+							      	}
+							      }
+							    });
+							}
+						});	
+			
+					},
+					editBindChild:function(){
+						ons.notification.toast('友情提示：只可以修改电话和家庭住址', toastOptions);
+						changeViewOrEdit("EDIT"); 
+					}
+				}
+			});
+			
+			var vm3 = new Vue({
+				el: "nav",
+				data: {
+					viewOrEdit: "VIEW"
+				}
+			});
+			
+			function changeViewOrEdit(value) {
+				vm2.viewOrEdit = value;
+				vm3.viewOrEdit = value;
+				vm4.viewOrEdit = value;
+			}
+			
+			/*document.querySelector('ons-navigator').addEventListener('postpush', function(evt){
+				vm = new Vue({
+					el: "#childlistcontent",
+					data: {
+						childs: [],
+						loadingflag:false
+					},
+					created: function() {
+						var that = this;
+						axiosGet({}, "/Encryption/Child/GetUserChildList?" + Math.random(1), function(data) {
+							if(data.code == '0'){
+								that.childs = data.data;
+								that.loadingflag = true;
+							}
+						});
+					},
+					methods:{
+						refreshFunc:function() {
+							var that = this;
+							axiosGet({}, "/Encryption/Child/GetUserChildList?" + Math.random(1), function(data) {
+								if(data.code == '0'){
+									that.childs = data.data;
+									that.loadingflag = true;
+								}
+							});
+						}
+					}
+				});
+			});*/
+		</script>	
+</ons-page>

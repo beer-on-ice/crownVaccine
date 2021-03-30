@@ -1,0 +1,232 @@
+<!--预约记录-->
+<ons-page>
+	<style>
+		[v-cloak] {
+			display: none;
+		}
+		
+		.yytitle {
+			display: flex;
+			justify-content: space-between;
+			flex-direction: row;
+			padding: 10px 10px;
+			background-color: #f7f7f7;
+		}
+		
+		.listchidinfo {
+			margin-top: 10px;
+			margin-left: 10px;
+			display: flex;
+			justify-content: flex-start;
+			flex-direction: row;
+		}
+		
+		.listchidinfo .label {
+			color: #666;
+			word-break: keep-all;
+			white-space: nowrap;
+		}
+		
+		#fixedtext {
+			overflow-y: auto;
+			height: calc(100vh - 44px);
+			padding-bottom: 25px;
+		}
+		
+		[data-style=android]#fixedtext {
+			overflow-y: auto;
+			height: calc(100vh - 56px);
+			padding-bottom: 25px;
+		}
+	</style>
+
+	<ons-toolbar class="toolbar">
+		<div class="left toolbar__left" onclick="backfunction()">
+			<ons-icon icon="ion-ios-arrow-back" style="color: white" size="24px"></ons-icon>
+		</div>
+		<div class="center toolbar__center">
+			预约记录
+		</div>
+	</ons-toolbar>
+
+	<div id="fixedtext" class="mui-content content" v-cloak>
+		<div style="background-color: #fdf7ac;color: red; text-align: center;right: 0;left: 0;padding:5px 0 0px 0;">去接种门诊之前，请量好孩子的体温并记录一下</div>
+		<div v-if="loadingflag&&bespeaklist.length>0" id="fixedtextInner">
+			<div v-for="bespeak in bespeaklist" v-on:click="gotoDetail(bespeak.reservation_code,bespeak.vaccine_name)">
+				<div>
+					<div class="yytitle">
+						<!--<div>预约号：<span style="font-weight: bold;">{{bespeak.reservation_display_code}}</span></div>-->
+						<div v-bind:style="bespeak.fontcolor">{{bespeak.reservation_status_desc}}</div>
+					</div>
+					<div>
+						<div class="listchidinfo">
+							<div class="label">儿童姓名：</div>
+							<div>{{bespeak.child_name}}</div>
+						</div>
+						<div class="listchidinfo">
+							<div class="label">儿童编码：</div>
+							<div>{{bespeak.child_code}}</div>
+						</div>
+						<div class="listchidinfo">
+							<div class="label">预约门诊：</div>
+							<div>{{bespeak.station_name}}</div>
+						</div>
+						<div class="listchidinfo">
+							<div class="label">接种疫苗：</div>
+							<div>
+								<div v-for="vaccine in bespeak.vaccinelist">{{vaccine}}</div>
+							</div>
+						</div>
+						<div class="listchidinfo">
+							<div class="label">预约时间：</div>
+							<div>{{bespeak.reservation_date}}&nbsp;{{bespeak.reservation_begin_time}}-{{bespeak.reservation_end_time}}</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div style="margin: 0 auto;position: fixed;top:50%;width: 100%;text-align: center;" v-else-if="loadingflag">该儿童无预约历史！</div>
+	</div>
+	<script>
+		var baby = JSON.parse(sessionStorage.getItem("baby"));
+		ons.getScriptPage().onInit = function() {
+			var vm = new Vue({
+				el: '#fixedtext',
+				data: {
+					bespeaklist: [],
+					ispay: false,
+					sessionBaby: baby,
+					nopermission: false,
+					loadingflag: true
+				},
+				mounted: function() {
+					var that = this;
+					if(baby.ispay == '1') {
+						that.ispay = true;
+					}
+					var page = 0;
+					var sw = true;
+					var senddata = {
+						"child_code": baby.child_code,
+						"page": page++
+					};
+					axiosGet(senddata, "/Encryption/Reservation/GetReservationList", function(data) {
+						if(data.code == '0') {
+							for(var i = 0; i < data.data.length; i++) {
+								var bespeak = data.data[i];
+								bespeak.vaccinelist = bespeak.vaccine_name.split(",");
+								bespeak.child_code = baby.child_code;
+								if(bespeak.reservation_status == '1003') {
+									bespeak.fontcolor = "color:orange";
+								} else if(bespeak.reservation_status == '1002') {
+									bespeak.fontcolor = "color:green";
+								} else if(bespeak.reservation_status == '1001') {
+									bespeak.fontcolor = "color:gray";
+								} else if(bespeak.reservation_status == '1004') {
+									bespeak.fontcolor = "color:red";
+								}
+							}
+							that.bespeaklist = data.data;
+							that.loadingflag = true;
+							if(that.bespeaklist.length < 20) {
+								sw = false;
+							}
+						}
+					});
+					var scrollflag;
+					// 注册scroll事件并监听  
+					document.getElementById("fixedtext").addEventListener('scroll', function(evt) {
+						var scrollTop = document.getElementById("fixedtext").scrollTop || document.documentElement.scrollTop || document.getElementById("fixedtext").scrollTop;
+						// 判断是否滚动到底部
+						var style = document.defaultView.getComputedStyle(document.getElementById("fixedtext"), null);
+						var styleinner = document.defaultView.getComputedStyle(document.getElementById("fixedtextInner"), null);
+						//console.log(scrollTop,parseInt(style.height),parseInt(styleinner.height))
+						if(scrollTop + parseInt(style.height) >= parseInt(styleinner.height)) {
+							if(scrollflag) {
+								return;
+							}
+							//console.log(sw);  
+							// 如果开关打开则加载数据  
+							if(sw == true) {
+								// 将开关关闭  
+								sw = false;
+								that.bespeaklist.push({});
+								var senddata = {
+									"child_code": baby.child_code,
+									"page": page++
+								};
+								axiosGet(senddata, "/Encryption/Reservation/GetReservationList", function(data) {
+									if(data.code == '0') {
+
+										for(var i = 0; i < data.data.length; i++) {
+											var bespeak = data.data[i];
+											bespeak.vaccinelist = bespeak.vaccine_name.split(",");
+											bespeak.child_code = baby.child_code;
+											if(bespeak.reservation_status == '1003') {
+												bespeak.fontcolor = "color:orange";
+											} else if(bespeak.reservation_status == '1002') {
+												bespeak.fontcolor = "color:green";
+											} else if(bespeak.reservation_status == '1001') {
+												bespeak.fontcolor = "color:gray";
+											} else if(bespeak.reservation_status == '1004') {
+												bespeak.fontcolor = "color:red";
+											}
+										}
+										that.bespeaklist.pop();
+										that.bespeaklist = that.bespeaklist.concat(data.data);
+										if(that.bespeaklist.length < 20) {
+											sw = false;
+										} else {
+											sw = true;
+										}
+										if(data.data.length == 0) {
+											ons.notification.toast("已经没有数据了!", toastOptions);
+											scrollflag = true;
+										}
+									}
+								});
+							}
+						}
+					});
+
+				},
+				methods: {
+					gotoDetail: function(code, name) {
+						//sessionStorage.setItem("reservation_code", code);
+						sessionStorage.setItem("list_reservation_code", code);
+						sessionStorage.setItem("list_vaccine_name", name);
+						if(baby.ispay == '1') {
+							/*    top.document.querySelector('ons-navigator').pushPage("bespeak/bespeakListPayDetail.html");
+							    return;*/
+
+							top.document.querySelector('ons-navigator').pushPage("bespeak/bespeakListPayDetail.html", {
+								callback: function() {
+									backfunction = function() {
+										backToPrevPage("bespeak/bespeak_list.html");
+									};
+									pageBackFuncs["bespeak/bespeakListPayDetail.html"] = backfunction;
+								}
+							});
+
+						}
+						/*  top.document.querySelector('ons-navigator').pushPage("bespeak/bespeak_detail.html");*/
+
+						top.document.querySelector('ons-navigator').pushPage("bespeak/bespeak_detail.html", {
+							callback: function() {
+								backfunction = function() {
+									backToPrevPage("bespeak/bespeak_list.html");
+								};
+								pageBackFuncs["bespeak/bespeak_detail.html"] = backfunction;
+							}
+						});
+
+					}
+				}
+			});
+
+		}
+	</script>
+
+</ons-page>
+
+

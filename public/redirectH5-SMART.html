@@ -1,0 +1,204 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+
+    <meta
+      http-equiv="Cache-Control"
+      content="no-cache, no-store, must-revalidate"
+    />
+
+    <meta http-equiv="Pragma" content="no-cache" />
+
+    <meta http-equiv="Expires" content="0" />
+
+    <meta
+      name="viewport"
+      content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no"
+    />
+
+    <title>金苗宝</title>
+
+    <script src="js/Util.js?version=v1.0.22"></script>
+
+    <script src="js/axios.min.js?version=v1.0.0"></script>
+
+    <script src="js/crypto-js.js"></script>
+
+    <script src="./js/md5.min.js?version=v1.0.0"></script>
+    <script src="js/onsenui.min.js?version=v1.0.1"></script>
+    <script src="js/vue.min.js?version=v1.0.0"></script>
+
+    <link
+      href="css/onsen-css-components.min.css?version=v1.0.8"
+      rel="stylesheet"
+    />
+    <style>
+      #city-select {
+        display: none;
+      }
+      .city-picker-wrapepr {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        overflow: hidden;
+      }
+      .city-picker-wrapepr h3 {
+        margin: 0;
+        font-size: 18px;
+        background: rgb(110, 137, 255);
+        color: #fff;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .city-picker-wrapepr .city-scroll {
+        position: fixed;
+        top: 40px;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        overflow-y: scroll;
+      }
+      .city-picker-wrapepr .cityList {
+        display: block;
+        width: 100%;
+        height: 100%;
+      }
+      .city-picker-wrapepr .cityList li {
+        width: 100%;
+        display: block;
+        padding: 10px;
+        border-bottom: 1px solid #ccc;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        color: #333;
+      }
+      .city-picker-wrapepr .cityList li span:nth-of-type(2) {
+        color: #ccc;
+      }
+      .city-picker-wrapepr .cityList li span:nth-of-type(2) img {
+        width: 16px;
+      }
+      .city-picker-wrapepr .city-scroll p {
+        text-align: center;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="city-select" class="city-picker-wrapepr" v-if="!hasCity">
+      <h3>选择城市</h3>
+      <div id="city-scroll" class="city-scroll">
+        <ul v-if="list.length" class="cityList">
+          <li v-for="(item, idx) in list" :key="idx" @click="selectCity(item)">
+            <span>{{item.city_name}}</span>
+            <span>
+              <img src="./images/list_arrow.png" alt="" srcset="" />
+            </span>
+          </li>
+        </ul>
+        <p v-else>暂无数据</p>
+      </div>
+    </div>
+
+    <script>
+      // SMART
+      function GetQueryString(name) {
+        var reg = new RegExp('(^|&)' + name + '=([^&]*)(&|$)')
+
+        var r = window.location.search.substr(1).match(reg)
+
+        if (r != null) return unescape(r[2])
+        return null
+      }
+      setTimeout(() => {
+        let div = document.getElementById('city-select')
+        if (div) {
+          div.style.display = 'block'
+        }
+      }, 1000)
+      new Vue({
+        el: '#city-select',
+        data: {
+          hasCity: false,
+          list: []
+        },
+        async created() {
+          await this.loginIn()
+          const city_code = sessionStorage.getItem('citycode')
+          if (city_code) {
+            this.hasCity = true
+          } else {
+            this.hasCity = false
+          }
+        },
+        async mounted() {
+          if (!this.hasCity) {
+            this.getCity()
+          }
+        },
+        methods: {
+          selectCity(item) {
+            sessionStorage.setItem('citycode', item.city_code)
+            this.loginIn()
+          },
+          getCity() {
+            let _this = this
+            axiosGet(
+              {
+                sup_id: '31'
+              },
+              '/Encryption/System/GetAppCityUrl',
+              function(data) {
+                if (data.code == '1') {
+                  ons.notification.toast(data.message, toastOptions)
+                } else if (data.code == '0') {
+                  _this.list = data.data
+                }
+              }
+            )
+          },
+          loginIn() {
+            var parameters = GetQueryString('parameters')
+            axiosGet(
+              {
+                parameters: parameters
+              },
+              '/Encryption/Web/LoginByParameters',
+              function(data) {
+                if (data.code == '1') {
+                  ons.notification.toast(data.message, toastOptions)
+                  setTimeout(() => {
+                    window.opener = null
+                    window.open('about:blank', '_top').close()
+                  }, 1000)
+                } else if (data.code == '0') {
+                  console.log(data)
+                  sessionStorage.setItem('user', data.data.user_name)
+                  sessionStorage.setItem('user_x', data.data.x)
+                  sessionStorage.setItem('user_y', data.data.y)
+
+                  if (data.data.city_code && data.data.city_code !== 'null') {
+                    sessionStorage.setItem('citycode', data.data.city_code)
+                  }
+
+                  if (data.data.cid && data.data.cid !== 'null') {
+                    sessionStorage.setItem('cid', data.data.cid)
+                  }
+
+                  if (sessionStorage.getItem('citycode')) {
+                    window.location.replace('./main.html?version=2.0.0')
+                  }
+                }
+              }
+            )
+          }
+        }
+      })
+    </script>
+  </body>
+</html>

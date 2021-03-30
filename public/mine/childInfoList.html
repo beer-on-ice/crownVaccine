@@ -1,0 +1,95 @@
+
+<ons-page>
+	
+	<ons-toolbar class="toolbar">
+	    <div class="left toolbar__left" onclick="backfunction()">
+			<ons-icon icon="ion-ios-arrow-back" style="color: white" size="24px"></ons-icon>
+		</div>
+	    <div class="center toolbar__center">
+	    	儿童信息
+	    </div>
+        <div class="right toolbar__right" id="toBindChildBtn">
+	      	<img id="toBindChildBtn" onclick="gotoBind()" src="images/ic_add_child.png" style="width: 24px;height: 24px;vertical-align: middle;">
+	    </div>
+	</ons-toolbar>
+	
+	<div class="content" id="childlistcontent">
+	<div v-if="loadingflag&&(!childs||childs.length==0)" style="color:#666;display: flex;justify-content: center;align-items: center;width:100%;height: 80vh;">暂无儿童信息</div>
+		<ul v-if="loadingflag&&childs&&childs.length>0" id="childList" class="list" style="margin-top:15px;">
+			<div v-for="child in childs">
+				  <li class="list-item list-item--chevron" onclick="childetail(this);" v-bind:data-childCode="child.child_code" v-bind:data-childType="child.child_type">
+				    <div class="list-item__left">
+				      <img class="list-item__thumbnail" src="images/img_user_avatar.png" alt="Cute kitten">
+				    </div>
+				    <div class="list-item__center">{{child.child_name ? child.child_name : child.child_code}}</div>
+				  </li>
+			</div>
+		</ul>
+	</div>
+	
+	<script>
+		
+		function childetail(e){
+			var obj=getTarget(e);
+			var childType=hideBindChildCode(obj);
+			if(childType== '1001'){//child-bind
+				top.document.querySelector('ons-navigator').pushPage("mine/modifyBindChild.html",{callback:function(){
+					backfunction = function(){
+						setBlur();
+						backToPrevPage("mine/childInfoList.html");
+					};
+					pageBackFuncs["mine/modifyBindChild.html"] = backfunction;
+				}});
+			}else{//child-zzdj
+				top.document.querySelector('ons-navigator').pushPage("mine/modifyZzdjChild.html",{callback:function(){
+					backfunction = function(){
+						setBlur();
+						backToPrevPage("mine/childInfoList.html");
+					};
+					pageBackFuncs["mine/modifyZzdjChild.html"] = backfunction;
+				}});
+			}
+			
+		}
+			
+	var childinfovm = new Vue({
+			el: "#childlistcontent",
+			data: {
+				childs: [],
+				loadingflag:false
+			},
+			created: function() {
+				var that = this;
+				axiosGet({}, "/Encryption/Child/GetUserChildList?" + Math.random(1), function(data) {
+					if(data.code == '0'){
+						that.childs = data.data;
+						that.loadingflag = true;
+					}
+				});
+			}
+		});
+			
+		function getTarget(obj){
+			if(obj.tagName.toLowerCase()=="li"){
+				return obj;
+			}else{
+				return getTarget(obj.parentNode);
+			}
+		}
+		function hideBindChildCode(obj) {
+			var childCode = obj.attributes['data-childCode'].value;
+			sessionStorage.setItem("mineBindChildCode",childCode);
+			return obj.attributes['data-childType'].value;
+		}
+		function gotoBind(){
+			top.document.querySelector('ons-navigator').pushPage("index/bindChild.html",{callback:function(){
+				backfunction = function(){
+					setBlur();
+					backToPrevPage("mine/childInfoList.html");
+				};
+				pageBackFuncs["index/bindChild.html"] = backfunction;
+			}});
+		}
+	</script>
+</ons-page>
+

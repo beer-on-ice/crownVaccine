@@ -1,0 +1,194 @@
+<ons-page>
+	 <style>
+        	[v-cloak] {
+              display: none;
+            }
+            *{
+            	font-family: "微软雅黑";
+            }
+        	.chidinfopaysucc{
+            	margin-top: 10px;
+            }
+            .chidinfopaysucc label{
+            	color:#666;
+            }
+            .column{
+            	display: flex;
+            	justify-content: center;
+            	flex-direction: column;
+            }
+            .row_space_between{
+            	display: flex;
+            	justify-content: space-between;
+            	flex-direction: row;
+            	margin-top: 10px;
+            	margin-right: 20px;
+            }
+            
+            .row_flex_start{
+            	display: flex;
+            	justify-content: flex-start;
+            	flex-direction: row;
+            }
+            .info_msg{
+        		font-size: 18px;
+        		font-weight: bold;
+        	}
+        	button[disabled]{
+        		background-color: #b3b3b3 !important;
+        	}
+        	button{
+        		    border-radius: 8px !important;
+        	}
+        	.button--large--cta{
+	 				margin-left: 5%;
+	 				background-color: #6798FF;
+	 				font-size: 18px;
+	 				color:#fff;
+	 				width: 90%;
+	 			}
+        </style>
+    	<ons-toolbar class="toolbar">
+		    <div class="center toolbar__center">
+		    	支付成功
+		    </div>
+		    <div class="right toolbar__right">
+		  		<img src="images/ic_home.png" style="width: 24px;height: 24px;vertical-align: middle;" onclick="backIndex();">
+		    </div>
+	 	</ons-toolbar>
+        <div class="pay-success-content" v-cloak style="margin-bottom: 10px;">
+        	<div v-if="loadingend">
+        	<div style="display: flex;flex-direction: row;justify-content: flex-start;padding: 10px;">
+	        	<div class="info_msg" style="font-weight: normal;">支付成功!</div>
+        	</div>
+        	<div style="margin: 10px;padding: 10px; background-color: #fffde9;color: red;display: flex;justify-content: flex-end;flex-direction: row;"
+        		v-if="bespeakInfo.reservation_status=='1004'">
+        		<div style="word-break:keep-all;white-space:nowrap; " v-if="stationszflag">签到提醒：</div><div v-if="stationszflag">请在预约时间段内到门诊签到！去接种门诊之前，请量好孩子的体温并做好记录。</div>
+        		<div style="word-break:keep-all;white-space:nowrap; " v-if="!stationszflag">预约提醒：</div><div v-if="!stationszflag">请在预约时间段内到门诊！去接种门诊之前，请量好孩子的体温并做好记录。</div>
+        	</div>
+        	<div style="margin-top: 10px;margin-left: 10px;margin-right: 10px;">
+	        	<div class="chidinfopaysucc">
+	        		<label>儿童姓名：</label>{{bespeakInfo.child_name}}
+	        	</div>
+	        	<div class="chidinfopaysucc">
+	        		<label>儿童编码：</label>{{bespeakInfo.child_code}}
+	        	</div>
+	        	<div class="chidinfopaysucc">
+	        		<label>预约门诊：</label>{{bespeakInfo.station_name}}
+	        	</div>
+	        	<div class="chidinfopaysucc">
+	        		<label>预约时间：</label>{{bespeakInfo.yydate}}<span v-if="bespeakInfo.begin_time&&bespeakInfo.end_time">&nbsp;{{bespeakInfo.begin_time}}-{{bespeakInfo.end_time}}</span>
+	        	</div>
+	        	<div class="chidinfopaysucc">
+	        		<label>接种疫苗：</label>
+	        		<div style="background: #fff;margin-top:5px ;" >
+	        			<div class="mui-clearfix" v-for="(vaccine,index) in bespeakInfo.vaccine_list">
+			        		<div class="column" style="margin-left:5px;">
+			        			<div class="row_space_between">
+			        				<div style="color: #666;">{{vaccine.vaccine_name}}<span v-if="vaccine.vaccine_producer">-{{vaccine.vaccine_producer}}</span>(第{{vaccine.vaccine_count}}剂次)
+			        					<span v-if="vaccine.jz_status=='0'">（未接种）</span><span v-if="vaccine.jz_status=='1'">（已接种）</span></div>
+			        				<div v-if="vaccine.vaccine_price">￥{{vaccine.vaccine_price}}</div>
+			        			</div>
+			        			<div>{{vaccine.vaccine_spec}}</div>
+			        			<div class="row_space_between" v-for="other in vaccine.other_cost_list">
+			        				<div style="color: #666;">{{other.other_cost_name}}</div><div>￥{{other.other_cost_price}}</div>
+			        			</div>
+			        			<div class="row_space_between" v-if="bespeakInfo.pay_status!='2001'">
+			        				<div style="color: #666;" v-if="vaccine.total_price!=null&&vaccine.total_price!=''">小计</div><div v-if="vaccine.total_price!=null&&vaccine.total_price!=''">￥{{vaccine.total_price}}</div>
+			        			</div>
+			        		</div>
+		        		</div>
+		        		
+	        		</div>
+	        		<div class="row_space_between">
+	        			<div style="color: #666;">总计：</div>
+	        			<div>￥{{bespeakInfo.vaccine_all_price}}</div>
+	        		</div>
+	        	</div>
+	        	<div class="chidinfopaysucc" v-if="bespeakInfo.pay_no!=undefined&&bespeakInfo.pay_no!=''">
+	        		<div style="display: inline-block;vertical-align: top;">订单号：</div><div style="display: inline-block;max-width: calc(100vw - 100px);word-break: break-all;word-wrap: break-word;">{{bespeakInfo.pay_no}}</div>
+	        	</div>
+        	</div>
+           	<div style="margin-top: 10px;">
+                	<button class="button--large--cta" v-on:click="backIndex()">确定</button>
+           	</div>
+           	</div>
+           	<div v-else>
+				<div class="mui-toast-container2 mui-active">
+					<div class="mui-toast-message" style="display: flex;flex-direction: row;justify-content: center;">
+						<div style="display: flex;flex-direction: column;justify-content: center;"><img src="images/loading.gif"  style="width:20px;height:20px" /></div>
+						<div style="display: flex;flex-direction: column;justify-content: center;">请稍候...</div>
+					</div>
+				</div>
+				<div class="mui-popup-backdrop mui-active" style="display: block;"></div>
+           	</div>
+           	<div v-if="nextFlag" class="info_msg" style="color: #6E89FF;padding-top: 5px;padding-bottom: 5px;font-size: normal;width: 100%;text-align: center;" v-on:click="goRemind">温馨提示</div>
+        </div>
+        
+        <script>
+        	 var vm = new Vue({
+                el: '.pay-success-content',
+                data: {
+                    bespeakInfo:{},
+                    stationszflag:false,
+                    loadingend:false,
+                    nextFlag:false
+                },
+                computed: {
+					vaccine_name: function() {
+						if(this.bespeakInfo.vaccine_name!=undefined&&this.bespeakInfo.vaccine_name!=''){
+							var vName=this.bespeakInfo.vaccine_name.split(',');
+							for(var v in vName){
+								vName[v]=vName[v].substr(0,vName[v].length-5);
+							}
+							return vName;
+						}
+						return [];
+					}
+				},
+                created: function() {
+                    var that=this;
+                    if(sessionStorage.getItem("reservation_code")==undefined||sessionStorage.getItem("reservation_code")==''){
+                    	top.backIndex();
+                    	return;
+                    } 
+                    that.sessionBaby = JSON.parse(sessionStorage.getItem("baby"));
+                	that.getPayData(sessionStorage.getItem("reservation_code"),0);
+                	that.nextFlag = sessionStorage.getItem("fk_type")=="next";
+                },
+                methods:{
+                	getPayData:function(reservation_code,times){
+                		var that=this;
+                    	var senddata={"reservation_code":reservation_code};
+                		axiosGet(senddata,"/Encryption/Reservation/GetReservationDetailsWithPay",function(data){
+	                        if(data.code=='0'){
+	                        	if(data.data.pay_status=="2003"){
+	                        		that.loadingend = true;
+		                            that.bespeakInfo=data.data;
+		                            that.stationszflag=data.data.station_digital=="1";
+	                        	}else{
+	                        		times++;
+	                        		if(times<=3){
+	                        			setTimeout(function(){
+	                        				that.getPayData(reservation_code,times);
+	                        			},3000);
+	                        		}else{
+	                        			ons.notification.alert("无法获取支付状态，请稍后查看。")
+	                        			top.backIndex();
+	                        		}
+	                        	}
+	                        }
+	                    });
+                	},
+                	backIndex:function(){
+                		top.backIndex();
+                	},
+                	goRemind:function(){
+                		sessionStorage.setItem("reservation_station_code",this.sessionBaby.station_code);
+                        top.document.querySelector('ons-navigator').pushPage("bespeak/tips.html");
+                	}
+                }
+            });
+        	
+        </script>
+</ons-page>

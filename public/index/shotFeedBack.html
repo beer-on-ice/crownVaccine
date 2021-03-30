@@ -1,0 +1,659 @@
+<ons-page>
+	<style>
+		#fengeDiv:before, #fengeDiv:after, #feedBackInstructionclass:before, #feedBackInstructionclass:after {
+			content: '';
+			position: absolute;
+			top: 50%;
+			background: #494949; 
+			width: 29%;
+			height: 1px;
+		}
+		
+		#fengeDiv:before, #feedBackInstructionclass:before {
+			left: 1%;
+		}
+		
+		#fengeDiv:after, #feedBackInstructionclass:after {
+			right: 1%;
+		}
+		
+		.rightDiv input {
+			margin-bottom: 0px;
+			line-height: 21px;
+			height: 21px;
+			padding: 7px 10px;
+		}
+		
+		.datepic{
+			position:absolute;right:18px;top:11px;opacity: 0.7;
+		}
+		
+		::-webkit-input-placeholder {
+			font-size: 14px;
+		}
+		
+		#shotExceptionFeedBack .rowDiv {
+			display: flex;
+			flex-direction: row;
+			justify-content: left;
+			margin-bottom: 5px;
+		}
+		
+		#shotExceptionFeedBack .leftDiv {
+			width: 30%;
+		}
+		
+		#shotExceptionFeedBack .rightDiv {
+			width: 70%;
+		}
+		.uploadImg {
+			height: 30px; 
+			width: 40px; 
+			border: 1px solid rgba(0,0,0,.2); 
+			display: flex; 
+			margin-right: 5px;
+		}
+		
+		.uploadImg img {
+			height: 30px; 
+			width: 40px;
+		}	
+		
+		
+		
+		#shotFeedMenus{
+			background-color: #1F86E3;
+			width:100%;
+			margin-top:0px;
+			padding-top:1px;
+			padding-bottom: 1px;
+			text-align: center;
+		}
+		.ion-star{
+			font-size: 24px;
+			margin-right: 10px;
+			color: #FFB400;
+		}
+		.ion-ios-star-outline{
+			font-size: 24px;
+			margin-right: 10px;
+			color: black;
+		}
+		.textarea{
+			background-color: white;
+			width: 100%;
+		}
+		.button--large--cta{
+			width: 100%; 
+			background-color:#6798FF;
+			border-color: #6798FF;
+			height: 43px;
+			line-height: 40px;
+		}
+		.date-selector-bg{
+			position: absolute;
+		}
+		
+		.but_light{
+			border:1px solid #ccc;
+			border-radius:3px;
+			background-color:#fff;
+			font:inherit;
+			line-height:1px;
+			padding:12px 6px;
+			margin-bottom:3px;
+		}
+		
+		.but_active{
+			background-color:#007aff;
+			color: white;
+		}
+		
+		
+		
+	</style>	
+	
+	<ons-toolbar class="toolbar" id="shotFeedHeader">
+	    <div class="left toolbar__left" onclick="backfunction()">
+	      	<ons-icon icon="ion-ios-arrow-back" style="color: white" size="24px"></ons-icon>
+	    </div>
+	    <div class="center toolbar__center">
+	    	接种反馈
+	    </div>
+	    <div class="right toolbar__right"  v-on:click="surveyQuestion();" v-show="showQuestion" >
+	    	<font style="font-size: 14px;margin-top: 5px;color: white;">
+	    	问卷调查
+	    	</font>
+	    </div>
+ 	</ons-toolbar>
+  	
+		<div class="content shotfeedcontent" >
+			<ons-segment id="shotFeedMenus">
+				<button v-on:click="shotFeedBack($event)" :active="btnIndex==0">接种评价</button>
+				<button v-bind:class="{'mui-active': pageActive}" v-on:click="shotExceptionFeedBack($event)" :active="btnIndex==1">接种异常反馈</button>
+			</ons-segment>
+		
+			<ons-carousel id="carousel_feedback" fullscreen><!--auto-scroll overscrollable --> 
+		        <ons-carousel-item >
+		        	<div id="shotFeedBack" style="padding: 10px;height:calc(100vh - 120px);overflow-y:auto;">
+						<div v-show="!showShotFeedBack" style="text-align: center;margin-top: 30%;">
+							无可评价的接种或已经做过评价！
+							<div style="width:100%;text-align: center;">
+								<img src="images/noContent.png"/>
+							</div>
+						</div>
+						<div v-show="showShotFeedBack">
+							<div style="font-size: 14px;">
+								您的宝宝<span v-if="childName">（{{childName}}）</span>已于{{shotDate1}}接种了{{shotBactNames1}}。请为此次接种进行评价。谢谢！
+							</div>
+							
+							<div style="text-align: center;height: 30px; line-height: 30px;margin: 10px 0px;">
+								<div id="fengeDiv" style="position: relative;">请为此次接种打分</div>
+							</div>
+							
+							<div  style="text-align: center;margin-bottom: 10px;">
+							            <template v-for="(star,index) in stars">
+							        		<ons-icon v-bind:icon="star.icon" v-on:click="rating(index)"></ons-icon>
+							        	</template>
+						    </div>
+						    
+						    <div>
+								<textarea id="textarea" class="textarea"  oninput="checktextarea(this,255,'评价最多255字！')" v-model="feedBackDetail" rows="7" cols="20" maxlength="255" placeholder="请输入您的评价意见..."></textarea>			    	
+						    </div>
+						    
+						    <div style="margin-top: 30px;margin-bottom: 10px;">
+								<button class="button--large--cta"  v-on:click="submitEvaluation();" type="button">
+									提 &nbsp;&nbsp;&nbsp;&nbsp;交
+								</button>
+							</div>
+						</div>
+					</div>
+		        </ons-carousel-item>
+		        <ons-carousel-item >
+		        	<div id="shotExceptionFeedBack" class="mui-control-content" v-bind:class="{'mui-active': pageActive}"
+		        		style="padding: 10px;height:calc(100vh - 45px - 70px);overflow-y:auto;">
+						<div v-show="!showShotExceptionFeedBack" style="text-align: center;margin-top: 30%;">
+							无可接种异常反馈的接种或已经做过接种异常反馈！
+							<div style="width:100%;text-align: center;">
+								<img src="images/noContent.png"/>
+							</div>
+						</div>
+						<div v-show="showShotExceptionFeedBack">
+						<div style="display: flex;flex-direction: row;justify-content:left;">
+							<div style="display: flex;flex-direction: column;justify-content:center;margin: 5px;">
+								<img src="images/img_user_avatar.png" style="width:60px;height: 60px;">
+							</div>
+							<div style="display: flex;flex-direction: column;justify-content:center;">
+								<div>
+									<div v-cloak>{{childName ? childName : child_code}}</div>
+								</div>
+								<div>
+									<div v-cloak>{{age}}</div>
+								</div>	
+							</div>
+						</div>
+						
+						<div style="text-align: center;height: 30px; line-height: 30px;margin: 5px 0px;" v-on:click="feedBackInstruction()">
+							<div style="position: relative;color:rgb(71, 179, 227)" id="feedBackInstructionclass">接种反应说明</div>
+						</div>
+						<div>
+							<div class="rowDiv">
+								<div class="leftDiv">接种疫苗：</div>
+								<div class="rightDiv">{{shotBactNames2}}</div>
+							</div>
+							<div class="rowDiv">
+								<div class="leftDiv">接种日期：</div>
+								<div class="rightDiv">{{shotDate2}}</div>
+							</div>
+							<div class="rowDiv">
+								<div class="leftDiv" style="display: flex;flex-direction: column;justify-content:center;">发现日期：</div>
+								<div class="rightDiv" style="height: 40px;position: relative;line-height: 40px;">
+								    <input type="text" v-model="findDate" id="findDate" name="findDate" readonly="readonly" placeholder="发现日期"
+								 autocomplete="off" ><ons-icon id="birthday-icon" icon="ion-calendar" class="datepic" style=""></ons-icon>
+								</div>
+							</div>
+							<div class="rowDiv">
+								<div class="leftDiv" style="display: flex;flex-direction: column;justify-content:center;">联系电话：</div>
+								<div class="rightDiv">
+									<input id="linkPhone" v-model="linkPhone" type="tel" maxlength="11" />
+								</div>
+							</div>
+							<div class="rowDiv">
+								<div>异常反应症状（可多选）</div>
+							</div>
+							<div class="rowDiv">
+								<div class="leftDiv">接种部位：</div>
+								<div id="shotPlace" class="rightDiv">
+									<button type="button" data-value="a" class="but_light" v-on:click="shotplace($event);">红</button>
+									<button type="button" data-value="b" class="but_light" v-on:click="shotplace($event);">肿</button>
+									<button type="button" data-value="c" class="but_light" v-on:click="shotplace($event);">热</button>
+									<button type="button" data-value="d" class="but_light" v-on:click="shotplace($event);">皮疹</button>
+									<button type="button" data-value="e" class="but_light" v-on:click="shotplace($event);">硬结</button>
+								</div>
+							</div>
+							<div class="rowDiv">
+								<div class="leftDiv">综合反应：</div>
+								<div id="comprehensiveReaction" class="rightDiv">
+									<button type="button" data-value="a" class="but_light" v-on:click="comprehensiveReaction($event);">体温升高</button>
+									<button type="button" data-value="b" class="but_light" v-on:click="comprehensiveReaction($event);">哭闹增加</button>
+									<button type="button" data-value="c" class="but_light" v-on:click="comprehensiveReaction($event);">食欲下降</button>
+									<button type="button" data-value="d" class="but_light" v-on:click="comprehensiveReaction($event);">没精神</button>
+									<button type="button" data-value="e" class="but_light" v-on:click="comprehensiveReaction($event);">呕吐</button>
+									<button type="button" data-value="f" class="but_light" v-on:click="comprehensiveReaction($event);">腹泻</button>
+									<button type="button" data-value="g" class="but_light" v-on:click="comprehensiveReaction($event);">咳嗽</button>
+								</div>
+							</div>
+							<div class="rowDiv">
+								<div>上传照片（最多可上传3张）</div>
+							</div>
+							<div class="rowDiv">
+								<div style="display: flex;flex-direction: row;justify-content:left;">
+									<a v-on:click="uploadImg($event)" class="uploadImg" style="margin-right: 15px;">
+										<img id="uploadImg1" v-bind:src="uploadImg1"/>
+									</a>
+									<a v-on:click="uploadImg($event)"  class="uploadImg" style="margin-right: 15px;">
+										<img id="uploadImg2" v-bind:src="uploadImg2"/>
+									</a>
+									<a v-on:click="uploadImg($event)" class="uploadImg" >
+										<img id="uploadImg3" v-bind:src="uploadImg3"/>
+									</a>
+								</div>
+								
+							</div>
+							
+								
+					    	
+					    	<div>
+								<textarea  class="textarea"   oninput="checktextarea(this,255,'描述最多255字！')" v-model="other_reaction" rows="3" cols="20" maxlength="255" placeholder="其他   请描述具体症状"></textarea>			    	
+						    </div>
+					    	
+							<div style="margin-top: 30px;margin-bottom: 10px;">
+								<button class="button--large--cta"  v-on:click="submitFeedBack();" type="button">
+									提 &nbsp;&nbsp;&nbsp;&nbsp;交
+								</button>
+							</div>
+						</div>
+						</div>
+						<div style="text-align: center;margin-bottom: 10px;" v-on:click="feedBackHistory()"><a href="#" style="color:#1F86E3;">查看历史接种反馈</a></div>
+						
+					</div>
+		        </ons-carousel-item>
+		    </ons-carousel>
+						<div id="findDateContainer"></div>
+	    </div>
+		
+		<script>
+			var pageActive = sessionStorage.getItem("pageActive");
+			var vm2;var vm;var vm3;var datepicker1;
+			var datearr = getNowFormatDate3();
+			ons.getScriptPage().onInit = function(){
+				vm3 = new Vue({
+					el: "#shotFeedHeader",
+					data: {
+						showQuestion: false,
+					},
+					created: function() {
+						var that = this;
+						var sessionBaby = JSON.parse(sessionStorage.getItem("baby"));
+						var childCode = sessionBaby.child_code;
+						axiosGet({child_code: childCode}, "/Encryption/Feedback/GetChildSurvey", function(data) {
+							if(data.code == "0"&&data.data) {
+								sessionStorage.setItem("question_survey_url", data.data.survey_url+"&type=1");
+								sessionStorage.setItem("question_survey_title", data.data.survey_title);
+								that.showQuestion = true;
+							}
+						});
+					},methods:{
+						surveyQuestion:function(){
+							top.document.querySelector('ons-navigator').pushPage("index/surveyQuestion.html");
+						}
+					}
+				});
+			    vm2 = new Vue({
+					el: "#shotFeedMenus",
+					data: {
+						pageActive: false,
+						btnIndex:0
+					},
+					methods:{
+						shotFeedBack:function(){
+							this.btnIndex = 0;
+						},
+						shotExceptionFeedBack:function(){
+							this.btnIndex = 1;
+						}
+					},
+					watch: {
+						btnIndex:function(val){
+							var carousel = document.getElementById('carousel_feedback');
+							if(carousel&&carousel.setActiveIndex){
+				 				carousel.setActiveIndex(val);
+							}
+						}
+					}
+				});
+	             var classoff = "ion-ios-star-outline";
+                 var classon = "ion-star";
+			     vm = new Vue({
+					el: "#carousel_feedback",
+					data: {
+						showShotFeedBack: false,
+						child_code: "",
+						childName: "",
+						shotDate1: "",
+						shotBactNames1: "",
+						starIndex: 0,
+						feedBackDetail: "",
+						pageActive:false,
+						showShotExceptionFeedBack: false,
+						age: "",
+						shotDate2: "",
+						shotBactNames2: "",
+						findDate: "",
+						linkPhone: "",
+						shotPlaces: [],
+						reactions: [],
+						other_reaction: "",
+						
+						uploadingImgId: "",
+						defaultImg: "images/ic_feedback_default.png",
+						uploadImg1: "images/ic_feedback_default.png",
+						uploadImg2: "images/ic_feedback_default.png",
+						uploadImg3: "images/ic_feedback_default.png",
+	                    stars: [{
+	                            icon:classoff,
+	                            active: false
+	                        }, {
+	                            icon:classoff,
+	                            active: false
+	                        }, {
+	                            icon:classoff,
+	                            active: false
+	                        },
+	                        {
+	                            icon:classoff,
+	                            active: false
+	                        }, {
+	                            icon:classoff,
+	                            active: false
+	                        }
+	                    ],
+	                    starNum: 0
+                
+					},
+					created: function() {
+						var that = this;
+						vm2.pageActive = !!pageActive;
+						that.pageActive = !!pageActive;
+						sessionStorage.removeItem("pageActive");
+						var sessionBaby = JSON.parse(sessionStorage.getItem("baby"));
+						that.childName = sessionBaby.child_name;
+						that.child_code = sessionBaby.child_code;
+						that.age = sessionBaby.age;
+						axiosGet({child_code: sessionBaby.child_code}, "/Encryption/Feedback/GetChildFeedbackVaccineNew", function(data) {
+							if(data.code == '1') {
+								that.showShotFeedBack = false;	
+							} else if(data.code == '0') {
+								var curData = data.data;
+								if(curData == null) {
+									that.showShotFeedBack = false;		
+								} else {
+									that.shotDate1 = curData.jz_date;
+									that.shotBactNames1 = curData.jz_vaccine;
+									that.showShotFeedBack = true;
+									
+								}
+								
+							}
+						});
+						axiosGet({child_code: sessionBaby.child_code}, "/Encryption/Feedback/GetChildJzReaction", function(data) {
+							if(data.code == '1') {
+								that.showShotExceptionFeedBack = false;	
+							} else if(data.code == '0') {
+								var curData = data.data;
+								if(curData == null) {
+									that.showShotExceptionFeedBack = false;		
+								} else {
+									that.shotDate2 = curData.jz_date;
+									that.shotBactNames2 = curData.jz_vaccine;
+									that.linkPhone = curData.mobphone;
+									var date = new Date();
+									var month = date.getMonth() + 1;
+									var day = date.getDate();
+									that.findDate = date.getFullYear() + '-' + (month>9?month:"0"+month) + '-' + (day>9?day:"0"+day);
+									that.showShotExceptionFeedBack = true;
+									
+								}
+								
+							}
+						});
+					},
+					updated:function(){
+						setmuidatafocus();
+					},
+	                methods: {
+	                	uploadImg:function(e){
+	                		var that=e.target;
+			              	vm.uploadingImgId = that.id;
+			              	top.WebViewJavascriptBridge.callHandler('getImageFromGallery', {}, function(resp) {
+				                
+				            });
+	                	},
+	                	feedBackInstruction:function(){
+								top.document.querySelector('ons-navigator').pushPage("index/shotFeedBackDesc.html");
+	                	},
+	                    rating: function(index) {
+	                        var total = this.stars.length; 
+	                        var idx = index + 1; 
+	                        if(this.starNum == 0) {
+	                            this.starNum = idx;
+	                            for(var i = 0; i < idx; i++) {
+	                                this.stars[i].icon = classon;
+	                                this.stars[i].active = true;
+	                            }
+	                            vm.starIndex = idx;
+	                        } else {
+	                            if(idx == this.starNum) {
+	                                for(var i = index; i < total; i++) {
+	                                    this.stars[i].icon = classoff;
+	                                    this.stars[i].active = false;
+	                                }
+	                            }
+	                            if(idx < this.starNum) {
+	                                for(var i = idx; i < this.starNum; i++) {
+	                                    this.stars[i].icon = classoff;
+	                                    this.stars[i].active = false;
+	                                }
+	                            }
+	                            if(idx > this.starNum) {
+	                                for(var i = 0; i < idx; i++) {
+	                                    this.stars[i].icon = classon;
+	                                    this.stars[i].active = true;
+	                                }
+	                            }
+	                            var count = 0; 
+	                            for(var i = 0; i < total; i++) {
+	                                if(this.stars[i].active) {
+	                                    count++;
+	                                }
+	                            }
+	                            this.starNum = count;
+	                            vm.starIndex = count;
+	                        }
+	                    },
+	                    submitEvaluation: function(index) {
+							var star_index = vm.starIndex;
+							if(!star_index) {
+								ons.notification.toast("您还没有打分！", toastOptions);
+								return false;
+							}
+							
+							var feedBack_Detail = vm.feedBackDetail.trim();
+							if(!feedBack_Detail || feedBack_Detail.length < 1) {
+								ons.notification.toast("您还没有填写评价内容！", toastOptions);
+								return false;
+							}else if(feedBack_Detail.length>255){
+								ons.notification.toast("评价最多255字！", toastOptions);
+								return false;
+							}
+							
+							var params = {};
+							params.child_code = vm.child_code;
+							params.jz_date = vm.shotDate1;
+							params.feedback_content = vm.feedBackDetail;
+							params.station_evaluate = star_index;
+							axiosGet(params, "/Encryption/Feedback/SubmitChildFeedbackNew", function(data2) {
+								if(data2.code == "1") {
+									ons.notification.toast(data2.message, toastOptions);	
+								} else if(data2.code == "0") {
+									ons.notification.toast('评价成功！', toastOptions);
+									setTimeout(function() { backfunction(); }, 2000);
+								}
+							});
+	                   },
+	                  submitFeedBack:function(){
+							//判断填写反馈内容是否合法
+							if(!vm.findDate) {
+								ons.notification.toast('请填写发现日期！', toastOptions);
+								return false;	
+							}
+							if(!vm.linkPhone) {
+								ons.notification.toast('请填联系电话！', toastOptions);
+								return false;
+							}else if(!isMobileNumber(vm.linkPhone)) {
+								ons.notification.toast('请填正确的联系电话！', toastOptions);
+								return false;
+							}
+							
+							//提交异常反馈
+							var formData = new FormData();
+							formData.append("child_code", vm.child_code);
+							formData.append("vaccine_name", vm.shotBactNames2);
+							formData.append("vaccine_count", "");
+							formData.append("jz_date", vm.shotDate2);
+							formData.append("find_date", vm.findDate);
+							formData.append("jz_site", coverArrayToString(vm.shotPlaces));
+							formData.append("jz_reaction", coverArrayToString(vm.reactions));
+							formData.append("other_reaction", vm.other_reaction);
+							var has_img = "0";
+							if(vm.uploadImg1 != vm.defaultImg || vm.uploadImg2 != vm.defaultImg || vm.uploadImg3 != vm.defaultImg  ) {
+								has_img = "1";	
+								
+								if(vm.uploadImg1 != vm.defaultImg) {
+									var blob1 = dataURItoBlob(vm.uploadImg1);
+									formData.append("file1", blob1, "file1"+ Math.random() +".jpg");
+								}	
+								
+								if(vm.uploadImg2 != vm.defaultImg) {
+									var blob2 = dataURItoBlob(vm.uploadImg2);
+									formData.append("file2", blob2, "file2"+ Math.random() +".jpg");
+								}	
+								
+								if(vm.uploadImg3 != vm.defaultImg) {
+									var blob3 = dataURItoBlob(vm.uploadImg3);
+									formData.append("file3", blob3, "file3"+ Math.random() +".jpg");
+								}
+							}
+							formData.append("has_img", has_img);
+							
+							formData.append("mobphone", vm.linkPhone);
+							axiosPost(formData, "/Feedback/SaveAbnormalReaction", function(data) {
+								if(data.code == "1") {
+									ons.notification.toast(data.message, toastOptions);		
+								} else if(data.code == "0") {
+									ons.notification.toast('接种异常反应报告提交成功，请等候医生回复，谢谢！', toastOptions);
+									setTimeout(function() { backfunction(); }, 2000);
+								}
+							});
+			
+	                  },
+	                  feedBackHistory:function(){
+	                  	    top.document.querySelector('ons-navigator').pushPage("index/feedBackHistoryList.html");
+	                  },
+	                  shotplace:function(e){
+							changeActiveValue(e.target,vm.shotPlaces);
+	                 },
+	                  comprehensiveReaction:function(e){
+	                    	changeActiveValue(e.target,vm.reactions);
+	                 }
+	                }
+				});
+		       datepicker1 = new DateSelector({
+				    input: 'findDate',
+				    container: 'findDateContainer',
+				    type: 0,
+				    param: [1, 1, 1, 0, 0],
+				    beginTime: [1985,1,1],
+				    endTime: datearr,
+				    recentTime: [],
+				    success: function (arr, arr2) {
+				      	vm.findDate = arr2.join("-");
+				    }
+				});
+			}
+			
+			
+			function changeActiveValue(cobj,vobj){
+				 	var data_value = cobj.attributes['data-value'].value;
+					if(cobj.classList.contains("but_active")) {
+						cobj.classList.remove("but_active");
+						vobj.removeByValue(data_value);
+					} else {
+						cobj.classList.add("but_active");
+						vobj.push(data_value);
+					}
+			}
+			
+			Array.prototype.removeByValue = function(val) {//数组删除指定元素
+				for(var i=0; i<this.length; i++) {
+			    	if(this[i] == val) {
+			      		this.splice(i, 1);
+			      		break;
+			    	}
+			  	}
+			}
+			
+			
+			
+		
+		/*	mui("#shotExceptionFeedBack").on("tap", "span.mui-icon-extra-calendar", function() {
+				var dateNode = this.previousSibling.previousSibling;
+				mui.trigger(dateNode, 'tap');
+			});*/
+				
+			
+			function checktextarea(obj,maxlen,text){
+				var len = obj.value.length;
+				if(len>maxlen){
+					obj.value = obj.value.substring(0,maxlen-1);
+				}
+			}
+			setmuidatafocus();
+			 //在改function 中添加原生调起js方法
+	      setupWebViewJavascriptBridge(function(bridge) {
+	            //注册原生调起方法
+			    //参数1： buttonjs 注册flag 供原生使用，要和原生统一
+			    //参数2： data  是原生传给js 的数据
+			    //参数3： responseCallback 是js 的回调，可以通过该方法给原生传数据
+			    bridge.registerHandler("returnPicture", function(data, responseCallback) {
+			        if(data) {
+			        	if(isAndroid_ios()) {
+			        		data = JSON.parse(data);
+			        	}
+			        	if(data.uploadFlag == "1") {
+			        		var imageData = "data:image/jpeg;base64," + data.imageData;
+			        		if(vm.uploadingImgId == "uploadImg1") {
+			                	vm.uploadImg1 = imageData;	
+			                } else if(vm.uploadingImgId == "uploadImg2") {
+			                	vm.uploadImg2 = imageData;
+			                } else if(vm.uploadingImgId == "uploadImg3") {
+			                	vm.uploadImg3 = imageData;
+			                }	
+			        	}
+			        }
+			    });
+	        });
+		</script>
+	
+</ons-page>
+

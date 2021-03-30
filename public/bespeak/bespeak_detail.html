@@ -1,0 +1,132 @@
+<ons-page>
+	<style>
+            .info_msg{
+        		font-size: 18px;
+        		font-weight: bold;
+        		text-align: center;
+        		margin-top: 15px;
+        	}
+        	.chidinfo{
+            	margin-top: 10px;
+            	margin-left: 10px;
+            	display: flex;
+            	justify-content: flex-start;
+            	flex-direction: row;
+            }
+            .chidinfo .label{
+            	color:#666;
+            	word-break:keep-all;
+            	white-space:nowrap;
+            }
+	    	.button--large--cta{
+		        margin-left: 5%;
+				background-color: #6798FF;
+				font-size: 18px;
+				color:#fff;
+				width: 90%;
+		    }
+	</style>
+        
+        <ons-toolbar class="toolbar">
+	  	    <div class="left toolbar__left" onclick="backfunction()">
+				<ons-icon icon="ion-ios-arrow-back" style="color: white" size="24px"></ons-icon>
+			</div>
+		    <div class="center toolbar__center">
+		    	预约详情
+		    </div>
+	 	</ons-toolbar>
+        
+        <div class="bespeakde-content content" v-cloak>
+        	<div class="info_msg" v-if="!!bespeakInfo.reservation_display_code">预约号：<span style="color: red;">{{bespeakInfo.reservation_display_code}}</span></div>
+        	<div style="margin: 10px;padding: 10px; background-color: #fffde9;color: red;display: flex;justify-content: flex-end;flex-direction: row;"
+        		v-if="bespeakInfo.reservation_status=='1004'">
+        		<div style="word-break:keep-all;white-space:nowrap; " v-if="stationszflag">签到提醒：</div><div v-if="stationszflag">请在预约时间段内到门诊签到！去接种门诊之前，请量好孩子的体温并做好记录。</div>
+        		<div style="word-break:keep-all;white-space:nowrap; " v-if="!stationszflag">预约提醒：</div><div v-if="!stationszflag">请在预约时间段内到门诊！去接种门诊之前，请量好孩子的体温并做好记录。</div>
+        	</div>
+        	<div style="margin-left: 10px;margin-right: 10px;overflow-y:auto;">
+        		<div class="chidinfo">
+	        		<div class="label">儿童姓名：</div>
+	        		<div>{{bespeakInfo.child_name}}</div>
+	        	</div>
+	        	<div class="chidinfo">
+	        		<div class="label">儿童编码：</div><div>{{bespeakInfo.child_code}}</div>
+	        	</div>
+	        	<div class="chidinfo">
+	        		<div class="label">预约门诊：</div>
+	        		<div>{{bespeakInfo.station_name}}</div>
+	        	</div>
+	        	<div class="chidinfo">
+	        		<div class="label">接种疫苗：</div>
+	        		<div><div v-for="bespeak in vaccine_name">{{bespeak}}</div></div>
+	        	</div>
+	        	<div class="chidinfo">
+	        		<div class="label">预约时间：</div>
+	        		<div>{{bespeakInfo.reservation_date}}&nbsp;{{bespeakInfo.reservation_begin_time}}-{{bespeakInfo.reservation_end_time}}</div>
+	        	</div>
+        	</div>
+        	<div style="margin-top:30px;">
+    			 <button class="button--large--cta" v-on:click="backIndex()" v-if="bespeakInfo.is_allow_cancel=='1'">取消预约</button>
+        	</div>
+        </div>
+        
+        <script>
+        	top.isBackbespeak = true;
+        	 var name = sessionStorage.getItem("list_vaccine_name");
+        	 var vm = new Vue({
+                el: '.bespeakde-content',
+                data: {
+                    bespeakInfo:{},
+                    stationszflag:false
+                },
+                computed: {
+					vaccine_name: function() {
+						if(name!=undefined&&name!=''){
+							return name.split(',');
+						}
+						return [];
+					}
+				},
+                created: function() {
+                    var that=this;
+                    if(sessionStorage.getItem("list_reservation_code")==undefined||sessionStorage.getItem("list_reservation_code")==''){
+                    	backIndex();
+                    	return;
+                    }
+                    that.sessionBaby = JSON.parse(sessionStorage.getItem("baby"));
+                    var senddata={"reservation_code":sessionStorage.getItem("list_reservation_code")};
+                	axiosGet(senddata,"/Encryption/Reservation/GetReservationDetails",function(data){
+                        if(data.code=='0'){
+                            that.bespeakInfo=data.data;
+                            that.stationszflag = data.data.station_digital=="1";
+                        }
+                    });
+                },
+                methods:{
+                	backIndex:function(){
+                		var btnArray = ['否', '是'];
+                		ons.notification.confirm('是否取消预约？', {
+		                 	buttonLabels:btnArray,
+		                 	title:"提示",
+		                 	callback: function(idx) {
+						      	if(idx==1){
+	                                var senddata={"reservation_code":sessionStorage.getItem("list_reservation_code")};
+	                                axiosGet(senddata,"/Encryption/Reservation/CancelReservation",function(data){
+	                                    if(data.code=='0'){
+	                                    	ons.notification.toast(data.message, toastOptions);
+	                                    	sessionStorage.setItem("cancelBespeak",data.message)
+	                                        setTimeout(function(){
+						                        top.backIndex();
+			                        		},1000);
+	                                    }else{
+	                                    	ons.notification.toast(data.message, toastOptions);
+	                                    }
+	                                });
+						      	}
+						    }
+		                });
+                	}
+                }
+            });
+        	
+        </script>
+</ons-page>

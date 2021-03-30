@@ -1,0 +1,29 @@
+<ons-page>
+		
+		<ons-toolbar class="toolbar" style="box-shadow:0 0px 0px 0 !important;">
+		    <div class="left toolbar__left" onclick="backfunction()">
+		      	<ons-icon icon="ion-ios-arrow-back" style="color: white" size="24px"></ons-icon>
+		    </div>
+		    <div class="center toolbar__center">
+		    	自助建档说明
+		    </div>
+	  	</ons-toolbar>
+		<div style="text-align: center;" class="zzjdinsclass">
+	        <iframe v-bind:src="mscur" style="width: 100%;border: 0px;height:calc(100vh - 80px);"></iframe>
+	    </div>
+		<script>
+			new Vue({
+				el: '.zzjdinsclass',
+				data: {
+					mscur:""
+				},
+				created: function() {
+					var that=this;
+					var curData=JMBWebAPPConfig.interfaceUrl + '/system/jiandang.html';
+					that.mscur = curData;
+				}
+			});
+			
+		</script>
+</ons-page>
+

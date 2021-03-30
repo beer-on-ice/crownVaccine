@@ -1,0 +1,68 @@
+import Vue from 'vue'
+import {
+  Button,
+  Cell,
+  SwipeCell,
+  Image,
+  Overlay,
+  Tabbar,
+  TabbarItem,
+  Swipe,
+  SwipeItem,
+  PullRefresh,
+  List,
+  Field,
+  Icon,
+  Card,
+  Tag,
+  Tabs,
+  Tab,
+  CellGroup,
+  NavBar,
+  Popup,
+  Picker,
+  CountDown,
+  Toast,
+  Form,
+  Search,
+  Calendar,
+  Notify,
+  NoticeBar,
+  ShareSheet,
+  DatetimePicker,
+  Radio,
+  RadioGroup
+} from 'vant'
+
+Vue.use(Radio)
+Vue.use(RadioGroup)
+Vue.use(DatetimePicker)
+Vue.use(ShareSheet)
+Vue.use(NoticeBar)
+Vue.use(Notify)
+Vue.use(Calendar)
+Vue.use(Search)
+Vue.use(Form)
+Vue.use(Toast)
+Vue.use(CountDown)
+Vue.use(Picker)
+Vue.use(Popup)
+Vue.use(NavBar)
+Vue.use(CellGroup)
+Vue.use(Tabs)
+Vue.use(Tab)
+Vue.use(Tag)
+Vue.use(Card)
+Vue.use(Icon)
+Vue.use(Button)
+Vue.use(Cell)
+Vue.use(SwipeCell)
+Vue.use(Image)
+Vue.use(Overlay)
+Vue.use(Tabbar)
+Vue.use(TabbarItem)
+Vue.use(Swipe)
+Vue.use(SwipeItem)
+Vue.use(PullRefresh)
+Vue.use(List)
+Vue.use(Field)

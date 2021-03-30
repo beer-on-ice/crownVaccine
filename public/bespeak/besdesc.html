@@ -1,0 +1,50 @@
+<!--预约说明-->
+<ons-page>
+	  <style>
+        .mui-content{
+        	height: calc(100vh - 54px);
+        	padding: 25px 10px 10px 10px;
+        	background-color: #EFEFF4;
+        	overflow-y:auto;
+        }
+        .mui-content p{
+        	color: #000;
+        }
+    </style>
+        <ons-toolbar class="toolbar">
+            <div class="left toolbar__left" onclick="backfunction()">
+							<ons-icon icon="ion-ios-arrow-back" style="color: white" size="24px"></ons-icon>
+						</div>
+				    <div class="center toolbar__center">
+				    	预约说明
+				    </div>
+				    <div class="right toolbar__right">
+			      	<img id="toBindChildBtn" src="images/ic_home.png" style="width: 24px;height: 24px;vertical-align: middle;"  onclick="backIndex();">
+			      </div>
+	     	</ons-toolbar>
+         <div class="mui-content content" v-html="remind" >
+        </div>
+	<script>
+		
+		ons.getScriptPage().onInit = function(){
+				 var vm = new Vue({
+                el: '.mui-content',
+                data: {
+                    remind:''
+                },
+                created: function() {
+                    var that=this;
+                    var baby = JSON.parse(sessionStorage.getItem("baby"));
+                    var senddata={"station_code":baby.station_code};
+                	  axiosGet(senddata,"/Encryption/Vaccine/GetVaccineDesc",function(data){
+                        if(data.code=='0'){
+                            that.remind=data.data.vaccine_remind;
+                        }
+                    });
+                }
+            });
+			
+		}
+        
+        </script>
+</ons-page>

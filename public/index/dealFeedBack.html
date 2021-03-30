@@ -1,0 +1,407 @@
+<ons-page>
+		<style>
+			.rowDiv {
+				display: flex;
+				flex-direction: row;
+				justify-content: left;
+				margin-bottom: 10px;	
+			}
+			
+			.contentDealfeedbac{
+				font-size: 14px;
+				font-family:'Helvetica Neue',Helvetica,sans-serif;
+			}
+			.mui-col-xs-3{
+				width: 25%;
+			}
+			.mui-col-xs-6{
+				width: 50%;
+			}
+			#bottomBar{
+				display: flex;
+				flex-direction: row;
+				justify-content:flex-start;
+				height: 100%;
+			}
+			.zuiweninput{
+				width: 50%;
+				display: flex;
+				flex-direction: column;
+				justify-content:center;
+			}
+			.zuiwen{
+				width:16.66666667%;
+				display: flex;
+				flex-direction: column;
+				justify-content:center;
+				padding:0 5px;
+				text-align: center;
+			}
+			.zuiwenimg{
+				display: flex;
+				flex-direction: column;
+				justify-content:center;
+				padding:0 5px;
+			}
+			.sentbutton{
+				display: flex;
+				flex-direction: column;
+				justify-content:center;
+				margin-left:9px;
+			}
+		</style>
+		
+		<ons-toolbar class="toolbar">
+		    <div class="left toolbar__left" onclick="backfunction()">
+		      	<ons-icon icon="ion-ios-arrow-back" style="color: white" size="24px"></ons-icon>
+		    </div>
+		    <div class="center toolbar__center">
+		    	异常反应处理
+		    </div>
+	    </ons-toolbar>
+    <div class="content" style="background-color: white !important; ">
+		<div class="contentDealfeedbac"  v-cloak >
+			<div  style="bottom: 60px;">
+    		<div style="height:calc(100vh - 110px);overflow-y:auto;">
+			<div style="padding: 20px 10px 20px 10px;">
+				<div class="rowDiv">
+					<div class="mui-col-xs-3">接种疫苗：</div>
+					<div>{{vaccine_name}}</div>
+				</div>
+				<div class="rowDiv">
+					<div class="mui-col-xs-3">接种日期：</div>
+					<div>{{jz_date}}</div>
+				</div>
+				<div class="rowDiv">
+					<div class="mui-col-xs-3">发现日期：</div>
+					<div>{{find_date}}</div>
+				</div>
+				<div class="rowDiv" style="margin-bottom: 0px;">
+					<div class="mui-col-xs-3">症&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;状：</div>
+					<div style="width:75%;word-break: break-all;">
+						<label v-if="jz_site">接种部位&nbsp;{{jz_site}}</label> 
+						<label v-if="jz_site && jz_reaction"><br></label> 
+						<label v-if="jz_reaction">综合反应&nbsp;{{jz_reaction}}</label> 
+						<label v-if="(jz_site || jz_reaction)&&other_reaction"><br></label> 
+						<label v-if="other_reaction">其他症状&nbsp;{{other_reaction}}</label>
+						<div>
+							<template v-for="img in imgs">
+								<img v-bind:src="img.img" style="max-width: 20vw;" onclick="setImg(this)">
+							</template>
+						</div>
+					</div>
+				</div>
+			</div>
+			
+			<div>
+				<div v-if="reply_flag == '1' && feedBackChats.length > 1" style="display: flex;flex-direction: row;justify-content:center;font-size: 18px;font-weight: bold;">
+					<div style="width:80%;text-align: center;color: rgb(254, 157, 102);">您的反馈已处理完成，如果有其他疑问请电话咨询门诊医生。</div>
+				</div>
+				<div v-if="reply_flag == '1' && feedBackChats.length == 1" style="display: flex;flex-direction: row;justify-content:center;font-size: 18px;font-weight: bold;">
+					<div style="width:80%;text-align: center;color: rgb(254, 157, 102);">医生已与您电话联系！</div>
+				</div>
+				
+				<div v-if="reply_flag != '1' && feedBackChats.length == 0" style="display: flex;flex-direction: row;justify-content:center;font-size: 18px;font-weight: bold;color: rgb(254, 157, 102);">
+					请等待医生回复
+				</div>
+				
+				<div v-if="reply_flag != '1' && feedBackChats.length > 0" style="display: flex;flex-direction: row;justify-content:center;font-size: 18px;font-weight: bold;">
+					医生回复结果
+				</div>
+				<div v-if="(reply_flag == '1' && feedBackChats.length > 1)||reply_flag != '1'">
+					<template v-for="chat in feedBackChats">
+						<div style="display: flex;flex-direction: row;justify-content:center;margin: 5px 0px;">
+							<div class="mui-col-xs-6" 
+								style="border: 1px solid #EFF5F3;text-align: center;padding: 3px 0px;background-color: #E4E8EB;border-radius: 6px;">
+								{{chat.send_time}}
+							</div>
+						</div>
+						<div v-if="chat.send_user == '1'" style="display: flex;flex-direction: row;justify-content:flex-start;padding-left:10px">
+							<div style="margin-right: 10px;display: flex;flex-direction: column;">
+								<img src="images/img_doctor_avatar.png" style="width:30px;height: 30px;">
+							</div>
+							<div style="max-width: 50%; display: flex;flex-direction: column;justify-content:center;">
+								{{chat.send_content}}
+							</div>
+						</div>
+						<div v-if="chat.send_user == '0'" style="display: flex;flex-direction: row-reverse;padding-right:10px ;">
+							<div style="margin-left: 10px;display: flex;flex-direction: column;">
+								<img src="images/img_user_avatar.png" style="width:30px;height: 30px;">
+							</div>
+							<div v-if="chat.send_type == '0'" style="max-width: 50%; display: flex;flex-direction: column;justify-content:center;">
+								{{chat.send_content}}
+							</div>
+							<div v-if="chat.send_type == '1'" style="display: flex;flex-direction: column;justify-content:center;">
+								<img v-bind:src="chat.send_content" style="width: 50px;height: 50px;"/>
+							</div>
+						</div>
+					</template>
+				</div>
+			</div>
+			</div>
+			</div>
+		</div>	
+		
+		<div id="chatDiv" v-if="chatMsgNum > 0 && reply_flag != '1'" >
+			<div class="tabbar" style="border-bottom: 1px solid rgba(0,0,0,.2);padding: 3px 0 3px 0;">
+			    <div id="bottomBar" >
+					<div class="zuiwen">
+						追问
+					</div>
+					<div class="zuiweninput">
+						<input type="text" v-model="chatContent" style="margin-bottom: 0px;" 
+							onfocus='inputfocus()' onblur='inputblur()' />
+					</div>
+					<div class="zuiwenimg">
+						<img id="sendImg" ontouchend="setBlur();top.sendImg();" src="images/ic_take_pic.png" style="height: 30px;width: 30px;"/>
+					</div>
+					<div class="sentbutton">
+						<button class="button" id="sendChat" style="padding: 7px 12px 7px 12px;" ontouchend="sendChat();">发送</button>
+					</div>
+				</div>
+			</div>
+		</div>
+		
+			
+		<div id="loadingDiv" v-if="active">
+			<div class="mui-toast-container2 mui-active">
+				<div class="mui-toast-message" style="display: flex;flex-direction: row;justify-content: center;">
+					<div style="display: flex;flex-direction: column;justify-content: center;"><img src="images/loading.gif"  style="width:20px;height:20px" /></div>
+					<div style="display: flex;flex-direction: column;justify-content: center;">正在上传...</div>
+				</div>
+			</div>
+			<div class="mui-popup-backdrop mui-active" style="display: block;"></div>
+		</div>
+		
+		
+	</div>
+		<script>
+		var lovm;var feedbacvm ;var chatvm;
+		ons.getScriptPage().onInit = function(){
+			    lovm = new Vue({
+					el: "#loadingDiv",
+					data: {
+						active: false	
+					}
+				});
+				
+			    feedbacvm = new Vue({
+					el: ".contentDealfeedbac",
+					data: {
+						vaccine_name: "",
+						jz_date: "",
+						find_date: "",
+						jz_site: "",
+						jz_reaction: "",
+						other_reaction: "",
+						feedBackChats: [],
+						abnormalId: "",
+						reply_flag: "",
+						imgs:[]
+					},
+					created: function() {
+						var abnormalId = sessionStorage.getItem("curBnormalId");
+						var that = this;
+						that.abnormalId = abnormalId;
+						axiosGet({abnormal_id: abnormalId}, "/Encryption/Feedback/GetAbnormalDetail", function(data) {
+							if(data.code == '1') {
+								that.showBabyInfo = false;	
+							} else if(data.code == '0') {
+								var curData = data.data;
+								if(curData == null) {
+								} else {
+									that.vaccine_name = curData.vaccine_name;
+									that.jz_date = curData.jz_date;
+									that.find_date = curData.find_date;
+									that.jz_site = curData.jz_site;
+									that.jz_reaction = curData.jz_reaction;
+									that.other_reaction = curData.other_reaction;
+									that.feedBackChats = curData.content;
+									that.reply_flag = curData.reply_flag; 
+									that.imgs = curData.images;
+									
+									chatvm.chatMsgNum = that.feedBackChats.length;
+									chatvm.reply_flag = that.reply_flag;
+									
+								}
+								
+							}
+						});
+					}
+				});
+				
+				 chatvm = new Vue({
+					el: "#chatDiv",
+					data: {
+						chatContent: "",
+						chatMsgNum: feedbacvm.feedBackChats.length,
+						reply_flag: "1"
+					},
+					methods: {
+						addPic: function(e) {
+							
+							//let that = this;
+							document.getElementById("sendImg").click();
+							return false;
+						},
+						onImageChange: function(e) {
+							lovm.active = true;
+							var files = e.target.files || e.dataTransfer.files;
+							if(!files.length) return;
+							this.createImage(files, e);
+						},
+						createImage: function(files, e) {
+							//let that = this;
+							var file = files[0];
+							try{
+								lrz(file, { width: 480 }, function(rst) {
+									var blob = dataURItoBlob(rst.base64);
+									sendContent("1", blob, file.name);
+									
+									return rst;
+								});
+							} catch(e2) {
+								// 清空文件上传控件的值
+								e.target.value = null;
+								lovm.active = false;
+							}
+							e.target.value = null;
+							
+						},
+					}
+				});
+		}
+
+			//在改function 中添加原生调起js方法
+	        setupWebViewJavascriptBridge(function(bridge) {
+	        	/*if(isAndroid_ios()) {//android
+		        	bridge.init(function(message, responseCallback) {
+		               
+		            });
+	           	}*/
+	            //注册原生调起方法
+			    //参数1： buttonjs 注册flag 供原生使用，要和原生统一
+			    //参数2： data  是原生传给js 的数据
+			    //参数3： responseCallback 是js 的回调，可以通过该方法给原生传数据
+			    bridge.registerHandler("returnPicture", function(data, responseCallback) {
+			        if(data) {
+			        	if(isAndroid_ios()) {//android
+			        		data = JSON.parse(data);
+			        	}
+			        	if(data.uploadFlag == "1") {
+			        		var imageData = "data:image/jpeg;base64," + data.imageData;
+			        		var blob = dataURItoBlob(imageData);
+							sendContent("1", blob);	
+			        	}
+			        }
+			    });
+	        });
+			
+
+			
+			function sendContent(type, blob) {
+				var chatContent = chatvm.chatContent;
+				var that = feedbacvm;
+				var formData = new FormData();
+				
+				formData.append("abnormal_id", feedbacvm.abnormalId);
+				formData.append("type", type);
+				if(type == "0") {
+					formData.append("content", chatContent);
+				} else if(type == "1") {
+					formData.append("file", blob, "file"+ Math.random() +".jpg");
+				}
+				axiosPost(formData, "/Feedback/SaveUserQuestion", function(data) {
+					lovm.active = false;
+					if(data.code == "1") {
+						ons.notification.toast(data.message, toastOptions);
+					} else if(data.code == "0") {
+						axiosGet({abnormal_id: that.abnormalId}, "/Encryption/Feedback/GetAbnormalDetail", function(data2) {
+							if(data2.code == '0') {
+								var curData = data2.data;
+								if(curData == null) {
+								} else {
+									that.vaccine_name = curData.vaccine_name;
+									that.jz_date = curData.jz_date;
+									that.find_date = curData.find_date;
+									that.jz_reaction = curData.jz_reaction;
+									that.feedBackChats = curData.content;
+									
+									
+								}
+								chatvm.chatContent="";
+								
+							}
+						});
+					}	
+				});
+				
+			}
+			function sendChat(){
+			  	var chatContent = chatvm.chatContent;
+				if(!chatContent) {
+					ons.notification.toast("发送内容不能为空！", toastOptions);
+					return false;	
+				}
+				sendContent("0");
+			}
+			function sendImg() {
+				//参数1： pay 注册flag 供原生使用，要和原生统一
+	            //参数2： 是调起原生时向原生传递的参数
+	            //参数3： 原生调用回调返回的数据
+				window.WebViewJavascriptBridge.callHandler('getImageFromGallery', {}, function(resp) {});
+           	}
+			function setImg(obj){
+				var body = document.body;
+				var shadow = document.createElement("div");
+				shadow.id = "imgshadow";
+				shadow.style.width="100vw";
+				shadow.style.height="100vh";
+				shadow.style.backgroundColor="black";
+				shadow.style.zIndex="99";
+				shadow.style.position="absolute";
+				shadow.style.left="0";
+				shadow.style.top="0";
+				shadow.style.display="flex";
+				shadow.style.alignContent="center";
+				shadow.style.alignItems="center";
+				var wrapper = document.createElement("div");
+				wrapper.className = "mui-zoom-wrapper";
+				var scroller = document.createElement("div");
+				scroller.className = "mui-zoom-scroller";
+				var img = document.createElement("img");
+				img.className = "mui-zoom";
+				img.style.width = "100vw";
+				img.setAttribute("src", obj.getAttribute("src"));
+				document.body.appendChild(shadow);
+				shadow.appendChild(wrapper);
+				wrapper.appendChild(scroller);
+				scroller.appendChild(img);
+				wrapper.addEventListener("tap",function(evt){
+					document.body.removeChild(shadow);
+					if(window.event) {
+					   window.event.cancelBubble = true;
+					}else{
+					   evt.stopPropagation();
+					}
+				})
+				document.getElementById("imgshadow").addEventListener("tap",function(evt){
+					document.body.removeChild(shadow);
+				})
+	    	}
+			function inputfocus(){
+				if(isAndroid_ios()){
+					document.getElementById("bottomBar").parentElement.style.bottom = "auto";
+					document.getElementById("bottomBar").parentElement.style.top = "0px";
+				}
+			}
+			function inputblur(){
+				if(isAndroid_ios()){
+					document.getElementById("bottomBar").parentElement.style.bottom = "0";
+					document.getElementById("bottomBar").parentElement.style.top = "auto";
+				}
+			}
+			
+			
+		</script>	
+</ons-page>

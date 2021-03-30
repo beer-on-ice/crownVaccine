@@ -1,0 +1,277 @@
+<ons-page>
+	<style>
+		.selectableday {
+			opacity: 1 !important;
+			background-color: #e0f7d8 !important;
+			color: #454545 !important;
+			border: 1px solid #c5c5c5 !important;
+		}
+		
+		.selectedday {
+			color: white !important;
+			background-color: rgb(103, 152, 255) !important;
+		}
+		
+		.red.selectedday {
+			color: red !important;
+		}
+		
+		.list {
+			float: left;
+			height: 50px;
+			width: 100%;
+			border-bottom-width: 1px;
+			border-bottom-style: solid;
+			border-bottom-color: #d5e1e5;
+		}
+		
+		.list .time {
+			float: left;
+			width: 39%;
+			height: 30px;
+			line-height: 30px;
+			margin-top: 0.7em;
+			font-size: 16px;
+			text-align: left;
+		}
+		
+		.list .listcontent {
+			float: left;
+			width: 30%;
+			margin-left: 2em;
+			margin-top: 0.7em;
+			height: 30px;
+			line-height: 30px;
+			color: #5f5f5f;
+			font-size: 16px;
+		}
+		
+		.list .btn {
+			width: 15%;
+			float: left;
+			text-align: center;
+			background-color: #6798FF;
+			height: 30px;
+			line-height: 30px;
+			font-size: 16px;
+			color: #FFF;
+			border-radius: 3px;
+			border-top-left-radius: 3px;
+			border-top-right-radius: 3px;
+			border-bottom-right-radius: 3px;
+			border-bottom-left-radius: 3px;
+			margin-top: 0.7em;
+		}
+		
+		#stationTime {
+			transform: none !important;
+		}
+	</style>
+	<ons-toolbar class="toolbar">
+		<div class="left toolbar__left" onclick="backfunction()">
+			<ons-icon icon="ion-ios-arrow-back" style="color: white" size="24px"></ons-icon>
+		</div>
+		<div class="center toolbar__center">
+			预约时间
+		</div>
+		<div class="right toolbar__right">
+			<img id="indexPng" src="images/ic_appoint_ment.png" style="width: 24px;height: 24px;vertical-align: middle;" onclick="goBespeakListSt()">
+		</div>
+	</ons-toolbar>
+
+	<div class="content" id="stationTime" v-cloak>
+		<div style="margin: 0 auto;position: fixed;top:65%;    width: 100%;
+    				text-align: center;" v-if="station_time.date_day==undefined&&loadingend">
+			<ons-icon icon="ion-notifications-outline" style="color: orange" size="24px"></ons-icon>{{info}}
+		</div>
+		<div>
+			<div id="div1"></div>
+			<div id="time" style="overflow: auto;">
+				<div class="list" style="width:95%;margin: 0 auto;float: none;" v-for="worktime in station_time.work_time_list">
+					<div class="time">{{worktime.work_begin_time}}-{{worktime.work_end_time}}</div>
+					<div class="listcontent">剩余<span v-bind:style="{'color':worktime.is_allow_reservation==0 ? 'red':''}">{{worktime.reservation_last_count}}</span>名</div>
+					<div class="btn" v-bind:style="{'background-color':worktime.is_allow_reservation==0 ? '#bababa':''}" v-on:click="yuyue(station_time.date_day,worktime.work_begin_time,worktime.work_end_time,worktime.reservation_last_count);">预约</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script>
+		ons.getScriptPage().onInit = function() {
+			var vm = new Vue({
+				el: '#stationTime',
+				data: {
+					station_time: {},
+					info: "ⓘ没有可预约的时间",
+					loadingend: false
+				},
+				created: function() {
+					var that = this;
+					if(sessionStorage.getItem("bespeak_vaccine") == undefined || sessionStorage.getItem("bespeak_vaccine") == '') {
+						top.backIndex();
+						return;
+					}
+					var baby = JSON.parse(sessionStorage.getItem("baby"));
+					sessionStorage.setItem("reservation_station_code", baby.station_code);
+					var params = {
+						"child_code": baby.child_code,
+						"vaccine_code": sessionStorage.getItem("bespeak_vaccine"),
+						"station_code": baby.station_code
+					};
+					axiosGet(params, "/Encryption/Station/GetStationDayListNew", function(data) {
+						that.loadingend = true;
+						if(data.code == '0') {
+							if(data.data.length > 0) {
+								var stationtimeList = data.data;
+								var month = parseInt(stationtimeList[0].date_day.split("-")[1]);
+								var selectabledays = getSelectabledays(stationtimeList, month);
+								var first = stationtimeList[0].date_day.split("-");
+								var last = stationtimeList[stationtimeList.length - 1].date_day.split("-");
+								new Calendar({
+									// 用户传入实际的数据
+									container: 'div1',
+									angle: 14,
+									isMask: false, // 是否需要弹层
+									beginTime: first, //如空数组默认设置成1970年1月1日开始,数组的每一位分别是年月日。
+									endTime: last, //如空数组默认设置成次年12月31日,数组的每一位分别是年月日。
+									recentTime: first, //如空数组默认设置成当月1日,数组的每一位分别是年月日。
+									isSundayFirst: false, // 周日是否要放在第一列
+									isShowNeighbor: false, // 是否展示相邻月份的月尾和月头
+									isToggleBtn: true, // 是否展示左右切换按钮
+									isChinese: true, // 是否是中文
+									monthType: 1, // 0:1月, 1:一月, 2:Jan, 3: April
+									canViewDisabled: false, // 是否可以阅读不在范围内的月份
+									beforeRenderArr: selectabledays,
+									success: function(item, arr) {
+										var nows = document.getElementsByClassName("div1-item-" + item);
+										if(nows.length == 0) {
+											return;
+										}
+										var lasts = document.getElementsByClassName("selectedday");
+										for(var j = 0; j < nows.length; j++) {
+											var now = nows[j];
+											if(now.className.indexOf("selectableday") == -1) {
+												return;
+											}
+											for(var i = 0; i < lasts.length; i++) {
+												var last = lasts[i];
+												if(now == last) {
+													return;
+												}
+											}
+										}
+										while(lasts.length > 0) {
+											var last = lasts[0];
+											last.className = last.className.replace("selectedday", "");
+										}
+										for(var j = 0; j < nows.length; j++) {
+											var now = nows[j];
+											now.className = now.className + " selectedday";
+										}
+										var timeitem = getFormatDate(item);
+										for(var i = 0; i < stationtimeList.length; i++) {
+											var stationtime = stationtimeList[i];
+											if(stationtime.date_day == timeitem) {
+												that.station_time = stationtime;
+											}
+										}
+									},
+									switchRender: function(year, month, cal) {
+										var lasts = document.getElementsByClassName("selectedday");
+										while(lasts.length > 0) {
+											var last = lasts[0];
+											last.className = last.className.replace(/selectedday/g, "");
+										}
+										that.station_time = {};
+										setTimeout(function() {
+											var data = getSelectabledays(stationtimeList, cal.currentMonth+1);
+											cal.renderCallbackArr(data);
+										}, 500)
+
+										setDivHeight();
+									}
+								});
+								setDivHeight();
+							}
+						}
+					});
+				},
+				methods: {
+					yuyue: function(yydate, begin_time, end_time, num) {
+						if(num == 0) {
+							return;
+						}
+						var datearr = yydate.split("-")
+						var timearr = end_time.split(":");
+						var time = new Date(datearr[0], datearr[1] - 1, datearr[2], timearr[0], timearr[1], "00");
+						if(time.getTime() <= new Date().getTime()) {
+							ons.notification.toast("该时间段不能预约！", toastOptions);
+							return;
+						}
+						sessionStorage.setItem("bespeak_yydate", yydate);
+						sessionStorage.setItem("bespeak_begin_time", begin_time);
+						sessionStorage.setItem("bespeak_end_time", end_time);
+						top.document.querySelector('ons-navigator').pushPage("bespeak/check_bespeak.html", {
+							callback: function() {
+								backfunction = function() {
+									backToPrevPage("bespeak/station_time.html");
+								};
+								pageBackFuncs["bespeak/check_bespeak.html"] = backfunction;
+							}
+						});
+					}
+				}
+			});
+
+			function setDivHeight() {
+				setTimeout(function() {
+					var h = parseInt(document.defaultView.getComputedStyle(document.querySelector("#div1"), null).height);
+					document.getElementById("time").style.height = document.body.clientHeight - 75 - h + "px";
+				}, 350);
+			}
+
+			function getSelectabledays(stationtimeList, month) {
+				var today = new Date();
+				var selectabledays = [];
+				today.setHours(0, 0, 0, 0);
+				selectabledays.push({
+					'stamp': today.getTime(),
+					'className': "red",
+				});
+				var dateitem, stationtimearr;
+				var firstflag = true;
+				for(var i = 0; i < stationtimeList.length; i++) {
+					stationtimearr = stationtimeList[i].date_day.split("-");
+					if(month==stationtimearr[1]){
+					dateitem = new Date(parseInt(stationtimearr[0]), parseInt(stationtimearr[1]) - 1,
+						parseInt(stationtimearr[2], 0, 0, 0));
+					selectabledays.push({
+						'stamp': dateitem.getTime(),
+						'className': "selectableday",
+					});
+					if(firstflag) {
+						vm.station_time = stationtimeList[i];
+						firstflag = false;
+						selectabledays.push({
+							'stamp': dateitem.getTime(),
+							'className': "selectedday",
+						});
+					}
+					}
+				}
+				return selectabledays;
+			}
+		}
+
+		function goBespeakListSt() {
+			top.document.querySelector('ons-navigator').pushPage("bespeak/bespeak_list.html", {
+				callback: function() {
+					backfunction = function() {
+						backToPrevPage("bespeak/station_time.html");
+					};
+					pageBackFuncs["bespeak/bespeak_list.html"] = backfunction;
+				}
+			});
+		}
+	</script>
+</ons-page>

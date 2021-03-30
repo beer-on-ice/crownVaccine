@@ -1,0 +1,64 @@
+<ons-page>
+		
+			<ons-toolbar class="toolbar" id="surveyquestiontitle">
+			
+			
+			    <div class="left toolbar__left" onclick="backfunction()" style="width:20%;">
+			      	<ons-icon icon="ion-ios-arrow-back" style="color: white" size="24px"></ons-icon>
+			    </div>
+			    <div class="center toolbar__center" style="position: relative !important;">
+			    	<marquee v-if="showmarque" scrollamount="3" ><font id="surveyTitle" size="5">{{question_survey_title}}</font></marquee>
+			    	<div v-else><font id="surveyTitle" size="5">{{question_survey_title}}</font></div>
+			    </div>
+			    <div class="right toolbar__right" style="width:20%;">
+			    </div>
+		 	</ons-toolbar>
+  	
+			<div style="text-align: center;" id="surveyQuestionPage">
+		        <iframe id="surveyQuestionSubPage" v-bind:src="mscur" style="width: 100%;border: 0px;height:calc(100vh - 80px);"></iframe>
+		    </div>
+		    
+		<script>
+			/*var question_survey_url = sessionStorage.getItem("question_survey_url");
+			var question_survey_title = sessionStorage.getItem("question_survey_title");
+			document.getElementById("surveyTitle").textContent = question_survey_title;*/
+			
+			ons.getScriptPage().onInit = function(){
+				new Vue({
+					el: '#surveyquestiontitle',
+					data: {
+						showmarque:false,
+						question_survey_title:""
+					},
+					created: function() {
+						var that=this;
+						that.question_survey_title=sessionStorage.getItem("question_survey_title");
+						var tlength=GetLength(that.question_survey_title);
+						if(tlength*12>(window.screen.availWidth*0.6)){
+						         that.showmarque=true;
+						}
+					}
+				});
+				new Vue({
+					el: '#surveyQuestionPage',
+					data: {
+						mscur:"",
+					},
+					created: function() {
+						var that=this;
+						that.mscur = sessionStorage.getItem("question_survey_url");
+					}
+				});
+			};
+			function GetLength(str) {
+			  return str.replace(/[\u0391-\uFFE5]/g,"aa").length;
+			};  
+			
+			function muiback() {//调查问卷回答完毕后调用，muiBack.html页面(嵌入到调查问卷页面)最终调用
+				top.document.querySelector('ons-navigator').resetToPage("indexpage.html");
+			}
+			
+		</script>
+	
+</ons-page>
+

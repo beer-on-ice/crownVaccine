@@ -1,0 +1,164 @@
+<!--预约-->
+<ons-page>
+	 <style>
+            [v-cloak] {
+              display: none;
+            }
+            .info_msg{
+        		font-size: 18px;
+        		font-weight: bold;
+        		text-align: center;
+        		margin-top: 15px;
+        	}
+        	.chidinfo{
+            	margin-top: 10px;
+            	margin-left: 10px;
+            	display: flex;
+            	justify-content: flex-start;
+            	flex-direction: row;
+            }
+            .chidinfo .label{
+            	color:#666;
+            	word-break:keep-all;
+            	white-space:nowrap;
+            }
+            .button--cta{
+				margin-left: 5%;
+				background-color: #6798FF;
+				font-size: 18px;
+				color:#fff;
+				width: 90%;
+			}
+			.mui-content{
+		    	height: calc(100vh - 50px);
+				background-color: #EFEFF4;
+				overflow-y:auto;
+		    }
+        </style>
+	
+		<ons-toolbar class="toolbar">
+	  	    <div class="left toolbar__left" onclick="backfunction()">
+				<ons-icon icon="ion-ios-arrow-back" style="color: white" size="24px"></ons-icon>
+			</div>
+		    <div class="center toolbar__center">
+		    	预约
+		    </div>
+		    <div class="right toolbar__right" >
+	      	     <img id="indexPng" src="images/ic_appoint_ment.png" style="width: 24px;height: 24px;vertical-align: middle;" onclick="goBespeakList()">
+		    </div>
+	 	</ons-toolbar>
+
+        <div class="mui-content content" id="detail-content" v-cloak>
+        	<div v-if="signflag" style="margin: 10px;padding: 10px; background-color: #fffde9;color: red;display: flex;justify-content: flex-end;flex-direction: row;">
+        		<div style="word-break:keep-all;white-space:nowrap; " v-if="stationszflag">签到提醒：</div><div v-if="stationszflag">请在预约时间段内到门诊签到！去接种门诊之前，请量好孩子的体温并做好记录。</div>
+        		<div style="word-break:keep-all;white-space:nowrap; " v-if="!stationszflag">预约提醒：</div><div v-if="!stationszflag">请在预约时间段内到门诊！去接种门诊之前，请量好孩子的体温并做好记录。</div>
+        	</div>
+        	<div>
+        		<div class="chidinfo">
+	        		<div class="label">儿童姓名：</div>
+	        		<div>{{bespeakInfo.child_name}}</div>
+	        	</div>
+	        	<div class="chidinfo">
+	        		<div class="label">儿童编码：</div><div>{{bespeakInfo.child_code}}</div>
+	        	</div>
+	        	<div class="chidinfo">
+	        		<div class="label">预约门诊：</div>
+	        		<div>{{bespeakInfo.station_name}}</div>
+	        	</div>
+	        	<div class="chidinfo">
+	        		<div class="label">接种疫苗：</div>
+	        		<div><div v-for="bespeak in vaccine_name">{{bespeak}}</div></div>
+	        	</div>
+	        	<div class="chidinfo">
+	        		<div class="label">预约时间：</div>
+	        		<div>{{bespeakInfo.reservation_date}}&nbsp;{{bespeakInfo.reservation_begin_time}}-{{bespeakInfo.reservation_end_time}}</div>
+	        	</div>
+        	</div>
+        	<div style="margin-top:30px;">
+	        			 <button class="button--cta" v-on:click="backIndex" v-if="bespeakInfo.is_allow_cancel=='1'">取消预约</button>
+        	</div>
+        </div>
+	
+	 <script>
+	 	
+	 	ons.getScriptPage().onInit = function(){
+	 		 var vm = new Vue({
+                el: '#detail-content',
+                data: {
+                    bespeakInfo:{},
+                    signflag:false,
+                    stationszflag:false
+                },
+                computed: {
+					vaccine_name: function() {
+						if(this.bespeakInfo.vaccine_name!=undefined&&this.bespeakInfo.vaccine_name!=''){
+							return this.bespeakInfo.vaccine_name.split(',');
+						}
+						return [];
+					}
+				},
+                created: function() {
+                    var that=this;
+                    if(sessionStorage.getItem("reservation_code")==undefined||sessionStorage.getItem("reservation_code")==''){
+                    	top.backIndex();
+                    	return;
+                    }
+                    that.sessionBaby = JSON.parse(sessionStorage.getItem("baby"));
+                    var senddata={"reservation_code":sessionStorage.getItem("reservation_code")};
+                	axiosGet(senddata,"/Encryption/Reservation/GetReservationDetails",function(data){
+                        if(data.code=='0'){
+                            that.bespeakInfo=data.data;
+                            var today = new Date();
+                    		today.setHours(23,59,59,999);
+                    		var yydate = new Date();
+                    		var timearr = that.bespeakInfo.reservation_date.split("-");
+                    		yydate.setFullYear(timearr[0],parseInt(timearr[1])-1,timearr[2]);
+                    		//if(yydate>=today){
+	                        	that.signflag=true;
+                    		//}
+                    		that.stationszflag=data.data.station_digital=="1";
+                        }
+                    });
+                },
+                methods:{
+                	backIndex:function(){
+                		var btnArray = ['否', '是'];
+            		    ons.notification.confirm('是否确定取消预约？', {
+		                 	buttonLabels:btnArray,
+		                 	title:"提示",
+		                 	callback: function(idx) {
+						      	if(idx==1){
+	                                var senddata={"reservation_code":sessionStorage.getItem("reservation_code")};
+	                                axiosGet(senddata,"/Encryption/Reservation/CancelReservation",function(data){
+	                                    if(data.code=='0'){
+	                                    	ons.notification.toast(data.message, toastOptions);
+			                        		setTimeout(function(){
+			                        			top.backIndex();
+			                        		},1000);
+	                                    }else{
+	                                    	ons.notification.toast(data.message, toastOptions);
+	                                    }
+	                                });
+                                }
+						    }
+		                });
+                	}
+                }
+            });
+	 	}
+	 	
+		function goBespeakList(){
+			//top.document.querySelector('ons-navigator').pushPage("bespeak/bespeak_list.html");
+			top.document.querySelector('ons-navigator').pushPage("bespeak/bespeak_list.html",{callback:function(){
+				backfunction = function(){
+					backToPrevPage("bespeak/bespeakdetail.html");
+				};
+				pageBackFuncs["bespeak/bespeak_list.html"] = backfunction;
+			}});
+		}
+        	
+        </script>
+</ons-page>
+
+
+

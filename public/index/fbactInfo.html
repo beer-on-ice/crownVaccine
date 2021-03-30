@@ -1,0 +1,168 @@
+
+		<ons-page>
+		<style>
+		#carouselContent .list-item__center{
+			display: inline-block !important;
+			text-align: left;
+			word-break: keep-all;
+			white-space: nowrap;
+			overflow: hidden;
+			text-overflow: ellipsis;
+		}
+		</style>
+			<ons-toolbar class="toolbar">
+			    <div class="left toolbar__left" onclick="backfunction()">
+					<ons-icon icon="ion-ios-arrow-back" style="color: white" size="24px"></ons-icon>
+				</div>
+			    <div class="center toolbar__center">
+			    	疫苗知识
+			    </div>
+			</ons-toolbar>
+			<div style="text-align: center;background-color: #1F86E3;" id="bactMenu">
+				<ons-segment id="menus_change" style="width: 90%;margin: 5px 0;">
+					<button v-on:click="gotoPage($event,0)" class="fontStyle" :active="btnIndex==1">免疫规划疫苗</button>
+					<button v-on:click="gotoPage($event,1)" class="fontStyle" :active="btnIndex==2">非免疫规划疫苗</button>
+				</ons-segment>	
+		    </div>
+			<ons-carousel id="carouselContent" style="background-color: white;height: calc(100% - 39px);"> 
+	    		<ons-carousel-item>
+	    			<ul class="list" style="margin: 0 10px;height: 100%;overflow: auto;">
+	    				<li class="list-item" v-on:click="showDetail('乙肝疫苗','/first/sh_yg')">
+						    <div class="list-item__center">乙肝疫苗</div>
+						</li>
+	    				<li class="list-item" v-on:click="showDetail('卡介苗','/first/sh_kjm')">
+						    <div class="list-item__center">卡介苗</div>
+						</li>
+	    				<li class="list-item" v-on:click="showDetail('脊灰减毒活疫苗','/first/sh_jhjdmh')">
+						    <div class="list-item__center">脊灰减毒活疫苗</div>
+						</li>
+	    				<li class="list-item" v-on:click="showDetail('脊灰灭活疫苗','/first/sh_jhmh')">
+						    <div class="list-item__center">脊灰灭活疫苗</div>
+						</li>
+	    				<li class="list-item" v-on:click="showDetail('流脑A群/A+C群多糖疫苗','/first/sh_lnac')">
+						    <div class="list-item__center">流脑A群/A+C群多糖疫苗</div>
+						</li>
+	    				<li class="list-item" v-on:click="showDetail('百白破疫苗/白破疫苗','/first/sh_bbp')">
+						    <div class="list-item__center">百白破疫苗/白破疫苗</div>
+						</li>
+	    				<li class="list-item" v-on:click="showDetail('麻疹疫苗/麻疹风疹联合疫苗/麻腮风疫苗','/first/sh_mzmf')">
+						    <div class="list-item__center">麻疹疫苗/麻疹风疹联合疫苗/麻腮风疫苗</div>
+						</li>
+	    				<li class="list-item" v-on:click="showDetail('乙脑减毒活疫苗','/first/sh_ynjd')">
+						    <div class="list-item__center">乙脑减毒活疫苗</div>
+						</li>
+	    				<li class="list-item" v-on:click="showDetail('水痘疫苗','/first/sh_sd')">
+						    <div class="list-item__center">水痘疫苗</div>
+						</li>
+	    				<li class="list-item" v-on:click="showDetail('甲肝灭活疫苗','/first/sh_jgmh')">
+						    <div class="list-item__center">甲肝灭活疫苗</div>
+						</li>
+	    				<li class="list-item" v-on:click="showDetail('23价肺炎球菌多糖疫苗','/first/sh_fyqjdt')">
+						    <div class="list-item__center">23价肺炎球菌多糖疫苗</div>
+						</li>
+					</ul>
+	    		</ons-carousel-item>
+	    		<ons-carousel-item>
+	    			<ul class="list" style="margin: 0 10px;height: 100%;overflow: auto;">
+	    			 	<li class="list-item" v-on:click="showDetail('乙肝疫苗','/second/sh_yg')">
+					    	<div class="list-item__center">乙肝疫苗</div>
+					  	</li>
+	    			 	<li class="list-item" v-on:click="showDetail('13价肺炎球菌多糖结合疫苗','/second/sh_fyqjdt13')">
+					    	<div class="list-item__center">13价肺炎球菌多糖结合疫苗</div>
+					  	</li>
+	    			 	<li class="list-item" v-on:click="showDetail('脊髓灰质炎灭活疫苗','/second/sh_jshzymh')">
+					    	<div class="list-item__center">脊髓灰质炎灭活疫苗</div>
+					  	</li>
+	    			 	<li class="list-item" v-on:click="showDetail('百白破-Hib-IPV联合疫苗（五联疫苗）*','/second/sh_wl')">
+					    	<div class="list-item__center">百白破-Hib-IPV联合疫苗（五联疫苗）*</div>
+					  	</li>
+	    			 	<li class="list-item" v-on:click="showDetail('轮状病毒疫苗','/second/sh_lzbd')">
+					    	<div class="list-item__center">轮状病毒疫苗</div>
+					  	</li>
+	    			 	<li class="list-item" v-on:click="showDetail('五价轮状病毒疫苗','/second/sh_wjlzbd')">
+					    	<div class="list-item__center">五价轮状病毒疫苗</div>
+					  	</li>
+	    			 	<li class="list-item" v-on:click="showDetail('流脑-Hib联合疫苗*','/second/sh_lnhib')">
+					    	<div class="list-item__center">流脑-Hib联合疫苗*</div>
+					  	</li>
+	    			 	<li class="list-item" v-on:click="showDetail('百白破-Hib联合疫苗（四联疫苗）*','/second/sh_bbphib')">
+					    	<div class="list-item__center">百白破-Hib联合疫苗（四联疫苗）*</div>
+					  	</li>
+	    			 	<li class="list-item" v-on:click="showDetail('b型流感嗜血杆菌（Hib）疫苗','/second/sh_hib')">
+					    	<div class="list-item__center">b型流感嗜血杆菌（Hib）疫苗</div>
+					  	</li>
+	    			 	<li class="list-item" v-on:click="showDetail('流感疫苗','/second/sh_lg')">
+					    	<div class="list-item__center">流感疫苗</div>
+					  	</li>
+	    			 	<li class="list-item" v-on:click="showDetail('EV71病毒疫苗','/second/sh_ev71')">
+					    	<div class="list-item__center">EV71病毒疫苗</div>
+					  	</li>
+	    			 	<li class="list-item" v-on:click="showDetail('乙脑灭活疫苗*','/second/sh_ynmh')">
+					    	<div class="list-item__center">乙脑灭活疫苗*</div>
+					  	</li>
+	    			 	<li class="list-item" v-on:click="showDetail('水痘疫苗','/second/sh_sd')">
+					    	<div class="list-item__center">水痘疫苗</div>
+					  	</li>
+	    			 	<li class="list-item" v-on:click="showDetail('甲肝灭活疫苗','/second/sh_jgmh')">
+					    	<div class="list-item__center">甲肝灭活疫苗</div>
+					  	</li>
+	    			 	<li class="list-item" v-on:click="showDetail('霍乱疫苗','/second/sh_hl')">
+					    	<div class="list-item__center">霍乱疫苗</div>
+					  	</li>
+	    			 	<li class="list-item" v-on:click="showDetail('ACYW135流脑多糖疫苗*','/second/sh_acyw135')">
+					    	<div class="list-item__center">ACYW135流脑多糖疫苗*</div>
+					  	</li>
+	    			 	<li class="list-item" v-on:click="showDetail('A+C群流脑结合疫苗*','/second/sh_aclnjh')">
+					    	<div class="list-item__center">A+C群流脑结合疫苗*</div>
+					  	</li>
+	    			 	<li class="list-item" v-on:click="showDetail('双价人乳头瘤病毒吸附/四价/九价人乳头瘤疫苗','/second/sh_rrtlbd')">
+					    	<div class="list-item__center">双价人乳头瘤病毒吸附/四价/九价人乳头瘤疫苗</div>
+					  	</li>
+	    			 	<li class="list-item" v-on:click="showDetail('23价肺炎球菌多糖疫苗','/second/sh_fyqjdt')">
+					    	<div class="list-item__center">23价肺炎球菌多糖疫苗</div>
+					  	</li>
+					</ul>
+	    		</ons-carousel-item>
+	    	</ons-carousel>
+		<script>
+			var vmmenu=new Vue({
+		        el: '#menus_change',
+		        data:{
+		        	btnIndex:0,
+		        },
+		        methods: {
+		            gotoPage: function(evt,index) { 
+		                this.btnIndex = index;
+		            }
+		        },
+				watch: {
+					btnIndex:function(val){
+						var menus_change = document.getElementById('menus_change');
+						if(menus_change&&menus_change.setActiveButton){
+			 				menus_change.setActiveButton(val);
+						}
+						var carousel = document.getElementById('carouselContent');
+						if(carousel&&carousel.setActiveIndex){
+			 				carousel.setActiveIndex(val);
+						}
+					}
+				}
+		    });
+		    new Vue({
+		        el: '#carouselContent',
+		        methods: {
+		            showDetail:function(itemName,itemEnName){
+		            	sessionStorage.setItem("ymname",itemName);
+		            	sessionStorage.setItem("ymenname",itemEnName);
+		            	top.document.querySelector('ons-navigator').pushPage("index/fbactDetail.html")
+		            }
+		        },
+		        mounted:function(){
+		        	document.querySelector("#bactMenu").addEventListener('touchmove', function (e) {
+				  		e.preventDefault(); //阻止默认的处理方式(阻止下拉滑动的效果)
+					}, {passive: false});	
+		        }
+		    });
+		</script>
+		</ons-page>
+		

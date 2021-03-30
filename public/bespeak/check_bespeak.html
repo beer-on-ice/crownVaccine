@@ -1,0 +1,479 @@
+<!--核对预约信息-->
+<ons-page>
+   <style>
+        [v-cloak] {
+          display: none;
+        }
+        .beschidinfo{
+        	margin-top: 10px;
+        }
+        .beschidinfo label{
+        	color:#666;
+        }
+        .column{
+        	display: flex;
+        	justify-content: center;
+        	flex-direction: column;
+        }
+        .row_space_between{
+        	display: flex;
+        	justify-content: space-between;
+        	flex-direction: row;
+        	margin-top: 10px;
+        	margin-right: 20px;
+        }
+        .row_flex_start{
+        	display: flex;
+        	justify-content: flex-start;
+        	flex-direction: row;
+        }
+        .mui-popup-in{
+        	background-color: white;
+        }
+        .mui-popup-buttons{
+        	height: 88px;
+        	display: block;
+        }
+        .mui-popup-button{
+        	min-width: 100%;
+        	display: block;
+        }
+        .mui-popup-button:first-child{
+        	border-radius: 0;
+        }
+        .mui-popup-button:last-child{
+        	border-radius: 0 0 13px 13px;
+        }        
+        .check-bespeak-detail{
+        	height: calc(100vh - 44px);
+        	background-color: #EFEFF4;
+        	overflow-y:auto;
+        }
+        .button--cta{
+			margin-left: 5%;
+			background-color: #6798FF;
+			font-size: 18px;
+			color:#fff;
+			width: 90%;
+	    }
+	    
+    	.show-bespeak-sheet{
+			position: absolute;
+			bottom: -400px;
+			height: 400px;
+			left: 0;
+			right: 0;
+			transition: bottom 0.5s;
+			z-index: 200001;
+			-webkit-font-smoothing:antialiased;
+			cursor:default;
+			background-color: white;
+			display: none;
+		}
+		.action-sheet-mask{
+			z-index: 20000; 
+			opacity: 1; 
+			transition: all 0.2s linear 0s;
+		}
+		.wuxiaojuan .alert-dialog-footer--material{
+			display:inherit !important;
+		}
+		.wuxiaojuan .alert-dialog-footer--rowfooter{
+			display:inherit !important;
+		}
+    </style>
+			<ons-toolbar class="toolbar">
+			    <div class="left toolbar__left" onclick="backfunction()">
+					<ons-icon icon="ion-ios-arrow-back" style="color: white" size="24px"></ons-icon>
+			    </div>
+			    <div class="center toolbar__center">
+			    	核对预约信息
+			    </div>
+			    <div class="right toolbar__right">
+			  		<img src="images/ic_home.png" style="width: 24px;height: 24px;vertical-align: middle;" onclick="backIndex();">
+			    </div>
+		 	</ons-toolbar>
+ 	
+ 	        <div class="check-bespeak-detail content" v-cloak >
+        	<div style="margin-top: 10px;margin-left: 10px;margin-right: 10px;margin-bottom: 25px;">
+	        	<div class="beschidinfo">
+	        		<label>儿童姓名：</label>{{child_name}}
+	        	</div>
+	        	<div class="beschidinfo">
+	        		<label>儿童编码：</label>{{child_code}}
+	        	</div>
+	        	<div class="beschidinfo">
+	        		<label>预约门诊：</label>{{station_name}}
+	        	</div>
+	        	<div class="beschidinfo">
+	        		<label>预约时间：</label>{{yydate}}
+	        	</div>
+	        	<div class="beschidinfo">
+	        		<label>接种疫苗：</label>
+	        		<div style="background: #fff;margin-top:5px ;" >
+	        			<div class="mui-clearfix" v-for="(vaccine,index) in vaccineList.vaccine_list">
+			        		<div class="mui-pull-left" style="margin-top: 5px;margin-left: 5px;margin-right: 5px;">
+			        			<div class="mui-btn mui-btn-outlined" v-if="vaccine.vaccine_class!=null&&vaccine.vaccine_class!=''"
+			        				v-bind:class="vaccine.vaccine_class=='国产'?'mui-btn-success':'mui-btn-danger'" style="padding: 0 3px;margin-top:3px;">
+			        				{{vaccine.vaccine_class}}
+			        			</div>
+			        		</div>
+			        		<div class="column" style="margin-left:5px;position: relative;padding-right: 30px;">
+			        			<div class="row_space_between">
+			        				<div style="color: #666;">{{vaccine.vaccine_name}}<span v-if="vaccine.vaccine_producer">-{{vaccine.vaccine_producer}}</span>(第{{vaccine.vaccine_count}}剂次)</div>
+			        				<div v-if="vaccine.vaccine_price">￥{{vaccine.vaccine_price}}</div>
+			        			</div>
+			        			<div>{{vaccine.vaccine_spec}}</div>
+			        			<div class="row_space_between" v-for="other in vaccine.other_cost_list">
+			        				<div style="color: #666;">{{other.other_cost_name}}</div><div>￥{{other.other_cost_price}}</div>
+			        			</div>
+			        			<div class="row_space_between" v-if="vaccineList.pay_status!='2001'">
+			        				<div style="color: #666;" v-if="vaccine.total_price!=null&&vaccine.total_price!=''">小计</div><div v-if="vaccine.total_price!=null&&vaccine.total_price!=''">￥{{vaccine.total_price}}</div>
+			        			</div>
+			        			<div v-show="ispayflag">
+			        				<div style="position: absolute;right: 0px;top:50%;" v-if="vaccine.is_multiple_price=='1'" 
+			        				v-on:click="showAllPrice(vaccine.vaccine_code,index)">
+			        				<img src="images/icon_price_normal.png" style="width: 50px;height: 50px;"/>
+			        				</div>
+			        			</div>
+			        			
+			        		</div>
+	        		</div>
+		        		
+	        		</div>
+	        		<div class="row_space_between">
+	        			<div style="color: #666;">总计：</div>
+	        			<div>￥{{vaccine_all_price}}</div>
+	        		</div>
+	        	    <button class="button--cta" v-on:click="saveYY()" >提交预约</button>
+	        	</div>
+        	</div>
+        </div>
+        
+        <div  class="action-sheet-mask" style="display: none;" onclick="hide_sheet_mask()"></div>
+        <div class="show-bespeak-sheet">
+		        <div style="background-color: white;" class="showcheckpayDetail">
+		            <div style="text-align: right;width: 100%;border-bottom:#E3E3E3 1px solid;margin: 5px 5px 0px 0px;height:30px;">
+				    	<ons-icon icon="ion-ios-close-outline" onclick="hide_sheet_mask()" style="color:#007AFF;" size="24px">&nbsp;</ons-icon>
+				    </div>
+				</div>
+				<div class="mui-scroll-wrapper" style="overflow-y: auto;height: 360px;">
+					<div class="mui-scroll">
+						<div class="mui-clearfix" v-for="(vaccine,index) in vaccineAllPrice" style="border-bottom: 1px solid #e3e3e3;">
+							<div class="mui-pull-left" style="margin-top: 5px;margin-left: 5px;margin-right: 5px;">
+								<div class="mui-btn mui-btn-outlined" v-if="vaccine.vaccine_class!=null&&vaccine.vaccine_class!=''" v-bind:class="vaccine.vaccine_class=='国产'?'mui-btn-success':'mui-btn-danger'" style="padding: 0 3px;margin-top:3px;">
+									{{vaccine.vaccine_class}}
+								</div>
+							</div>
+							<div class="column" style="margin-left:5px;padding-right:13px;position: relative;">
+								
+									<div class="row_space_between">
+										<div style="color: #666;">{{vaccine.vaccine_name}}<span v-if="vaccine.vaccine_producer">-{{vaccine.vaccine_producer}}</span>(第{{vaccine.vaccine_count}}剂次)</div>
+										<div>￥{{vaccine.vaccine_price}}</div>
+									</div>
+									<div>{{vaccine.vaccine_spec}}</div>
+									<div class="row_space_between" v-for="other in vaccine.other_cost_list">
+										<div style="color: #666;">{{other.other_cost_name}}</div>
+										<div>￥{{other.other_cost_price}}</div>
+									</div>
+									<div class="row_space_between" v-if="vaccineAllPrice.pay_status!='2001'">
+										<div style="color: #666;" v-if="vaccine.total_price!=null&&vaccine.total_price!=''">小计</div>
+										<div v-if="vaccine.total_price!=null&&vaccine.total_price!=''">￥{{vaccine.total_price}}</div>
+									</div>
+								    
+								    <div style="position: absolute;right: 0px;top:50%;">
+								    	<label class="radio-button radio-button--material" >
+									    	<input  name="radio" type="radio"  v-bind:value="index" v-model="checkPrice"  class="radio-button__input radio-button--material__input">
+				        				    <div style="top: 50%;width: 26px;right:1px;"  class="radio-button__checkmark radio-button--material__checkmark"></div>
+			        				    </label>
+								    </div>
+								    
+								
+							</div>
+							
+						</div>
+					</div>
+				</div>
+		</div>
+        
+			
+    <script>
+    	var baby = JSON.parse(sessionStorage.getItem("baby"));
+    	var payVum;var paydetailVum;
+    	ons.getScriptPage().onInit = function(){
+    		payVum = new Vue({
+					el: '.check-bespeak-detail',
+					data: {
+						child_name:'',
+						child_code:'',
+						station_name:'',
+						yydate:'',
+						vaccineList:{},
+						vaccineAllPrice:[],
+						ispayflag:payflag,
+		    			checkPrice:'0',
+		    			maxheight:document.documentElement.clientHeight*0.8,
+						computedFlag:false,
+						firstFlag:[],
+						toastFlag:true
+					},
+					created: function() {
+						var that=this;
+						that.child_name=baby.child_name;
+						that.child_code=baby.child_code;
+						that.station_name=baby.station_name;
+						that.yydate=sessionStorage.getItem("bespeak_yydate")+" "
+							+sessionStorage.getItem("bespeak_begin_time")+"-"+sessionStorage.getItem("bespeak_end_time");
+						axiosGet({"vaccine_code":sessionStorage.getItem("bespeak_vaccine"),"station_code":baby.station_code,"yydate":sessionStorage.getItem("bespeak_yydate")},
+		                            "/Encryption/Reservation/GetVaccinePriceByCode",function(data){
+		                            if(data.code=='0'){
+		                                that.vaccineList=data.data;
+		                                this.computedFlag = true;
+		                            }
+		                        });
+		                        
+					},
+					computed: {
+						vaccine_all_price:function(){
+							if(this.computedFlag){
+								this.computedFlag = false;
+							}
+							var list = this.vaccineList.vaccine_list;
+							if(!list){
+								return 0;
+							}
+							var all = 0;
+							for(var i=0;i<list.length;i++){
+								all += parseFloat(list[i].total_price?list[i].total_price:0);
+							}
+							return all.toFixed(2);
+						}
+					},
+					methods:{
+						saveYY:function(){
+							if(this.ispayflag){
+								pay1();
+							}else{
+								nopay1();
+							}
+						},
+						showAllPrice:function(vaccine_code,index){
+							showpriceview(vaccine_code,index);
+						}
+					}
+				});
+				
+			paydetailVum=new Vue({
+			    el: '.show-bespeak-sheet',
+			    data:{
+        				vaccineAllPrice:[],
+        				checkPrice:'0'
+        			},
+				watch:{
+		    			checkPrice:function(val){
+		    				var that=payVum;
+		    				that.computedFlag = true;
+		    				for(var i=0;i<that.vaccineList.vaccine_list.length;i++){
+		    					var vaccine=that.vaccineList.vaccine_list[i];
+		    					if(vaccine.vaccine_code==paydetailVum.vaccineAllPrice[val].vaccine_code){
+		    						that.vaccineList.vaccine_list[i]=paydetailVum.vaccineAllPrice[val];
+		        						if(!paydetailVum.vaccineAllPrice[val].total_price||paydetailVum.vaccineAllPrice[val].total_price=="0"){
+		        							if(that.toastFlag)ons.notification.toast("该疫苗免费，无需再支付!", toastOptions);
+		        						}
+		    						break;
+		    					}
+		    				}
+		    				if(!that.toastFlag){
+		    					return;
+		    				}
+		    				hide_sheet_mask();
+	    			}
+	    		}
+			});
+				
+				
+    	}
+    /*需要钱支付*/
+    function pay1(){
+        var that=payVum;
+		var priceid=[];
+		var vaccinecode=[];
+		for(var i=0;i<that.vaccineList.vaccine_list.length;i++){
+        	var vaccine=that.vaccineList.vaccine_list[i];
+        	priceid[i]=vaccine.price_id;
+        	vaccinecode[i]=vaccine.vaccine_code;
+        }
+		var sendata={"child_code":baby.child_code,
+			"vaccine_code":vaccinecode.join(","),"station_code":baby.station_code,
+			"reservation_date":sessionStorage.getItem("bespeak_yydate"),
+			"reservation_begin_time":sessionStorage.getItem("bespeak_begin_time"),
+			"reservation_end_time":sessionStorage.getItem("bespeak_end_time"),
+			"reservation_flag":"0",
+			"price_id":priceid.join(","),
+			"type":"0"
+		}
+		axiosGet(sendata,
+            "/Encryption/Reservation/SaveReservationDetails",function(data){
+            if(data.message=="1001"){
+            		ons.notification.toast("当前有未完成的预约，不能再预约！", toastOptions);
+            	return;
+            }
+            if(data.code=='0'){
+            	sessionStorage.setItem("reservation_code",data.data.reservation_code);
+                if(data.data.is_need_pay=="1"){
+                	if(data.data.is_can_pay!="2"){
+                		var today = new Date();
+                		today.setHours(23,59,59,999);
+                		var yydate = new Date();
+                		var timearr = sessionStorage.getItem("bespeak_yydate").split("-");
+                		yydate.setFullYear(timearr[0],parseInt(timearr[1])-1,timearr[2]);
+                		if(yydate>today){
+                			ons.notification.alert("您的预约单中包含自费疫苗，您可在接种日当天选择在线支付。", {
+                				buttonLabels:["确认"],
+                				title:"提示",
+                				callback:function(){
+                					top.document.querySelector('ons-navigator').pushPage("bespeak/bespeak_success.html");
+                				}
+                			});
+                			return;
+                		}
+                		setTimeout(function(){
+                        	sessionStorage.setItem("fk_type","next");
+                        	top.document.querySelector('ons-navigator').pushPage("bespeak/checkPayDetail.html",{callback:function(){
+								backfunction = function(){
+									backToPrevPage("bespeak/check_bespeak.html");
+								};
+								pageBackFuncs["bespeak/checkPayDetail.html"] = backfunction;
+							}});
+                        },100);
+                    }else{
+                    	var btnArray = ['是，现在就支付', '不，我选择现场支付'];
+                    	ons.notification.confirm('提示：您的预约单中包含自费疫苗，是否在线支付？支付完成后接种单位将为您预留疫苗。', {
+                    		title:"提示",
+                    		buttonLabels:btnArray,
+                    		class:"wuxiaojuan",
+                    		callback:function(indx){
+                    			if (indx == 0) {
+	                            	sessionStorage.setItem("fk_type","next");
+	                                setTimeout(function(){
+	                                	top.document.querySelector('ons-navigator').pushPage("bespeak/checkPayDetail.html",{callback:function(){
+											backfunction = backIndex;
+											pageBackFuncs["bespeak/checkPayDetail.html"] = backfunction;
+										}});
+	                                },100);
+	                            }else{
+	                            	setTimeout(function(){
+			                            top.document.querySelector('ons-navigator').pushPage("bespeak/bespeak_success.html");
+	                                },100);
+	                            }
+                    		}
+                    	});
+                    }
+
+                }else{
+                    top.document.querySelector('ons-navigator').pushPage("bespeak/bespeak_success.html");
+                }
+            }else{
+            	  ons.notification.alert(data.message);
+            }
+        });
+					
+    }
+    
+    /*不需要钱支付*/
+    function nopay1(){
+    	var that=payVum;
+		var priceid=[];
+		var vaccinecode=[];
+		for(var i=0;i<that.vaccineList.vaccine_list.length;i++){
+        	var vaccine=that.vaccineList.vaccine_list[i];
+        	priceid[i]=vaccine.price_id;
+        	vaccinecode[i]=vaccine.vaccine_code;
+        }
+		var sendata={"child_code":baby.child_code,
+			"vaccine_code":vaccinecode.join(","),"station_code":baby.station_code,
+			"reservation_date":sessionStorage.getItem("bespeak_yydate"),
+			"reservation_begin_time":sessionStorage.getItem("bespeak_begin_time"),
+			"reservation_end_time":sessionStorage.getItem("bespeak_end_time"),
+			"reservation_flag":"0",
+			"price_id":priceid.join(","),
+			"type":"0"
+		}
+		axiosGet(sendata,
+            "/Encryption/Reservation/SaveReservationDetails",function(data){
+            if(data.message=="1001"){
+            	ons.notification.toast("当前有未完成的预约，不能再预约！", toastOptions);
+            	return;
+            }
+            if(data.code=='0'){
+            	sessionStorage.setItem("reservation_code",data.data.reservation_code);
+                top.document.querySelector('ons-navigator').pushPage("bespeak/bespeak_success.html");
+            }else{
+            	ons.notification.alert(data.message, {buttonLabels:"确定",title:"提示"});
+            	document.getElementsByClassName("alert-dialog-mask")[0].addEventListener('touchmove', function (e) {
+			  		e.preventDefault(); //阻止默认的处理方式(阻止下拉滑动的效果)
+				}, {passive: false});
+            }
+        });
+							
+    }
+    
+    function showpriceview(vaccine_code,index){
+		var that=payVum;
+   		var price_id = that.vaccineList.vaccine_list[index].price_id;
+		axiosGet({"vaccine_code":vaccine_code,"station_code":baby.station_code,"yydate":sessionStorage.getItem("bespeak_yydate"),"child_code":baby.child_code},
+            "/Encryption/Reservation/GetVaccinePrice",function(data){
+            if(data.code=='0'){
+                paydetailVum.vaccineAllPrice=data.data;
+                var defaultItem;
+                if(!that.firstFlag[index]){
+                	that.firstFlag[index] = true;
+                    paydetailVum.vaccineAllPrice.forEach(function(item,index){
+                    	if(item.is_default){
+                    		defaultItem = item;
+                    	}
+                    })
+                    for(var i=0;i<that.vaccineList.vaccine_list.length;i++){
+                    	if(that.vaccineList.vaccine_list[i].price_id == price_id){
+                    		that.vaccineList.vaccine_list[i] = defaultItem;
+                    		break;
+                    	}
+                    }
+                }else{
+                	paydetailVum.vaccineAllPrice.forEach(function(item,index){
+                    	if(item.price_id==price_id){
+                    		item.is_default = "1";
+                    		defaultItem = item;
+                    	}else{
+                    		item.is_default = null;
+                    	}
+                    })
+                }
+                that.toastFlag = false;
+                that.checkPrice = paydetailVum.vaccineAllPrice.indexOf(defaultItem);
+                paydetailVum.checkPrice=that.checkPrice;
+                showww();
+                setTimeout(function(){
+                	that.toastFlag = true;
+                },100)
+            }
+        });
+    }
+				
+				
+	function showww(){
+		document.getElementsByClassName("show-bespeak-sheet")[0].style.display="block";
+		setTimeout(function(){
+		   document.getElementsByClassName("show-bespeak-sheet")[0].style.bottom="0px";
+		},0)
+		document.getElementsByClassName("action-sheet-mask")[0].style.display="block";
+	}
+	function hide_sheet_mask(){
+	    document.getElementsByClassName("show-bespeak-sheet")[0].style.bottom="-400px";
+		document.getElementsByClassName("action-sheet-mask")[0].style.display="none";
+	}
+    
+    </script>
+ 	
+</ons-page>
+
